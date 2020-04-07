@@ -25,6 +25,10 @@ export default class CameraScreen extends Component {
     );
     this.repeatPhoto = this.repeatPhoto.bind(this);
     this.usePhoto = this.usePhoto.bind(this);
+
+		setTimeout(() => {
+      this.refs.toast.show('Action!', DURATION.LENGTH_SHORT);
+    }, 1000);
   }
 
   state = {
@@ -65,20 +69,28 @@ export default class CameraScreen extends Component {
 
           console.log("blur photo");
 
-          this.refs.toast.show('Photo is blurred!', DURATION.FOREVER);
+          this.refs.toast.show('Photo is blurred!!!', DURATION.FOREVER);
           return this.repeatPhoto();
+        }else {
+
+          console.log('clear photo');
+
+          setTimeout( ()=> {
+            this.refs.toast.show('Photo is CLEAR!!', DURATION.FOREVER);
+
+          }, 0)
+
+          this.setState({
+            photoAsBase64: {
+              ...this.state.photoAsBase64,
+              isPhotoPreview: true,
+              photoPath,
+            },
+          });
+
+
         }
 
-        console.log('clear photo');
-
-        this.refs.toast.show('Photo is clear!', DURATION.FOREVER);
-        this.setState({
-          photoAsBase64: {
-            ...this.state.photoAsBase64,
-            isPhotoPreview: true,
-            photoPath,
-          },
-        });
       })
       .catch((err) => {
         console.log('err', err);
@@ -117,6 +129,8 @@ export default class CameraScreen extends Component {
   }
 
   render() {
+
+
     if (this.state.photoAsBase64.isPhotoPreview) {
       return (
         <View style={styles.container}>
