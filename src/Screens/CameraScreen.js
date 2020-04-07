@@ -12,6 +12,7 @@ import Toast, {DURATION} from 'react-native-easy-toast';
 
 import styles from '../Styles/Screens/CameraScreen';
 import OpenCV from '../NativeModules/OpenCV';
+import MLkit from '../NativeModules/MLKit';
 import CircleWithinCircle from '../assets/svg/CircleWithinCircle';
 
 export default class CameraScreen extends Component {

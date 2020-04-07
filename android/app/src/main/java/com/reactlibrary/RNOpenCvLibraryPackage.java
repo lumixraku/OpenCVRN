@@ -12,7 +12,7 @@ import com.facebook.react.bridge.JavaScriptModule;
 public class RNOpenCvLibraryPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        return Arrays.<NativeModule>asList(new RNOpenCvLibraryModule(reactContext));
+        return Arrays.<NativeModule>asList(new RNOpenCvLibraryModule(reactContext), new RNMLKitLibraryModule(reactContext));
     }
 
     // Deprecated from RN 0.47
