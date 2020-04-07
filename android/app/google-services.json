@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "80965356630",
+    "firebase_url": "https://facetest-711be.firebaseio.com",
+    "project_id": "facetest-711be",
+    "storage_bucket": "facetest-711be.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:80965356630:android:5ab96e812b96f67d727ff7",
+        "android_client_info": {
+          "package_name": "com.cv2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "80965356630-r2f4oefl42l8h6a84n2mnidab27stn1a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUeEi1IeAEouK4zY8zf14B5deWBhi13tI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "80965356630-r2f4oefl42l8h6a84n2mnidab27stn1a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

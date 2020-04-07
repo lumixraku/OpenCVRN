@@ -16,6 +16,10 @@ import org.opencv.imgproc.Imgproc;
 
 import android.util.Base64;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
 public class RNOpenCvLibraryModule extends ReactContextBaseJavaModule {
 
     private final ReactApplicationContext reactContext;
@@ -79,4 +83,26 @@ public class RNOpenCvLibraryModule extends ReactContextBaseJavaModule {
             errorCallback.invoke(e.getMessage());
         }
     }
+
+
+    // 初始化人脸级联分类器，必须先初始化
+//    private void initClassifier() {
+//        try {
+//            InputStream is = getResources()
+//                    .openRawResource(R.raw.lbpcascade_frontalface);
+//            File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
+//            File cascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
+//            FileOutputStream os = new FileOutputStream(cascadeFile);
+//            byte[] buffer = new byte[4096];
+//            int bytesRead;
+//            while ((bytesRead = is.read(buffer)) != -1) {
+//                os.write(buffer, 0, bytesRead);
+//            }
+//            is.close();
+//            os.close();
+//            classifier = new CascadeClassifier(cascadeFile.getAbsolutePath());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

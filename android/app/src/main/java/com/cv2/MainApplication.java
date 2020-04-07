@@ -18,7 +18,9 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import android.util.Log;
 
-public class MainApplication extends Application implements ReactApplication {
+import androidx.multidex.MultiDexApplication;
+
+public class MainApplication extends MultiDexApplication implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =
       new ReactNativeHost(this) {
@@ -73,8 +75,6 @@ public class MainApplication extends Application implements ReactApplication {
       Log.d("OpenCV", "OpenCV library found inside package. Using it!");
       mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
     }
-
-
   }
 
   @Override
