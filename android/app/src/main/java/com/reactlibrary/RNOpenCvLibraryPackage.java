@@ -1,5 +1,7 @@
 package com.reactlibrary;
 
+import android.util.Log;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -12,6 +14,7 @@ import com.facebook.react.bridge.JavaScriptModule;
 public class RNOpenCvLibraryPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
+        Log.v("LogDemo", "createNativeModules");
         return Arrays.<NativeModule>asList(new RNOpenCvLibraryModule(reactContext), new RNMLKitLibraryModule(reactContext));
     }
 

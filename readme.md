@@ -15,6 +15,16 @@ React Native 0.62.1
 use `npm install ` not yarn
 
 
+## Log
+npm start show log in js
+OR
+npx react-native log-android
+
+android log
+adb logcat
+
+
+
 
 ## Trouble shooting
 

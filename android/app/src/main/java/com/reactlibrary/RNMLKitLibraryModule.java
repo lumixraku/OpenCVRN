@@ -67,10 +67,14 @@ public class RNMLKitLibraryModule extends ReactContextBaseJavaModule {
         return null;
     }
 
-    private void detectFaces() {
+    public void detectFaces(String filePath, Callback errorCallback, Callback successCallback) {
+        try{
+
+
+        Log.v("LogDemo","detectFaces");
         Uri fileUri = Uri.fromFile(new File("/storage/emulated/0/Pictures/Screenshots/Screenshot_20200324-172019.jpg"));
         this.image = this.imageFromPath(reactContext, fileUri);
-
+        Log.v("LogDemo","this image " + this.image);
 
         // [START set_detector_options]
         FirebaseVisionFaceDetectorOptions options =
@@ -126,6 +130,8 @@ public class RNMLKitLibraryModule extends ReactContextBaseJavaModule {
                                         }
                                         // [END get_face_info]
                                         // [END_EXCLUDE]
+
+                                        successCallback.invoke("123");
                                     }
                                 })
                         .addOnFailureListener(
@@ -137,7 +143,9 @@ public class RNMLKitLibraryModule extends ReactContextBaseJavaModule {
                                     }
                                 });
         // [END run_detector]
-
+        }catch (Exception e) {
+            errorCallback.invoke(e.getMessage());
+        }
     }
 
 

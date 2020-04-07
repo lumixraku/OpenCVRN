@@ -27,6 +27,8 @@ export default class CameraScreen extends Component {
     this.repeatPhoto = this.repeatPhoto.bind(this);
     this.usePhoto = this.usePhoto.bind(this);
 
+
+    console.log("where is this log???") // in npm start
 		setTimeout(() => {
       this.refs.toast.show('Action!', DURATION.LENGTH_SHORT);
     }, 1000);
@@ -42,6 +44,7 @@ export default class CameraScreen extends Component {
   };
 
   checkForBlurryImage(imageAsBase64) {
+
     return new Promise((resolve, reject) => {
       if (Platform.OS === 'android') {
         OpenCV.checkForBlurryImage(
@@ -99,7 +102,14 @@ export default class CameraScreen extends Component {
   }
 
   async takePicture() {
+      console.log('LogDemo  takePicture');
+
     if (this.camera) {
+      new Promise((resolve, reject) => {
+        MLkit.detectFaces();
+        reject("...")
+      })
+      console.log('LogDemo  after MLkit.detectFaces', MLkit.detectFaces);
       const options = {quality: 0.5, base64: true};
       const data = await this.camera.takePictureAsync(options);
       this.setState({
