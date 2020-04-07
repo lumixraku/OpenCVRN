@@ -25,6 +25,7 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 const App: () => React$Node = () => {
+  console.log("....")
   return (
     <>
       <StatusBar barStyle="dark-content" />
@@ -35,7 +36,7 @@ const App: () => React$Node = () => {
           <Header />
           {global.HermesInternal == null ? null : (
             <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
+              <Text style={styles.footer}>Engine: !!Hermes</Text>
             </View>
           )}
           <View style={styles.body}>
