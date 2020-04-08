@@ -87,7 +87,8 @@ export default StyleSheet.create({
     right: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    flex:0,
+    flex: 0,
+    backgroundColor: 'red',
   },
   absView: {
     width: stageWidth,

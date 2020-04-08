@@ -232,6 +232,18 @@ export default class CameraScreen extends Component {
                 <CircleWithinCircle />
               </View>
             </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              position: 'absolute',
+              paddingVertical: 20,
+              bottom: 0,
+              left: 20,
+              justifyContent: 'center',
+              alignItems: 'center',
+              flex: 0,
+              backgroundColor: 'yellow',
+            }}>
             <TouchableOpacity onPress={this.changeCameraType}>
               <View>
                 <Svg height="68" width="68">
