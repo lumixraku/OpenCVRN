@@ -7,6 +7,8 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
+import {Svg, Circle} from 'react-native-svg';
+
 import {RNCamera as Camera} from 'react-native-camera';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import {WebView} from 'react-native-webview';
@@ -29,6 +31,7 @@ export default class CameraScreen extends Component {
 
     this.takePicture = this.takePicture.bind(this);
     this.checkForBlurryImage = this.checkForBlurryImage.bind(this);
+    this.changeCameraType = this.changeCameraType.bind(this);
     this.proceedWithCheckingBlurryImage = this.proceedWithCheckingBlurryImage.bind(
       this,
     );
@@ -41,6 +44,9 @@ export default class CameraScreen extends Component {
       MLkit.show('Awesome', MLkit.SHORT);
       this.callDetectFace();
     }, 1000);
+
+    this.state.cameraType = 'back'
+    this.state.mirrorMode = false;
   }
 
   state = {
@@ -50,6 +56,8 @@ export default class CameraScreen extends Component {
       isPhotoPreview: false,
       photoPath: '',
     },
+    cameraType: 'back',
+    mirrorMode: false
   };
 
   callDetectFace() {
@@ -164,6 +172,20 @@ export default class CameraScreen extends Component {
 		console.log("RCT  recevice event", event.nativeEvent.data);
 	}
 
+  changeCameraType() {
+    if (this.state.cameraType === 'back') {
+      this.setState({
+        cameraType: 'front',
+        mirrorMode: true
+      });
+    } else {
+      this.setState({
+        cameraType: 'back',
+        mirrorMode: false
+      });
+    }
+  }
+
   render() {
     if (this.state.photoAsBase64.isPhotoPreview) {
       return (
@@ -201,11 +223,20 @@ export default class CameraScreen extends Component {
           permissionDialogTitle={'Permission to use camera'}
           permissionDialogMessage={
             'We need your permission to use your camera phone'
-          }>
+          }
+          type={this.state.cameraType}
+          mirrorImage={this.state.mirrorMode}>
           <View style={styles.takePictureContainer}>
             <TouchableOpacity onPress={this.takePicture}>
               <View>
                 <CircleWithinCircle />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={this.changeCameraType}>
+              <View>
+                <Svg height="68" width="68">
+                  <Circle cx="34" cy="34" fill="#FFF" r="28" />
+                </Svg>
               </View>
             </TouchableOpacity>
           </View>
