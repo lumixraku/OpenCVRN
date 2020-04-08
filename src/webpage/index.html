@@ -4,14 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <script src="./index.js"></script>
   <title>Document</title>
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #canvas {
+      width: 100%; height: 100%;
+    }
+
+  </style>
 </head>
 <body>
   <img id="immmg" src="" alt="">
+  <canvas id="canvas"></canvas>
   <script>
     window.GLOBAL_VAR = {}
   </script>
+  <script src="./index.js"></script>
+
   <script src="./dist/vconsole.min.js"></script>
   <script>
     new VConsole();
@@ -26,21 +40,28 @@
     //     immmg.src = URL.createObjectURL(window.GLOBAL_VAR.imgdata);
     //   }
     // }, 1000)
-    // window.postMessage("jajajajajja")
+    window.postMessage("jajajajajja")
 
   </script>
 
   <script>
-  var myImage = document.querySelector('#immmg');
 
-  fetch('./grid_bg.jpg').then(function (response) {
-    return response.blob();
-  }).then(function (myBlob) {
-    console.log(myBlob)
-    var objectURL = URL.createObjectURL(myBlob);
-    myImage.src = objectURL;
 
-  });
+
+  </script>
+
+
+  <script>
+  // var myImage = document.querySelector('#immmg');
+
+  // fetch('./grid_bg.jpg').then(function (response) {
+  //   return response.blob();
+  // }).then(function (myBlob) {
+  //   console.log(myBlob)
+  //   var objectURL = URL.createObjectURL(myBlob);
+  //   myImage.src = objectURL;
+
+  // });
 
   </script>
 </body>
