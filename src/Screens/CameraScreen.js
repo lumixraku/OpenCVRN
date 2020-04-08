@@ -40,10 +40,13 @@ export default class CameraScreen extends Component {
             // error handling
           },
           (msg) => {
+            console.log("LogDemo callback", msg)
             resolve(msg);
           },
         );
-      });
+      }).then( (data) => {
+        console.log("LogDemo react JS get data", data);
+      } );
 
       console.log('LogDemo  after MLkit.detectFaces', MLkit.detectFaces);
     }, 1000);

@@ -202,7 +202,8 @@ public class RNMLKitLibraryModule extends ReactContextBaseJavaModule {
                                             ;
                                             Gson gson = new Gson();
                                             String jsonToReact = gson.toJson(faceDataToReact);
-                                            successCallback.invoke(jsonToReact);
+                                            Log.v("LogDemo", "json to react " + jsonToReact);
+                                            successCallback.invoke(faceDataToReact);
                                         }
                                     })
                             .addOnFailureListener(
@@ -211,6 +212,7 @@ public class RNMLKitLibraryModule extends ReactContextBaseJavaModule {
                                         public void onFailure(@NonNull Exception e) {
                                             // Task failed with an exception
                                             // ...
+                                            errorCallback.invoke(e.getMessage());
                                         }
                                     });
             // [END run_detector]
