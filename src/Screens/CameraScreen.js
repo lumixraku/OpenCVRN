@@ -27,9 +27,8 @@ export default class CameraScreen extends Component {
     this.repeatPhoto = this.repeatPhoto.bind(this);
     this.usePhoto = this.usePhoto.bind(this);
 
-
-    console.log("where is this log???") // in npm start
-		setTimeout(() => {
+    console.log('where is this log???'); // in npm start
+    setTimeout(() => {
       // this.refs.toast.show('Action!', DURATION.LENGTH_SHORT);
       // console.log('MLkit  is null ???', MLkit); // 需要卸载然后安装 不然总是 null
       MLkit.show('Awesome', MLkit.SHORT);
@@ -48,7 +47,6 @@ export default class CameraScreen extends Component {
 
       console.log('LogDemo  after MLkit.detectFaces', MLkit.detectFaces);
     }, 1000);
-
   }
 
   state = {
@@ -61,7 +59,6 @@ export default class CameraScreen extends Component {
   };
 
   checkForBlurryImage(imageAsBase64) {
-
     return new Promise((resolve, reject) => {
       if (Platform.OS === 'android') {
         OpenCV.checkForBlurryImage(
@@ -87,19 +84,16 @@ export default class CameraScreen extends Component {
     this.checkForBlurryImage(content)
       .then((blurryPhoto) => {
         if (blurryPhoto) {
-
-          console.log("blur photo");
+          console.log('blur photo');
 
           this.refs.toast.show('Photo is blurred!!!', DURATION.FOREVER);
           return this.repeatPhoto();
-        }else {
-
+        } else {
           console.log('clear photo');
 
-          setTimeout( ()=> {
+          setTimeout(() => {
             this.refs.toast.show('Photo is CLEAR!!', DURATION.FOREVER);
-
-          }, 0)
+          }, 0);
 
           this.setState({
             photoAsBase64: {
@@ -108,10 +102,7 @@ export default class CameraScreen extends Component {
               photoPath,
             },
           });
-
-
         }
-
       })
       .catch((err) => {
         console.log('err', err);
@@ -119,11 +110,23 @@ export default class CameraScreen extends Component {
   }
 
   async takePicture() {
-      console.log('LogDemo  takePicture');
+    console.log('LogDemo  takePicture');
 
+    new Promise((resolve, reject) => {
+      MLkit.detectFaces(
+        '././path_to_file',
+        (error) => {
+          // error handling
+        },
+        (msg) => {
+          resolve(msg);
+        },
+      );
+    });
+
+    console.log('LogDemo  after MLkit.detectFaces', MLkit.detectFaces);
 
     if (this.camera) {
-
       const options = {quality: 0.5, base64: true};
       const data = await this.camera.takePictureAsync(options);
       this.setState({
@@ -154,8 +157,6 @@ export default class CameraScreen extends Component {
   }
 
   render() {
-
-
     if (this.state.photoAsBase64.isPhotoPreview) {
       return (
         <View style={styles.container}>
