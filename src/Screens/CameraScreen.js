@@ -27,7 +27,6 @@ export default class CameraScreen extends Component {
     this.repeatPhoto = this.repeatPhoto.bind(this);
     this.usePhoto = this.usePhoto.bind(this);
 
-    console.log('where is this log???'); // in npm start
     setTimeout(() => {
       // this.refs.toast.show('Action!', DURATION.LENGTH_SHORT);
       // console.log('MLkit  is null ???', MLkit); // 需要卸载然后安装 不然总是 null

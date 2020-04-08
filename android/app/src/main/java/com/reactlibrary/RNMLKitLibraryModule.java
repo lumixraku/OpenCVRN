@@ -203,7 +203,7 @@ public class RNMLKitLibraryModule extends ReactContextBaseJavaModule {
                                             Gson gson = new Gson();
                                             String jsonToReact = gson.toJson(faceDataToReact);
                                             Log.v("LogDemo", "json to react " + jsonToReact);
-                                            successCallback.invoke(faceDataToReact);
+                                            successCallback.invoke(jsonToReact);
                                         }
                                     })
                             .addOnFailureListener(
