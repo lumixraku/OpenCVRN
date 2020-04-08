@@ -30,8 +30,25 @@ export default class CameraScreen extends Component {
 
     console.log("where is this log???") // in npm start
 		setTimeout(() => {
-      this.refs.toast.show('Action!', DURATION.LENGTH_SHORT);
+      // this.refs.toast.show('Action!', DURATION.LENGTH_SHORT);
+      // console.log('MLkit  is null ???', MLkit); // 需要卸载然后安装 不然总是 null
+      MLkit.show('Awesome', MLkit.SHORT);
+
+      new Promise((resolve, reject) => {
+        MLkit.detectFaces(
+          '././path_to_file',
+          (error) => {
+            // error handling
+          },
+          (msg) => {
+            resolve(msg);
+          },
+        );
+      });
+
+      console.log('LogDemo  after MLkit.detectFaces', MLkit.detectFaces);
     }, 1000);
+
   }
 
   state = {
@@ -104,12 +121,9 @@ export default class CameraScreen extends Component {
   async takePicture() {
       console.log('LogDemo  takePicture');
 
+
     if (this.camera) {
-      new Promise((resolve, reject) => {
-        MLkit.detectFaces();
-        reject("...")
-      })
-      console.log('LogDemo  after MLkit.detectFaces', MLkit.detectFaces);
+
       const options = {quality: 0.5, base64: true};
       const data = await this.camera.takePictureAsync(options);
       this.setState({

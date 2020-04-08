@@ -23,6 +23,8 @@ npx react-native log-android
 android log
 adb logcat
 
+## Others
+adb shell ls -Ral /storage/emulated/0/Pictures/Screenshots
 
 
 
