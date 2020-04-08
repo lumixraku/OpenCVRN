@@ -9,15 +9,23 @@ import {
 } from 'react-native';
 import {RNCamera as Camera} from 'react-native-camera';
 import Toast, {DURATION} from 'react-native-easy-toast';
+import {WebView} from 'react-native-webview';
 
 import styles from '../Styles/Screens/CameraScreen';
 import OpenCV from '../NativeModules/OpenCV';
 import MLkit from '../NativeModules/MLKit';
 import CircleWithinCircle from '../assets/svg/CircleWithinCircle';
 
+import {postToWebview} from '../util/util';
+
+
+var webviewURL = 'http://10.12.167.120:5001/';
+
+
 export default class CameraScreen extends Component {
   constructor(props) {
     super(props);
+    // this.webview = this.props.webview;// failed!
 
     this.takePicture = this.takePicture.bind(this);
     this.checkForBlurryImage = this.checkForBlurryImage.bind(this);
@@ -31,23 +39,7 @@ export default class CameraScreen extends Component {
       // this.refs.toast.show('Action!', DURATION.LENGTH_SHORT);
       // console.log('MLkit  is null ???', MLkit); // 需要卸载然后安装 不然总是 null
       MLkit.show('Awesome', MLkit.SHORT);
-
-      new Promise((resolve, reject) => {
-        MLkit.detectFaces(
-          '././path_to_file',
-          (error) => {
-            // error handling
-          },
-          (msg) => {
-            console.log("LogDemo callback", msg)
-            resolve(msg);
-          },
-        );
-      }).then( (data) => {
-        console.log("LogDemo react JS get data", data);
-      } );
-
-      console.log('LogDemo  after MLkit.detectFaces', MLkit.detectFaces);
+      this.callDetectFace();
     }, 1000);
   }
 
@@ -59,6 +51,26 @@ export default class CameraScreen extends Component {
       photoPath: '',
     },
   };
+
+  callDetectFace() {
+    new Promise((resolve, reject) => {
+      MLkit.detectFaces(
+        '././path_to_file',
+        (error) => {
+          // error handling
+        },
+        (msg) => {
+          console.log('LogDemo callback', msg);
+          resolve(msg);
+        },
+      );
+    }).then((data) => {
+      //console.log("LogDemo react JS get data", data);
+      postToWebview(this.webref, data);
+    });
+
+    console.log('LogDemo  after MLkit.detectFaces', MLkit.detectFaces);
+  }
 
   checkForBlurryImage(imageAsBase64) {
     return new Promise((resolve, reject) => {
@@ -113,21 +125,11 @@ export default class CameraScreen extends Component {
 
   async takePicture() {
     console.log('LogDemo  takePicture');
-
-    new Promise((resolve, reject) => {
-      MLkit.detectFaces(
-        '././path_to_file',
-        (error) => {
-          // error handling
-        },
-        (msg) => {
-          resolve(msg);
-        },
-      );
-    });
+    this.callDetectFace()
 
     console.log('LogDemo  after MLkit.detectFaces', MLkit.detectFaces);
 
+    return
     if (this.camera) {
       const options = {quality: 0.5, base64: true};
       const data = await this.camera.takePictureAsync(options);
@@ -157,6 +159,10 @@ export default class CameraScreen extends Component {
   usePhoto() {
     // do something, e.g. navigate
   }
+
+	onMessage(event) {
+		console.log("RCT  recevice event", event.nativeEvent.data);
+	}
 
   render() {
     if (this.state.photoAsBase64.isPhotoPreview) {
@@ -204,6 +210,16 @@ export default class CameraScreen extends Component {
             </TouchableOpacity>
           </View>
         </Camera>
+        <View style={styles.absView}>
+          <WebView
+            ref={(r) => (this.webref = r)}
+            style={styles.webview}
+            onMessage={this.onMessage}
+            source={{
+              uri: webviewURL,
+            }}
+          />
+        </View>
         <Toast ref="toast" position="center" />
       </View>
     );

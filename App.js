@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 
 import CameraScreen from './src/Screens/CameraScreen';
-import {WebView} from 'react-native-webview';
+// import {WebView} from 'react-native-webview';
 
 var stageWidth = Dimensions.get('window').width; //full width
 var stageHeight = Dimensions.get('window').height; //full height
@@ -27,7 +27,7 @@ export default class App extends Component<Props> {
     this.state = {
       text: 'Initializing AR..',
     };
-    this.getWebView();
+    // this.getWebView();
   }
 
   getWebView() {
@@ -44,12 +44,11 @@ export default class App extends Component<Props> {
   }
 
   render() {
-    console.log("webref", this.webref)
-    console.log('webview', this.webview);
+    // console.log("webref", this.webref)
+    // console.log('webview', this.webview);
     return (
       <View style={localStyles.outer}>
         <CameraScreen />
-        <View style={localStyles.absView}>{this.webview}</View>
       </View>
     );
   }

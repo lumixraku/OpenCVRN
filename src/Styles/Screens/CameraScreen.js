@@ -1,6 +1,10 @@
-import {
-  StyleSheet,
-} from 'react-native';
+import {StyleSheet, Dimensions} from 'react-native';
+
+var stageWidth = Dimensions.get('window').width; //full width
+var stageHeight = Dimensions.get('window').height; //full height
+var bottomHeight = 200;
+var absViewHeight = stageHeight - bottomHeight;
+
 
 export default StyleSheet.create({
   imagePreview: {
@@ -83,5 +87,17 @@ export default StyleSheet.create({
     right: 0,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  absView: {
+    width: stageWidth,
+    height: absViewHeight,
+    // backgroundColor: "yellow",
+    position: 'absolute',
+    top: 0,
+  },
+  webview: {
+    height: 350,
+    alignSelf: 'stretch',
+    backgroundColor: 'transparent',
   },
 });

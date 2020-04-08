@@ -1,8 +1,9 @@
-const	postToWebview = () => {
+const	postToWebview = (webview, data) => {
 		var runJS = `
-			window.postMessage("jajajajajja")
+			window.postMessage("...........")
 		`;
-		this.webref.injectJavaScript(runJS);
+		console.log("LogDemo :::: runJS ", runJS);
+		webview.injectJavaScript(runJS);
   }
 
 export {postToWebview};
