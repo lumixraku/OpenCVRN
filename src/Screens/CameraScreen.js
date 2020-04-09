@@ -73,6 +73,13 @@ export default class CameraScreen extends Component {
       quality: RNCamera.Constants.VideoQuality['288p'],
     },
     isRecording: false,
+    preLandMarks: {
+      mouth: {
+        leftMouthPosition: {x: 0, y: 0},
+        rightMouthPosition: { x: 0, y: 0 },
+        bottomMouthPosition: {x: 0, y:0},
+      }
+    }
   };
 
   callDetectFace(imageAsBase64) {
@@ -94,7 +101,7 @@ export default class CameraScreen extends Component {
     }).then((data) => {
       console.log('LogDemo react JS get data', data);
       console.log('this webref2', _this.webref);
-      postToWebview(_this.webref, data);
+      // postToWebview(_this.webref, data);
     });
 
   }
@@ -234,9 +241,6 @@ export default class CameraScreen extends Component {
   }
 
   facesDetected( detectData ){
-
-    // { "faces": [{ "bounds": [Object], "faceID": 3, "rollAngle": 345.21717262268066, "yawAngle": 39.389644622802734 }], "target": 87, "type": "face" }
-
     this.setState({
       faces: detectData.faces
     })
@@ -244,7 +248,8 @@ export default class CameraScreen extends Component {
 
   renderFace(faceData){
     let { bounds, faceID, rollAngle, yawAngle } = faceData;
-    console.log("face Data", faceData );
+    console.log("face Data", faceData.bottomMouthPosition.y );
+    postToWebview(this.webref,  faceData);
     return (
       <View
         key={faceID}

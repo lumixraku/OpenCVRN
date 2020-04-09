@@ -1,6 +1,11 @@
 
 import _ from "underscore";
 
+import { StyleSheet, Dimensions } from 'react-native';
+
+var stageWidth = Dimensions.get('window').width; //full width
+var stageHeight = Dimensions.get('window').height; //full height
+
 const	postToWebview = (webview, data) => {
 	  // Ok postMessage 可以放对象
 		// var runJS = `
@@ -13,8 +18,9 @@ const	postToWebview = (webview, data) => {
 		// 这么做实际上是 window.postMessage([object Object])
 
 		var dataStr = ""
+		console.log("post to webview", data)
 		if ( typeof(data) != "string" ) {
-			dataStr = JSON.parse(data)
+			dataStr = JSON.stringify(data)
 		}else{
 			dataStr = data;
 		}
@@ -22,8 +28,8 @@ const	postToWebview = (webview, data) => {
 		var runJS = `
 			window.postMessage(${dataStr})
 		`;
-
-		console.log("LogDemo :::: runJS ", runJS);
+		console.log(stageHeight, stageWidth)
+		// console.log("LogDemo :::: runJS ", runJS);
 		webview.injectJavaScript(runJS);
   }
 

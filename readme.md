@@ -27,6 +27,16 @@ adb logcat
 adb shell ls -Ral /storage/emulated/0/Pictures/Screenshots
 
 
+## ML kit
+后面不再使用 openCV 了, 改为 ML kit.
+
+
+Demo face data
+```
+{"bottomMouthPosition": {"x": 208.13790457589283, "y": 468.79666500999815}, "bounds": {"origin": {"x": 119.19382440476187, "y": 190.57920183454243}, "size": {"height": 385.4539483933222, "width": 264.6894066220238}}, "faceID": 0, "leftCheekPosition": {"x": 266.8521670386905, "y": 410.85753348214286}, "leftEarPosition": {"x": 303.18650018601187, "y": 322.4182466052828}, "leftEarTipPosition": {"x": 298.98031761532735, "y": 372.8970765613374}, "leftEyePosition": {"x": 247.11902436755952, "y": 334.06106828962055}, "leftMouthPosition": {"x": 248.3365769159226, "y": 458.0550605410622}, "noseBasePosition": {"x": 210.47440011160714, "y": 384.48196382068454}, "rightCheekPosition": {"x": 147.54206194196428, "y": 418.72340988885793}, "rightEarPosition": {"x": 88.73911830357143, "y": 361.4497962588356}, "rightEarTipPosition": {"x": 100.95754278273809, "y": 418.58929050990514}, "rightEyePosition": {"x": 162.62662760416666, "y": 339.20050528390067}, "rightMouthPosition": {"x": 166.49730282738093, "y": 463.29231901622956}, "rollAngle": -3.3242709636688232, "yawAngle": -2.6576273441314697}
+```
+
+
 
 ## Trouble shooting
 

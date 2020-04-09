@@ -20,6 +20,8 @@ import org.opencv.android.OpenCVLoader;
 import android.util.Log;
 
 import androidx.multidex.MultiDexApplication;
+import android.webkit.WebView;
+
 
 public class MainApplication extends MultiDexApplication implements ReactApplication {
 
@@ -83,7 +85,7 @@ public class MainApplication extends MultiDexApplication implements ReactApplica
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
-
+    WebView.setWebContentsDebuggingEnabled(true);
     if (!OpenCVLoader.initDebug()) {
       Log.d("OpenCv", "Error while init");
     }
