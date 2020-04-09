@@ -5,6 +5,7 @@ var stageHeight = Dimensions.get('window').height; //full height
 var bottomHeight = 200;
 var absViewHeight = stageHeight - bottomHeight;
 
+var landmarkSize = 5
 
 export default StyleSheet.create({
   imagePreview: {
@@ -116,7 +117,7 @@ export default StyleSheet.create({
     position: 'absolute',
     borderColor: '#FFD700',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.0)',
   },
   faceText: {
     color: '#FFD700',
@@ -124,5 +125,11 @@ export default StyleSheet.create({
     textAlign: 'center',
     margin: 10,
     backgroundColor: 'transparent',
+  },
+  landmark: {
+    width: landmarkSize,
+    height: landmarkSize,
+    position: 'absolute',
+    backgroundColor: 'red',
   },
 });

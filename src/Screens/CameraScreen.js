@@ -22,6 +22,8 @@ import {postToWebview} from '../util/util';
 
 var webviewURL = 'http://10.12.167.120:5001/';
 
+const landmarkSize = 5;
+
 export default class CameraScreen extends Component {
   constructor(props) {
     super(props);
@@ -43,6 +45,7 @@ export default class CameraScreen extends Component {
     this.facesDetected = this.facesDetected.bind(this);
     this.renderFace = this.renderFace.bind(this);
     this.renderFaces = this.renderFaces.bind(this);
+    this.renderLandmarks = this.renderLandmarks.bind(this);
 
     setTimeout(() => {
       // this.refs.toast.show('Action!', DURATION.LENGTH_SHORT);
@@ -266,10 +269,48 @@ export default class CameraScreen extends Component {
     )
   }
 
+  renderLandmarksOfFace(face) {
+    const renderLandmark = position =>
+      position && (
+        <View
+          style={[
+            styles.landmark,
+            {
+              left: position.x - landmarkSize / 2,
+              top: position.y - landmarkSize / 2,
+            },
+          ]}
+        />
+      );
+    return (
+      <View key={`landmarks-${face.faceID}`}>
+        {renderLandmark(face.leftEyePosition)}
+        {renderLandmark(face.rightEyePosition)}
+        {renderLandmark(face.leftEarPosition)}
+        {renderLandmark(face.rightEarPosition)}
+        {renderLandmark(face.leftCheekPosition)}
+        {renderLandmark(face.rightCheekPosition)}
+        {renderLandmark(face.leftMouthPosition)}
+        {renderLandmark(face.mouthPosition)}
+        {renderLandmark(face.rightMouthPosition)}
+        {renderLandmark(face.noseBasePosition)}
+        {renderLandmark(face.bottomMouthPosition)}
+      </View>
+    );
+  }
+
   renderFaces(){
     return (
       <View style={styles.facesContainer} pointerEvents="none">
         {this.state.faces ? this.state.faces.map(this.renderFace) : null}
+      </View>
+    )
+  }
+
+  renderLandmarks() {
+    return (
+      <View style={styles.facesContainer} pointerEvents="none">
+        {this.state.faces ? this.state.faces.map(this.renderLandmarksOfFace): null }
       </View>
     )
   }
@@ -329,6 +370,9 @@ export default class CameraScreen extends Component {
           mirrorImage={this.state.mirrorMode}
           trackingEnabled
           onFacesDetected={this.facesDetected}
+          faceDetectionLandmarks={
+           RNCamera.Constants.FaceDetection.Landmarks.all
+          }
           >
           <View style={styles.takePictureContainer}>
             <TouchableOpacity onPress={this.takePicture}>
@@ -387,6 +431,7 @@ export default class CameraScreen extends Component {
             </TouchableOpacity>
           </View>
           { this.renderFaces() }
+          { this.renderLandmarks()}
         </RNCamera>
         <View style={styles.absView}>
           <WebView
