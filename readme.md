@@ -49,3 +49,6 @@ https://stackoverflow.com/questions/44446523/unable-to-load-script-from-assets-i
 `react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res`
 
 What mentioned above is not a good choice, you would lost reload if you do that.
+
+### can not set resolution of RNCamera
+https://github.com/react-native-community/react-native-camera/issues/1271

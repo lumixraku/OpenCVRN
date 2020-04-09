@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {Svg, Circle} from 'react-native-svg';
 
-import {RNCamera as Camera} from 'react-native-camera';
+import {RNCamera} from 'react-native-camera';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import {WebView} from 'react-native-webview';
 
@@ -20,9 +20,7 @@ import CircleWithinCircle from '../assets/svg/CircleWithinCircle';
 
 import {postToWebview} from '../util/util';
 
-
 var webviewURL = 'http://10.12.167.120:5001/';
-
 
 export default class CameraScreen extends Component {
   constructor(props) {
@@ -30,22 +28,30 @@ export default class CameraScreen extends Component {
     // this.webview = this.props.webview;// failed!
 
     this.takePicture = this.takePicture.bind(this);
+    this.takeVideo = this.takeVideo.bind(this);
     this.checkForBlurryImage = this.checkForBlurryImage.bind(this);
     this.changeCameraType = this.changeCameraType.bind(this);
     this.proceedWithCheckingBlurryImage = this.proceedWithCheckingBlurryImage.bind(
       this,
     );
+    this.proceedWithCheckingFacePhoto = this.proceedWithCheckingFacePhoto.bind(
+      this,
+    );
+
     this.repeatPhoto = this.repeatPhoto.bind(this);
     this.usePhoto = this.usePhoto.bind(this);
+    this.facesDetected = this.facesDetected.bind(this);
+    this.renderFace = this.renderFace.bind(this);
+    this.renderFaces = this.renderFaces.bind(this);
 
     setTimeout(() => {
       // this.refs.toast.show('Action!', DURATION.LENGTH_SHORT);
       // console.log('MLkit  is null ???', MLkit); // 需要卸载然后安装 不然总是 null
       MLkit.show('Awesome', MLkit.SHORT);
-      this.callDetectFace();
+      // this.callDetectFace();
     }, 1000);
 
-    this.state.cameraType = 'back'
+    this.state.cameraType = 'back';
     this.state.mirrorMode = false;
   }
 
@@ -57,13 +63,23 @@ export default class CameraScreen extends Component {
       photoPath: '',
     },
     cameraType: 'back',
-    mirrorMode: false
+    mirrorMode: false,
+    recordOptions: {
+      mute: false,
+      maxDuration: 5,
+      quality: RNCamera.Constants.VideoQuality['288p'],
+    },
+    isRecording: false,
   };
 
-  callDetectFace() {
-    new Promise((resolve, reject) => {
-      MLkit.detectFaces(
-        '././path_to_file',
+  callDetectFace(imageAsBase64) {
+    var _this = this;
+    if (!imageAsBase64) {
+      console.log('LogDemo', 'NOt base64');
+    }
+    return new Promise((resolve, reject) => {
+      MLkit.detectFacesByBase64(
+        imageAsBase64,
         (error) => {
           // error handling
         },
@@ -73,11 +89,11 @@ export default class CameraScreen extends Component {
         },
       );
     }).then((data) => {
-      //console.log("LogDemo react JS get data", data);
-      postToWebview(this.webref, data);
+      console.log('LogDemo react JS get data', data);
+      console.log('this webref2', _this.webref);
+      postToWebview(_this.webref, data);
     });
 
-    console.log('LogDemo  after MLkit.detectFaces', MLkit.detectFaces);
   }
 
   checkForBlurryImage(imageAsBase64) {
@@ -131,13 +147,23 @@ export default class CameraScreen extends Component {
       });
   }
 
+  proceedWithCheckingFacePhoto() {
+    const {content, photoPath} = this.state.photoAsBase64;
+    console.log('this webref1', this.webref);
+    this.callDetectFace(content).then((rs) => {
+      this.setState({
+        photoAsBase64: {
+          ...this.state.photoAsBase64,
+          isPhotoPreview: true,
+          photoPath,
+        },
+      });
+    });
+  }
+
   async takePicture() {
     console.log('LogDemo  takePicture');
-    this.callDetectFace()
 
-    console.log('LogDemo  after MLkit.detectFaces', MLkit.detectFaces);
-
-    return
     if (this.camera) {
       const options = {quality: 0.5, base64: true};
       const data = await this.camera.takePictureAsync(options);
@@ -149,9 +175,27 @@ export default class CameraScreen extends Component {
           photoPath: data.uri,
         },
       });
-      this.proceedWithCheckingBlurryImage();
+      // this.proceedWithCheckingBlurryImage();
+      this.proceedWithCheckingFacePhoto();
     }
   }
+
+  async takeVideo() {
+    if (this.camera) {
+      try {
+        const promise = this.camera.recordAsync(this.state.recordOptions);
+
+        if (promise) {
+          this.setState({isRecording: true});
+          const data = await promise;
+          this.setState({isRecording: false});
+          console.warn('takeVideo', data);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
 
   repeatPhoto() {
     this.setState({
@@ -168,22 +212,66 @@ export default class CameraScreen extends Component {
     // do something, e.g. navigate
   }
 
-	onMessage(event) {
-		console.log("RCT  recevice event", event.nativeEvent.data);
-	}
+  onMessage(event) {
+    console.log('RCT  recevice event', event.nativeEvent.data);
+  }
 
   changeCameraType() {
     if (this.state.cameraType === 'back') {
       this.setState({
         cameraType: 'front',
-        mirrorMode: true
+        mirrorMode: true,
       });
     } else {
       this.setState({
         cameraType: 'back',
-        mirrorMode: false
+        mirrorMode: false,
       });
     }
+  }
+
+  facesDetected( detectData ){
+
+    // { "faces": [{ "bounds": [Object], "faceID": 3, "rollAngle": 345.21717262268066, "yawAngle": 39.389644622802734 }], "target": 87, "type": "face" }
+
+    this.setState({
+      faces: detectData.faces
+    })
+  };
+
+  renderFace(faceData){
+    let { bounds, faceID, rollAngle, yawAngle } = faceData;
+    console.log("face Data", faceData );
+    return (
+      <View
+        key={faceID}
+        transform={[
+          { perspective: 600 },
+          { rotateZ: `${rollAngle.toFixed(0)}deg` },
+          { rotateY: `${yawAngle.toFixed(0)}deg` },
+        ]}
+        style={[
+          styles.face,
+          {
+            ...bounds.size,
+            left: bounds.origin.x,
+            top: bounds.origin.y,
+          },
+        ]}
+      >
+        <Text style={styles.faceText}>ID: {faceID}</Text>
+        <Text style={styles.faceText}>rollAngle: {rollAngle.toFixed(0)}</Text>
+        <Text style={styles.faceText}>yawAngle: {yawAngle.toFixed(0)}</Text>
+      </View>
+    )
+  }
+
+  renderFaces(){
+    return (
+      <View style={styles.facesContainer} pointerEvents="none">
+        {this.state.faces ? this.state.faces.map(this.renderFace) : null}
+      </View>
+    )
   }
 
   render() {
@@ -197,6 +285,18 @@ export default class CameraScreen extends Component {
             }}
             style={styles.imagePreview}
           />
+
+          <View style={styles.absView}>
+            <WebView
+              ref={(r) => (this.webref = r)}
+              style={styles.webview}
+              onMessage={this.onMessage}
+              source={{
+                uri: webviewURL,
+              }}
+            />
+          </View>
+
           <View style={styles.repeatPhotoContainer}>
             <TouchableOpacity onPress={this.repeatPhoto}>
               <Text style={styles.photoPreviewRepeatPhotoText}>
@@ -215,7 +315,7 @@ export default class CameraScreen extends Component {
 
     return (
       <View style={styles.container}>
-        <Camera
+        <RNCamera
           ref={(cam) => {
             this.camera = cam;
           }}
@@ -224,8 +324,12 @@ export default class CameraScreen extends Component {
           permissionDialogMessage={
             'We need your permission to use your camera phone'
           }
+          ratio="4:3"
           type={this.state.cameraType}
-          mirrorImage={this.state.mirrorMode}>
+          mirrorImage={this.state.mirrorMode}
+          trackingEnabled
+          onFacesDetected={this.facesDetected}
+          >
           <View style={styles.takePictureContainer}>
             <TouchableOpacity onPress={this.takePicture}>
               <View>
@@ -252,7 +356,38 @@ export default class CameraScreen extends Component {
               </View>
             </TouchableOpacity>
           </View>
-        </Camera>
+          <View
+            style={{
+              position: 'absolute',
+              paddingVertical: 20,
+              bottom: 0,
+              right: 20,
+              justifyContent: 'center',
+              alignItems: 'center',
+              flex: 0,
+              backgroundColor: 'yellow',
+            }}
+          >
+            <TouchableOpacity
+              style={[
+                styles.flipButton,
+                {
+                  flex: 0.3,
+                  alignSelf: 'flex-end',
+                  backgroundColor: this.state.isRecording ? 'white' : 'darkred',
+                },
+              ]}
+              onPress={this.state.isRecording ? () => { } : this.takeVideo}
+            >
+              {this.state.isRecording ? (
+                <Text style={styles.flipText}> ☕ </Text>
+              ) : (
+                  <Text style={styles.flipText}> REC </Text>
+                )}
+            </TouchableOpacity>
+          </View>
+          { this.renderFaces() }
+        </RNCamera>
         <View style={styles.absView}>
           <WebView
             ref={(r) => (this.webref = r)}
