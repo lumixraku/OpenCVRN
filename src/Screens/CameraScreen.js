@@ -51,7 +51,7 @@ export default class CameraScreen extends Component {
       // this.callDetectFace();
     }, 1000);
 
-    this.state.cameraType = 'back';
+    this.state.cameraType = 'front';
     this.state.mirrorMode = false;
   }
 
@@ -62,7 +62,7 @@ export default class CameraScreen extends Component {
       isPhotoPreview: false,
       photoPath: '',
     },
-    cameraType: 'back',
+    cameraType: 'front',
     mirrorMode: false,
     recordOptions: {
       mute: false,
