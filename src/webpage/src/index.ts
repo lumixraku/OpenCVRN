@@ -1,9 +1,14 @@
-var c = document.getElementById('canvas');
+
+
+import Drawing from './drawing'
+import { Queue } from './queue.js'
+
+
+var c:HTMLCanvasElement = <HTMLCanvasElement>document.getElementById('canvas');
 var ctx = c.getContext('2d');
 c.width = document.body.clientWidth;
 c.height = document.body.clientHeight;
 
-import Drawing from './drawing.js'
 
 
 var faceDataQueue = new Queue()
@@ -21,9 +26,8 @@ setTimeout( function(){
 }, 1000);
 
 
-window.addEventListener("message", receivePostMessage, false);
-var infoDiv = document.querySelector("#info")
-function receivePostMessage(event) {
+window.addEventListener("message", (event: MessageEvent)=> {
+    
 	// For Chrome, the origin property is in the event.originalEvent
 	// object.
 	// 这里不准确，chrome没有这个属性
@@ -37,28 +41,8 @@ function receivePostMessage(event) {
 	faceDataQueue.enqueue(event.data)
 	drawing.drawMouth(event.data)
 	drawing.drawClassification(event.data)
-	drawing.drawNose(event.data)
-  if (window.ReactNativeWebView) {
-		window.ReactNativeWebView.postMessage("Hello! From JS");
+  if (window["ReactNativeWebView"]) {
+		window["ReactNativeWebView"].postMessage("Hello! From JS");
 	}
 
-
-	// ...
-}
-
-
-
-
-
-
-function drawRectTest(data) {
-	if (data.facepos && data.facepos.length == 4) {
-
-		ctx.beginPath();
-		ctx.lineWidth = '6';
-		ctx.strokeStyle = 'red';
-		ctx.rect(2, 54, 292, 347);
-		ctx.stroke();
-	}
-
-}
+}, false);

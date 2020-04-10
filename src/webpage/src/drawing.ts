@@ -1,4 +1,8 @@
+import { Queue } from "./queue"
+
 class Drawing {
+    ctx: CanvasRenderingContext2D
+    faceDataQueue: Queue
     constructor() {
         this.ctx = null
         this.faceDataQueue = null

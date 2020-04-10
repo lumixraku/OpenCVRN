@@ -1,3 +1,6 @@
+export { Node, Stack, Queue }
+
+
 // Linked List
 function Node(data) {
     this.data = data;

@@ -1,0 +1,16 @@
+{
+  "name": "webpage",
+  "version": "1.0.0",
+  "description": "tsc -d --declarationDir dist/lib --declarationMap --emitDeclarationOnly",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "rollup": "^2.4.0",
+    "rollup-plugin-typescript2": "^0.27.0",
+    "typescript": "^3.8.3"
+  }
+}
