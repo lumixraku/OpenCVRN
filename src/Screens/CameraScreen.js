@@ -47,6 +47,7 @@ export default class CameraScreen extends Component {
     this.renderFaces = this.renderFaces.bind(this);
     this.renderLandmarks = this.renderLandmarks.bind(this);
 
+    this.lastTime = +new Date;
     setTimeout(() => {
       // this.refs.toast.show('Action!', DURATION.LENGTH_SHORT);
       // console.log('MLkit  is null ???', MLkit); // 需要卸载然后安装 不然总是 null
@@ -241,14 +242,18 @@ export default class CameraScreen extends Component {
   }
 
   facesDetected( detectData ){
+    // console.log("face data", detectData)
     this.setState({
       faces: detectData.faces
     })
   };
 
+
   renderFace(faceData){
     let { bounds, faceID, rollAngle, yawAngle } = faceData;
-    console.log("face Data", faceData.bottomMouthPosition.y );
+    var now = +new Date;
+    console.log("date:::", now - this.lastTime)
+    this.lastTime = now
     postToWebview(this.webref,  faceData);
     return (
       <View
@@ -377,6 +382,9 @@ export default class CameraScreen extends Component {
           onFacesDetected={this.facesDetected}
           faceDetectionLandmarks={
            RNCamera.Constants.FaceDetection.Landmarks.all
+          }
+          faceDetectionClassifications={
+            RNCamera.Constants.FaceDetection.Classifications.all
           }
           >
           <View style={styles.takePictureContainer}>

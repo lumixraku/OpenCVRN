@@ -26,7 +26,7 @@
   </script>
 <script src="./dist/vconsole.min.js"></script>
   <script src="./queue.js"></script>
-  <script src="./index.js"></script>
+  <script type="module" src="./index.js"></script>
 
  
   <script>
@@ -42,7 +42,10 @@
     //     immmg.src = URL.createObjectURL(window.GLOBAL_VAR.imgdata);
     //   }
     // }, 1000)
-    window.postMessage({"leftCheekPosition":{"x":355.9078252883184,"y":681.4967607770648},"leftEarPosition":{"x":361.86075846354163,"y":616.0107477097284},"rightEarTipPosition":{"x":149.14392671130952,"y":702.045501999628},"leftEarTipPosition":{"x":369.99365234375,"y":667.5836274646578},"rightMouthPosition":{"x":283.3239281063988,"y":720.2501168387278},"bottomMouthPosition":{"x":305.8128720238095,"y":734.4208568754651},"noseBasePosition":{"x":315.1540120442708,"y":643.8741925920759},"rightEyePosition":{"x":259.7449544270833,"y":609.1072396414621},"yawAngle":-14.202940940856934,"faceID":1,"bounds":{"origin":{"y":436.2311186290923,"x":195.90651739211307},"size":{"height":453.92333039783296,"width":311.7069847470238}},"rightCheekPosition":{"x":252.9186779203869,"y":688.181330217634},"rightEarPosition":{"x":134.14071800595238,"y":645.0122942243304},"leftMouthPosition":{"x":334.3867013113839,"y":704.8980698358446},"leftEyePosition":{"x":340.8810860770089,"y":608.3679408482143},"rollAngle":-5.588932037353516})
+    window.addEventListener("load", ()=>{
+      window.postMessage({"leftCheekPosition":{"x":355.9078252883184,"y":681.4967607770648},"leftEarPosition":{"x":361.86075846354163,"y":616.0107477097284},"rightEarTipPosition":{"x":149.14392671130952,"y":702.045501999628},"leftEarTipPosition":{"x":369.99365234375,"y":667.5836274646578},"rightMouthPosition":{"x":283.3239281063988,"y":720.2501168387278},"bottomMouthPosition":{"x":305.8128720238095,"y":734.4208568754651},"noseBasePosition":{"x":315.1540120442708,"y":643.8741925920759},"rightEyePosition":{"x":259.7449544270833,"y":609.1072396414621},"yawAngle":-14.202940940856934,"faceID":1,"bounds":{"origin":{"y":436.2311186290923,"x":195.90651739211307},"size":{"height":453.92333039783296,"width":311.7069847470238}},"rightCheekPosition":{"x":252.9186779203869,"y":688.181330217634},"rightEarPosition":{"x":134.14071800595238,"y":645.0122942243304},"leftMouthPosition":{"x":334.3867013113839,"y":704.8980698358446},"leftEyePosition":{"x":340.8810860770089,"y":608.3679408482143},"rollAngle":-5.588932037353516})
+    }, false)
+    
 
   </script>
 

@@ -24,7 +24,6 @@ const	postToWebview = (webview, data) => {
 		}else{
 			dataStr = data;
 		}
-		// dataStr = dataStr.replace('"', '\"')
 		var runJS = `
 			window.postMessage(${dataStr})
 		`;

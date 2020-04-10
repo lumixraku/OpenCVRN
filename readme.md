@@ -1,11 +1,18 @@
 
 # Open CV in React Native
 
-Please read this https://brainhub.eu/blog/opencv-react-native-image-processing/
+If you wants to config OpenCV with RN, Please read this https://brainhub.eu/blog/opencv-react-native-image-processing/
 
 It's a demo that detect photo is blur or not.
 
 PS : 不一定出现手抖才叫 blur, 没对上焦也算, 比入当镜头离手机太近的时候.
+
+If you want to config ML kit with android, also read that.
+
+One more thing, ML kit requires Google Firebase. Please follow the steps here https://firebase.google.com/docs/android/setup
+
+react-native-camera itself supports ML kit.
+
 
 
 ## Prepare
@@ -33,7 +40,7 @@ adb shell ls -Ral /storage/emulated/0/Pictures/Screenshots
 
 Demo face data
 ```
-{"bottomMouthPosition": {"x": 208.13790457589283, "y": 468.79666500999815}, "bounds": {"origin": {"x": 119.19382440476187, "y": 190.57920183454243}, "size": {"height": 385.4539483933222, "width": 264.6894066220238}}, "faceID": 0, "leftCheekPosition": {"x": 266.8521670386905, "y": 410.85753348214286}, "leftEarPosition": {"x": 303.18650018601187, "y": 322.4182466052828}, "leftEarTipPosition": {"x": 298.98031761532735, "y": 372.8970765613374}, "leftEyePosition": {"x": 247.11902436755952, "y": 334.06106828962055}, "leftMouthPosition": {"x": 248.3365769159226, "y": 458.0550605410622}, "noseBasePosition": {"x": 210.47440011160714, "y": 384.48196382068454}, "rightCheekPosition": {"x": 147.54206194196428, "y": 418.72340988885793}, "rightEarPosition": {"x": 88.73911830357143, "y": 361.4497962588356}, "rightEarTipPosition": {"x": 100.95754278273809, "y": 418.58929050990514}, "rightEyePosition": {"x": 162.62662760416666, "y": 339.20050528390067}, "rightMouthPosition": {"x": 166.49730282738093, "y": 463.29231901622956}, "rollAngle": -3.3242709636688232, "yawAngle": -2.6576273441314697}
+{"bottomMouthPosition": {"x": 270.27269345238096, "y": 480.5116423107329}, "bounds": {"origin": {"x": 76.46005394345241, "y": 74.11966451009116}, "size": {"height": 601.4217692057292, "width": 412.9934430803571}}, "faceID": 0, "leftCheekPosition": {"x": 329.1755719866071, "y": 349.8769292922247}, "leftEarPosition": {"x": 344.4310128348214, "y": 189.23731391543436}, "leftEarTipPosition": {"x": 361.72421409970235, "y": 273.5698423839751}, "leftEyeOpenProbability": 0.5554949641227722, "leftEyePosition": {"x": 272.0940755208333, "y": 265.4891751970564}, "leftMouthPosition": {"x": 311.18770926339283, "y": 425.8223577590216}, "noseBasePosition": {"x": 240.8182663690476, "y": 378.8622230166481}, "rightCheekPosition": {"x": 173.11481584821428, "y": 466.3295253208706}, "rightEarPosition": {"x": 66.69898623511905, "y": 392.3728966122582}, "rightEarTipPosition": {"x": 105.62802269345238, "y": 457.1561119442895}, "rightEyeOpenProbability": 0.434387743473053, "rightEyePosition": {"x": 153.3656994047619, "y": 353.0205575125558}, "rightMouthPosition": {"x": 221.801025390625, "y": 491.40720810663134}, "rollAngle": -26.673864364624023, "smilingProbability": 0.19892069697380066, "yawAngle": 1.3344969749450684}
 ```
 
 
