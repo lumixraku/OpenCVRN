@@ -2,8 +2,7 @@
 
 import Drawing from './drawing'
 import { Queue } from './queue.js'
-
-
+import EatGame from './game'
 var c:HTMLCanvasElement = <HTMLCanvasElement>document.getElementById('canvas');
 var ctx = c.getContext('2d');
 c.width = document.body.clientWidth;
@@ -18,8 +17,6 @@ var faceDataQueue = new Queue()
 const drawing = new Drawing();
 drawing.SetCtx(ctx);
 drawing.SetFaceDataQueue(faceDataQueue)
-
-
 
 setTimeout( function(){
 	console.log("width  height", document.body.clientWidth, document.body.clientHeight);
@@ -46,3 +43,5 @@ window.addEventListener("message", (event: MessageEvent)=> {
 	}
 
 }, false);
+
+new EatGame();

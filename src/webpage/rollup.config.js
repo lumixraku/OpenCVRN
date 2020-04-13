@@ -10,6 +10,10 @@ export default {
     output: {
         file: './dist/index.js',
         format: 'iife',
-        sourcemap: true
-    }
+        sourcemap: true,
+        globals: {
+            'pixi.js':'PIXI'
+        }
+    },
+
 }
