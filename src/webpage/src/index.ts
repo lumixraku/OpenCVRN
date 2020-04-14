@@ -38,7 +38,7 @@ window.addEventListener("message", (event: MessageEvent)=> {
 	faceDataQueue.enqueue(event.data)
 	drawing.drawMouth(event.data)
 	drawing.drawClassification(event.data)
-  if (window["ReactNativeWebView"]) {
+	if (window["ReactNativeWebView"]) {
 		window["ReactNativeWebView"].postMessage("Hello! From JS");
 	}
 

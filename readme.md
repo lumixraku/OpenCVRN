@@ -50,8 +50,8 @@ Demo face data
 ### Cannot choose between the following variants of project :react-native-camera
 
 https://github.com/react-native-community/react-native-camera/issues/2138
-
-
+添加这么一行
+missingDimensionStrategy 'react-native-camera', 'general' <-- insert this line
 
 
 ### React Native Apps keeps stopping

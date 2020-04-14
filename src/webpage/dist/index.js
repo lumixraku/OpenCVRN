@@ -1,4 +1,4 @@
-(function (PIXI) {
+(function (PIXI, TWEEN) {
     'use strict';
 
     var Drawing = /** @class */ (function () {
@@ -159,13 +159,27 @@
         }
     };
 
+    var Vector2 = /** @class */ (function () {
+        function Vector2(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        return Vector2;
+    }());
+    //# sourceMappingURL=Vector.js.map
+
     console.log("pixi......", PIXI);
     var loader = PIXI.loader;
     var resources = PIXI.loader.resources;
     var TextureCache = PIXI.utils.TextureCache;
     var Sprite = PIXI.Sprite;
+    var stageHeight = document.body.clientHeight;
+    var eatPosY = stageHeight / 2; //超过这个点还没有吃到的话  视为miss
     var EatGame = /** @class */ (function () {
         function EatGame() {
+            var _this = this;
+            // 不断的生成猫猫
+            this.elapse = 0;
             var app = new PIXI.Application({
                 width: document.body.clientWidth,
                 height: document.body.clientHeight,
@@ -177,7 +191,16 @@
             this.makeScene = this.makeScene.bind(this);
             document.body.appendChild(app.view);
             this.loadRes(this.makeScene);
+            this.catList = new Array();
+            app.ticker.add(function (delta) { return _this.gameLoop(delta); });
         }
+        EatGame.prototype.gameLoop = function (delta) {
+            TWEEN.update();
+            this.moreCats(delta);
+            this.movingCat();
+            this.reachBottomLineCat();
+            this.shouldIEat();
+        };
         EatGame.prototype.loadRes = function (callback) {
             loader
                 .add("/images/animals.json")
@@ -186,13 +209,93 @@
         EatGame.prototype.makeScene = function () {
             this.addCat();
         };
+        EatGame.prototype.moreCats = function (delta) {
+            this.elapse += delta;
+            if (this.elapse > 60) {
+                this.elapse = 0;
+                this.addCat();
+            }
+        };
         EatGame.prototype.addCat = function () {
             var app = this.app;
             var resourceMap = resources["/images/animals.json"].textures;
             //The cat
             var cat = new Sprite(resourceMap["cat.png"]);
             cat.position.set(16, 16);
+            this.catList.push(cat);
             app.stage.addChild(cat);
+        };
+        EatGame.prototype.movingCat = function () {
+            for (var _i = 0, _a = this.catList; _i < _a.length; _i++) {
+                var cat = _a[_i];
+                if (cat.transform) {
+                    cat.y += 6;
+                }
+                // console.log("cat", cat.y)
+            }
+        };
+        EatGame.prototype.reachBottomLineCat = function () {
+            for (var i = 0; i < this.catList.length; i++) {
+                var cat = this.catList[i];
+                if (cat.y >= stageHeight - cat.height) {
+                    console.log('miss');
+                    cat.destroy();
+                    this.catList.splice(i--, 1);
+                }
+            }
+        };
+        // 寻找当前列表中第一个不是 miss 的cat
+        EatGame.prototype.getFirstAvailableCat = function () {
+            for (var _i = 0, _a = this.catList; _i < _a.length; _i++) {
+                var cat = _a[_i];
+                if (!cat["miss"]) {
+                    return cat;
+                }
+            }
+            return null;
+        };
+        // call Each Frame
+        EatGame.prototype.shouldIEat = function () {
+            var firstCat = this.getFirstAvailableCat();
+            if (firstCat) {
+                // 调用过 sprite.destroy 之后 sprite下的transform 就是空了
+                if (firstCat && firstCat.transform && firstCat.y > eatPosY) {
+                    var openMouthPropability = void 0;
+                    if (!firstCat["propability"]) {
+                        firstCat["propability"] = Math.random();
+                    }
+                    openMouthPropability = firstCat["propability"];
+                    if (openMouthPropability > 0.5) {
+                        var cat = this.catList.pop();
+                        console.log("eat", cat.y);
+                        this.eatCat(cat, new Vector2(200, 300));
+                        //miss
+                    }
+                    else {
+                        var resourceMap = resources["/images/animals.json"].textures;
+                        firstCat["miss"] = true;
+                        firstCat.texture = resourceMap["hedgehog.png"];
+                    }
+                }
+            }
+        };
+        EatGame.prototype.eatCat = function (cat, dest) {
+            var _this = this;
+            new TWEEN.Tween({ x: cat.x, y: cat.y })
+                .to({ x: dest.x, y: dest.y }, 900 + Math.random() * 200)
+                .onUpdate(function (o) {
+                cat.y = o.y;
+                cat.x = o.x;
+            })
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                // .repeat(Infinity)
+                // .yoyo(true) //到了终点之后 再动画返回原点
+                .start()
+                .onComplete(function (e) {
+                console.log("eat finish", cat);
+                cat.destroy();
+                _this.app.stage.removeChild(cat);
+            });
         };
         return EatGame;
     }());
@@ -226,6 +329,7 @@
         }
     }, false);
     new EatGame();
+    //# sourceMappingURL=index.js.map
 
-}(PIXI));
+}(PIXI, TWEEN));
 //# sourceMappingURL=index.js.map
