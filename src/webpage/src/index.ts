@@ -3,6 +3,8 @@
 import Drawing from './drawing'
 import { Queue } from './queue.js'
 import EatGame from './game'
+
+import { FaceData } from './faceData'
 var c:HTMLCanvasElement = <HTMLCanvasElement>document.getElementById('canvas');
 var ctx = c.getContext('2d');
 c.width = document.body.clientWidth;
@@ -12,6 +14,7 @@ c.height = document.body.clientHeight;
 
 var faceDataQueue = new Queue()
 
+var game = new EatGame();
 
 
 const drawing = new Drawing();
@@ -34,14 +37,15 @@ window.addEventListener("message", (event: MessageEvent)=> {
 	// console.log("event FROM RN::::", typeof(event.data),  event.data)
 
 	ctx.clearRect(0, 0, c.width, c.height)
+	let faceData = event.data as FaceData
+	faceDataQueue.enqueue(faceData)
+	// console.log("event data::", faceData )
+	// drawing.drawMouth(event.data)
+	// drawing.drawClassification(event.data)
+	game.setMouthPos(faceData)
 
-	faceDataQueue.enqueue(event.data)
-	drawing.drawMouth(event.data)
-	drawing.drawClassification(event.data)
 	if (window["ReactNativeWebView"]) {
 		window["ReactNativeWebView"].postMessage("Hello! From JS");
 	}
 
 }, false);
-
-new EatGame();

@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js'
 import * as TWEEN from '@tweenjs/tween.js'
 import { Vector2 } from './Vector'
+import { FaceData } from './faceData';
 const Application = PIXI.Application;
 const Container = PIXI.Container;
 const loader = PIXI.loader;
@@ -155,16 +156,6 @@ class EatGame {
         }
     }
 
-    // 寻找当前列表中第一个不是 miss 的cat
-    getFirstAvailableCat() {
-        for (let food of this.foodList) {
-            if (!food.miss) {
-                return food
-            }
-        }
-        return null
-    }
-
     // call Each Frame
     shouldIEat() {        
         if (this.mouthOpen) {
@@ -226,6 +217,10 @@ class EatGame {
         this.app.stage.addChild( mouthText)
     }
 
+
+    public setMouthPos(faceData: FaceData){
+        return 
+    }
 }
 
 

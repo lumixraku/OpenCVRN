@@ -28,9 +28,13 @@
   <script>
     window.GLOBAL_VAR = {}
   </script>
-<!-- <script src="./dist/vconsole.min.js"></script>   -->
+<script src="./dist/vconsole.min.js"></script>  
   <script>
-    // new VConsole();
+    alert(window.navigator.userAgent)
+    if (window.navigator.userAgent.indexOf("ONEPLUS") != -1) {
+      new VConsole();
+
+    }
   </script>
 
 

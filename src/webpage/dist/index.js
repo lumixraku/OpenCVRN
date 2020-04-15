@@ -296,16 +296,6 @@
                 }
             }
         };
-        // 寻找当前列表中第一个不是 miss 的cat
-        EatGame.prototype.getFirstAvailableCat = function () {
-            for (var _i = 0, _a = this.foodList; _i < _a.length; _i++) {
-                var food = _a[_i];
-                if (!food.miss) {
-                    return food;
-                }
-            }
-            return null;
-        };
         // call Each Frame
         EatGame.prototype.shouldIEat = function () {
             if (this.mouthOpen) {
@@ -362,6 +352,9 @@
             mouthText.y = 15;
             this.app.stage.addChild(mouthText);
         };
+        EatGame.prototype.setMouthPos = function (faceData) {
+            return;
+        };
         return EatGame;
     }());
     //# sourceMappingURL=game.js.map
@@ -371,6 +364,7 @@
     c.width = document.body.clientWidth;
     c.height = document.body.clientHeight;
     var faceDataQueue = new Queue();
+    var game = new EatGame();
     var drawing = new Drawing();
     drawing.SetCtx(ctx);
     drawing.SetFaceDataQueue(faceDataQueue);
@@ -386,14 +380,16 @@
         // console.log("screen size:::", c.clientWidth, c.clientHeight)
         // console.log("event FROM RN::::", typeof(event.data),  event.data)
         ctx.clearRect(0, 0, c.width, c.height);
-        faceDataQueue.enqueue(event.data);
-        drawing.drawMouth(event.data);
-        drawing.drawClassification(event.data);
+        var faceData = event.data;
+        faceDataQueue.enqueue(faceData);
+        // console.log("event data::", faceData )
+        // drawing.drawMouth(event.data)
+        // drawing.drawClassification(event.data)
+        game.setMouthPos(faceData);
         if (window["ReactNativeWebView"]) {
             window["ReactNativeWebView"].postMessage("Hello! From JS");
         }
     }, false);
-    new EatGame();
 
 }(PIXI, TWEEN));
 //# sourceMappingURL=index.js.map
