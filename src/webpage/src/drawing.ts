@@ -52,11 +52,11 @@ class Drawing {
         mouthOpenDirection.forEach((data) => {
             openCount += (data == "+") ? 1 : 0
         })
-        if (openCount / mouthOpenDirection.length > 0.5) {
-            this.drawStatusText("mouse open", { x: 50, y: 50 })
-        } else {
-            this.drawStatusText("mouse close", { x: 50, y: 50 })
-        }
+        // if (openCount / mouthOpenDirection.length > 0.5) {
+        //     this.drawStatusText("mouse open", { x: 50, y: 50 })
+        // } else {
+        //     this.drawStatusText("mouse close", { x: 50, y: 50 })
+        // }
     }
 
 
