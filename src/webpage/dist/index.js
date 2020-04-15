@@ -184,17 +184,70 @@
     var TextureCache = PIXI.utils.TextureCache;
     var Sprite = PIXI.Sprite;
     var stageHeight = document.body.clientHeight;
-    var eatPosSY = stageHeight / 2 - 100; //超过这个点还没有吃到的话  视为miss
-    var eatPosEY = stageHeight / 2 + 100; //超过这个点还没有吃到的话  视为miss
+    // 这两个点的位置应该由嘴巴来决定
+    // const eatPosSY = stageHeight / 2 - 100; //超过这个点还没有吃到的话  视为miss
+    // const eatPosEY = stageHeight / 2 + 100; //超过这个点还没有吃到的话  视为miss
+    var Mouth = /** @class */ (function (_super) {
+        __extends(Mouth, _super);
+        function Mouth(leftPos, rightPos, bottomPos) {
+            var _this = _super.call(this) || this;
+            _this.leftPos = leftPos;
+            _this.rightPos = rightPos;
+            _this.bottomPos = bottomPos;
+            return _this;
+        }
+        Mouth.prototype.refreshByNewPoint = function (leftPos, rightPos, bottomPos) {
+            this.clear();
+            this.leftPos = leftPos;
+            this.rightPos = rightPos;
+            this.bottomPos = bottomPos;
+            this.beginFill(0xFF0000, 1);
+            this.lineStyle(0, 0xFF0000, 1);
+            this.moveTo(rightPos.x, rightPos.y);
+            this.lineTo(leftPos.x, leftPos.y);
+            this.lineTo(bottomPos.x, bottomPos.y);
+            this.endFill();
+        };
+        Mouth.prototype.getTopLine = function () {
+            var topY = Math.min(this.leftPos.y, this.rightPos.y) - 100;
+            return topY;
+        };
+        Mouth.prototype.getBottomLine = function () {
+            var bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y) + 100;
+            return bottomY;
+        };
+        Mouth.prototype.getXPos = function () {
+            return this.bottomPos.x;
+        };
+        Mouth.prototype.getYPos = function () {
+            // return (this.getTopLine() + this.getBottomLine() )/2
+            return this.bottomPos.y;
+        };
+        return Mouth;
+    }(PIXI.Graphics));
     var Food = /** @class */ (function (_super) {
         __extends(Food, _super);
         function Food() {
             var _this = this;
             var resourceMap = resources["/images/animals.json"].textures;
-            // new Sprite(resourceMap["cat.png"]);
             _this = _super.call(this, resourceMap["cat.png"]) || this;
+            _this.textures = resourceMap;
+            // new Sprite(resourceMap["cat.png"]);
+            _this.bounds = _this.getBounds();
+            _this.width = _this.bounds.width;
+            _this.height = _this.bounds.height;
             return _this;
         }
+        Food.prototype.changeTexture = function () {
+            this.texture = this.textures["hedgehog.png"];
+        };
+        Food.prototype.setCenterPos = function (x, y) {
+            this.x = x - this.width / 2;
+            this.y = y - this.height / 2;
+        };
+        Food.prototype.centerPosToLeftTopPos = function (x, y) {
+            return new Vector2(x - this.width / 2, y - this.height / 2);
+        };
         return Food;
     }(PIXI.Sprite));
     var EatGame = /** @class */ (function () {
@@ -265,24 +318,25 @@
             var app = this.app;
             var food = new Food();
             food.x = 16;
-            food.y = 16;
+            food.y = 16 + Math.random() * 30;
             this.foodList.push(food);
             app.stage.addChild(food);
-            console.log("pixi......", app.stage.children);
         };
         EatGame.prototype.movingFood = function () {
             for (var _i = 0, _a = this.foodList; _i < _a.length; _i++) {
                 var food = _a[_i];
                 if (food.transform) {
                     if (!food.eating) {
-                        food.y += 6;
+                        food.y += (3 + Math.random() * 3);
                     }
                 }
                 //miss
-                if (food.y > eatPosEY && food.miss === false) {
-                    var resourceMap = resources["/images/animals.json"].textures;
+                if (food.y > this.mouth.getBottomLine() && !food.miss) {
+                    console.log("miss");
                     food.miss = true;
-                    food.texture = resourceMap["hedgehog.png"];
+                    food.changeTexture();
+                    // let resourceMap = resources["/images/animals.json"].textures;
+                    // food.texture = resourceMap["hedgehog.png"]
                 }
             }
         };
@@ -290,7 +344,6 @@
             for (var i = 0; i < this.foodList.length; i++) {
                 var food = this.foodList[i];
                 if (food.y >= stageHeight - food.height) {
-                    console.log('miss');
                     food.destroy();
                     this.foodList.splice(i--, 1);
                 }
@@ -303,9 +356,10 @@
                     var food = this.foodList[i];
                     if (food && food.transform) {
                         // 调用过 sprite.destroy 之后 sprite下的transform 就是空了
-                        if (food.y > eatPosSY && food.y < eatPosEY) {
+                        if (food.y > this.mouth.getTopLine() && food.y < this.mouth.getBottomLine()) {
                             this.foodList.splice(i--, 1);
-                            this.eatingFood(food, new Vector2(200, 300));
+                            var mouthPos = new Vector2(this.mouth.getXPos(), this.mouth.getYPos());
+                            this.eatingFood(food, mouthPos);
                         }
                     }
                 }
@@ -313,9 +367,11 @@
         };
         EatGame.prototype.eatingFood = function (food, dest) {
             var _this = this;
+            var leftTopPos = food.centerPosToLeftTopPos(dest.x, dest.y);
+            // 注意应该使图片的中心位置移动到 dest
             food.eating = true;
             new TWEEN.Tween({ x: food.x, y: food.y })
-                .to({ x: dest.x, y: dest.y }, 1000)
+                .to({ x: leftTopPos.x, y: leftTopPos.y }, 1000)
                 .onUpdate(function (o) {
                 food.y = o.y;
                 food.x = o.x;
@@ -325,14 +381,14 @@
                 // .yoyo(true) //到了终点之后 再动画返回原点
                 .start()
                 .onComplete(function (e) {
-                console.log("eat finish", food.x, food.y);
+                // console.log("eat finish", food.x, food.y)
                 food.destroy();
                 _this.app.stage.removeChild(food);
             });
         };
         EatGame.prototype.changeMouthState = function () {
             // 这里还会有一些其他条件  待补充
-            if (Math.random() > 0.5) {
+            if (Math.random() > 0.0) {
                 this.mouthText.text = "OPEN";
                 this.mouthOpen = true;
             }
@@ -353,7 +409,17 @@
             this.app.stage.addChild(mouthText);
         };
         EatGame.prototype.setMouthPos = function (faceData) {
-            return;
+            var rightPos = faceData.rightMouthPosition;
+            var leftPos = faceData.leftMouthPosition;
+            var bottomPos = faceData.bottomMouthPosition;
+            console.log("set mouth");
+            if (!this.mouth) {
+                this.mouth = new Mouth(leftPos, rightPos, bottomPos);
+                this.app.stage.addChild(this.mouth);
+            }
+            else {
+                this.mouth.refreshByNewPoint(leftPos, rightPos, bottomPos);
+            }
         };
         return EatGame;
     }());
