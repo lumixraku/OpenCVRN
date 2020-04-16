@@ -122,15 +122,27 @@
         "rollAngle": -5.588932037353516
       }
       i = 1
-      // setInterval(() => {
-      //   faceData.leftMouthPosition.y = faceData.leftMouthPosition.y - 1
-      //   faceData.rightMouthPosition.y = faceData.rightMouthPosition.y - 1
-      //   faceData.bottomMouthPosition.y = faceData.bottomMouthPosition.y - 1
-      //   window.postMessage(faceData)
 
-      //   i++;
+      movingmouth()
 
-      // }, 100)
+      function movingmouth(){
+        let d = 1
+        setInterval(() => {
+          if (faceData.leftMouthPosition.x > 390) {
+              d = -1
+          } else if(faceData.leftMouthPosition.x < 290){
+            d = 1
+          }
+
+          faceData.leftMouthPosition.x = faceData.leftMouthPosition.x +d
+          faceData.rightMouthPosition.x = faceData.rightMouthPosition.x +d
+          faceData.bottomMouthPosition.x = faceData.bottomMouthPosition.x +d
+          window.postMessage(faceData)
+  
+          i++;
+  
+        }, 100)
+      }
     }, false)
 
 

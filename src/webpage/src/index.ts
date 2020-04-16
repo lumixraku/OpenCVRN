@@ -39,9 +39,6 @@ window.addEventListener("message", (event: MessageEvent)=> {
 	ctx.clearRect(0, 0, c.width, c.height)
 	let faceData = event.data as FaceData
 	faceDataQueue.enqueue(faceData)
-	// console.log("event data::", faceData )
-	// drawing.drawMouth(event.data)
-	// drawing.drawClassification(event.data)
 	game.setMouthPos(faceData)
 
 	if (window["ReactNativeWebView"]) {

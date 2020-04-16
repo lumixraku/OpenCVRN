@@ -206,11 +206,17 @@
             this.leftPos = leftPos;
             this.rightPos = rightPos;
             this.bottomPos = bottomPos;
+            console.log("pos", leftPos, rightPos, bottomPos);
             this.beginFill(0xFF0000, 1);
             this.lineStyle(0, 0xFF0000, 1);
             this.moveTo(rightPos.x, rightPos.y);
             this.lineTo(leftPos.x, leftPos.y);
             this.lineTo(bottomPos.x, bottomPos.y);
+            //draw Top Line & bottom Line
+            this.beginFill(0x00FF00, 1);
+            this.lineStyle(3, 0x00FF00, 1);
+            this.moveTo(rightPos.x, rightPos.y - 100);
+            this.lineTo(rightPos.x, rightPos.y + 100);
             this.endFill();
         };
         Mouth.prototype.getTopLine = function () {
@@ -365,7 +371,7 @@
             this.loadRes(this.makeScene);
             this.foodList = new Array();
             this.foodMovingList = new Array();
-            var ct = new CircleTable(stageWidth / 2, 200, 200);
+            var ct = new CircleTable(stageWidth / 2, 490, 200);
             ct.draw(this.app.stage);
             this.table = ct;
             // 初始化
@@ -521,7 +527,7 @@
         };
         EatGame.prototype.eatingFood = function (food, dest) {
             var _this = this;
-            var leftTopPos = food.centerPosToLeftTopPos(dest.x, dest.y);
+            // let leftTopPos = food.centerPosToLeftTopPos(dest.x, dest.y)
             // 注意应该使图片的中心位置移动到 dest
             food.eating = true;
             new TWEEN.Tween({ x: food.x, y: food.y })
@@ -602,15 +608,11 @@
         ctx.clearRect(0, 0, c.width, c.height);
         var faceData = event.data;
         faceDataQueue.enqueue(faceData);
-        // console.log("event data::", faceData )
-        // drawing.drawMouth(event.data)
-        // drawing.drawClassification(event.data)
         game.setMouthPos(faceData);
         if (window["ReactNativeWebView"]) {
             window["ReactNativeWebView"].postMessage("Hello! From JS");
         }
     }, false);
-    //# sourceMappingURL=index.js.map
 
 }(PIXI, TWEEN));
 //# sourceMappingURL=index.js.map

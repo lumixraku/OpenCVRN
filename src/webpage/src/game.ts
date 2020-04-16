@@ -36,12 +36,20 @@ class Mouth extends PIXI.Graphics {
         this.leftPos = leftPos
         this.rightPos = rightPos
         this.bottomPos = bottomPos
-
+        console.log("pos", leftPos, rightPos, bottomPos)
         this.beginFill(0xFF0000, 1);
         this.lineStyle(0, 0xFF0000, 1);
         this.moveTo(rightPos.x, rightPos.y);
         this.lineTo(leftPos.x, leftPos.y);
         this.lineTo(bottomPos.x, bottomPos.y);
+        
+        
+        //draw Top Line & bottom Line
+        this.beginFill(0x00FF00, 1)
+        this.lineStyle(3, 0x00FF00, 1);
+        this.moveTo(rightPos.x, rightPos.y - 100)
+        this.lineTo(rightPos.x, rightPos.y + 100)
+
         this.endFill();
     }    
 
@@ -257,7 +265,7 @@ class EatGame {
         this.foodMovingList = new Array<Food>();
 
 
-        let ct = new CircleTable(stageWidth/2, 200, 200)
+        let ct = new CircleTable(stageWidth/2, 490, 200)
         ct.draw(this.app.stage)   
         this.table = ct
 
@@ -467,7 +475,7 @@ class EatGame {
     }
 
     eatingFood(food: Food, dest: Vector2) {
-        let leftTopPos = food.centerPosToLeftTopPos(dest.x, dest.y)
+        // let leftTopPos = food.centerPosToLeftTopPos(dest.x, dest.y)
         // 注意应该使图片的中心位置移动到 dest
         food.eating = true
         new TWEEN.Tween({ x: food.x, y: food.y })
@@ -518,8 +526,7 @@ class EatGame {
         let leftPos = faceData.leftMouthPosition
         let bottomPos = faceData.bottomMouthPosition
         console.log("set mouth")
-        if (!this.mouth) {
-            
+        if (!this.mouth) {            
             this.mouth = new Mouth(leftPos,  rightPos, bottomPos)
             this.app.stage.addChild(this.mouth);
         }else{
