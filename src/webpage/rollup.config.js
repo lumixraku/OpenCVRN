@@ -12,7 +12,8 @@ export default {
         format: 'iife',
         sourcemap: true,
         globals: {
-            'pixi.js':'PIXI'
+            'pixi.js':'PIXI',
+            'pixi-fps': 'PixiFps'
         }
     },
 

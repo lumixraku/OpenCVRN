@@ -3,12 +3,18 @@ import * as TWEEN from '@tweenjs/tween.js'
 import { Vector2 } from './Vector'
 import { FaceData } from './faceData';
 import { IResourceDictionary, ITextureDictionary } from 'pixi.js';
+
+
+
+
 const Application = PIXI.Application;
 const Container = PIXI.Container;
 const loader = PIXI.loader;
 const resources = PIXI.loader.resources;
 const TextureCache = PIXI.utils.TextureCache;
 const Sprite = PIXI.Sprite;
+
+
 
 
 const stageHeight = document.body.clientHeight;
@@ -36,7 +42,6 @@ class Mouth extends PIXI.Graphics {
         this.leftPos = leftPos
         this.rightPos = rightPos
         this.bottomPos = bottomPos
-        console.log("pos", leftPos, rightPos, bottomPos)
         this.beginFill(0xFF0000, 1);
         this.lineStyle(0, 0xFF0000, 1);
         this.moveTo(rightPos.x, rightPos.y);
@@ -147,7 +152,6 @@ class CircleTable extends PIXI.Graphics {
     }
 
     draw(stage: PIXI.Container){
-        // 不生效???????????
         this.beginFill(0xFF0000, 1);
         this.drawCircle(0, 0, this.radius); // drawCircle(x, y, radius)
         this.endFill();    
@@ -245,6 +249,9 @@ class EatGame {
     mouth: Mouth;
     table: CircleTable;
 
+    score: number = 0;
+    scoreText: PIXI.Text;
+
     constructor() {
         let app = new PIXI.Application({
             width: document.body.clientWidth,
@@ -265,7 +272,7 @@ class EatGame {
         this.foodMovingList = new Array<Food>();
 
 
-        let ct = new CircleTable(stageWidth/2, 490, 200)
+        let ct = new CircleTable(stageWidth/2, stageHeight, 200)
         ct.draw(this.app.stage)   
         this.table = ct
 
@@ -275,9 +282,12 @@ class EatGame {
         this.mouth = new Mouth(defaultPos, defaultPos, defaultPos)
         this.app.stage.addChild(this.mouth);
 
-        this.renderText()
+        // this.score = 0
+        this.renderScore()
 
         
+        // 收尾
+        this.renderTestText()
     }
     testTween(){
         let resourceMap = resources["/images/animals.json"].textures;
@@ -320,7 +330,6 @@ class EatGame {
         let setPosFn = (deg) => {
 
                 let pos = this.table.degreeToPos(deg)
-                console.log("px", deg, pos)
                 // let deg = 315
                 cat.x = pos.x
                 cat.y = pos.y
@@ -338,39 +347,40 @@ class EatGame {
         
     }
 
-    makeScene() {
-        this.app.ticker.add(delta => this.gameLoop(delta));
-
-        // this.testSpin()
-        
-    }
-
     elapse = 0
     genFoodGap = 60
     frameCount = 0
+    makeScene() {
+        this.app.ticker.add(delta => this.gameUILoop(delta));
+        this.app.ticker.add(delta=> this.gameCheckLoop(delta));
+        // this.testSpin()
 
-    gameLoop(delta) {
-        TWEEN.update();
-        
-        this.table.startSpin(delta)
-        this.elapse++ ;
-        this.frameCount ++;
-        // this.movingFood()
-        this.movingFoodOnTable(delta)
+    }
+
+
+    gameCheckLoop(delta) {
 
         //60帧 加一次食物
-        if (this.frameCount > this.genFoodGap ) {
-        
+        if (this.frameCount > this.genFoodGap) {
+
             this.addMoreFood()
             this.changeMouthState()
 
             this.frameCount = 0
         }
-
         this.reachBottomLineCat()
         this.shouldIEat();
+    }
 
 
+    gameUILoop(delta) {
+        this.elapse++;
+        this.frameCount++;        
+
+        TWEEN.update();
+        this.table.startSpin(delta)
+        // this.movingFood()
+        this.movingFoodOnTable(delta)
     }
 
     loadRes(callback) {
@@ -383,7 +393,7 @@ class EatGame {
 
 
     addMoreFood() {
-
+        console.log("more food")
         // 桌上最多 6个 食物
         if (this.foodList.length >= 6) {
             return 
@@ -413,7 +423,6 @@ class EatGame {
 
             //miss
             if (food.y > this.mouth.getBottomLine() && !food.miss ) {
-                console.log("miss")
                 food.miss = true
                 food.changeTexture()
                 // let resourceMap = resources["/images/animals.json"].textures;
@@ -422,13 +431,11 @@ class EatGame {
         }
     }
 
-
+    /**
+     * 食物转圈圈
+     * @param delta 
+     */
     movingFoodOnTable(delta) {
-        // for(let i=0; i< this.foodList.length; i++) {
-
-
-
-        // }
         const foodInTable = (food):boolean => {
             return food.transform && !food.eating
         }
@@ -448,7 +455,7 @@ class EatGame {
     reachBottomLineCat() {
         for (let i = 0; i < this.foodList.length; i++) {
             let food = this.foodList[i] as PIXI.Sprite;
-            if (food.y >= stageHeight - food.height) {
+            if (food.y >= stageHeight + 400) {
 
                 food.destroy()
                 this.foodList.splice(i--, 1)
@@ -484,20 +491,21 @@ class EatGame {
                 food.y = o.y
                 food.x = o.x
             })
-            .easing(TWEEN.Easing.Cubic.In )
+            .easing(TWEEN.Easing.Quintic.Out )
             // .repeat(Infinity)
             // .yoyo(true) //到了终点之后 再动画返回原点
             .start()
             .onComplete((e) => {
-                // console.log("eat finish", food.x, food.y)
                 food.destroy()
                 this.app.stage.removeChild(food)
+                this.finishEating()
+
             })
     }
 
     changeMouthState() {
             // 这里还会有一些其他条件  待补充
-            if  (Math.random() > 0.0) {
+            if  (Math.random() > 0.4) {
                 this.mouthText.text = "OPEN"
                 this.mouthOpen = true;
             }else {
@@ -506,13 +514,30 @@ class EatGame {
             }
     }
 
-    renderText() {
+    finishEating() {
+        this.score++;    
+        this.renderScore();
+    }
+
+    renderScore() {
+        if (!this.scoreText) {
+            this.scoreText = new PIXI.Text(`Score: ${this.score}`, new PIXI.TextStyle({
+                fontFamily: "Futura",
+                fontSize: 24,
+                fill: "red"
+            }))
+            this.scoreText.x = stageWidth - 100
+            this.scoreText.y = 25
+            this.app.stage.addChild(this.scoreText)
+        }else{
+            this.scoreText.text = `Score: ${this.score}`
+        }
+    }
+
+
+    renderTestText() {
                 
-        let mouthText = new PIXI.Text("The En", new PIXI.TextStyle({
-            fontFamily: "Futura",
-            fontSize: 64,
-            fill: "red"
-        }));
+        let mouthText = new PIXI.Text("The End");
         this.mouthText = mouthText
         mouthText.x = 15
         mouthText.y = 15
@@ -525,7 +550,6 @@ class EatGame {
         let rightPos = faceData.rightMouthPosition
         let leftPos = faceData.leftMouthPosition
         let bottomPos = faceData.bottomMouthPosition
-        console.log("set mouth")
         if (!this.mouth) {            
             this.mouth = new Mouth(leftPos,  rightPos, bottomPos)
             this.app.stage.addChild(this.mouth);

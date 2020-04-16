@@ -44,5 +44,4 @@ window.addEventListener("message", (event: MessageEvent)=> {
 	if (window["ReactNativeWebView"]) {
 		window["ReactNativeWebView"].postMessage("Hello! From JS");
 	}
-
 }, false);
