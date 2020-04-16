@@ -141,33 +141,46 @@ class TT extends PIXI.Graphics {
         super()
     }
 }
-class CircleTable extends PIXI.Graphics {
+class CircleTable extends PIXI.Sprite {
     origin: Vector2
     radius: number
     degree: number
     graph: PIXI.Graphics
-
+    bounds: PIXI.Rectangle
 
     // x y 表示圆桌在画布上的位置
     constructor(x: number, y: number, radius: number) {
-        super()
         // 这样会改变在画布中的额位置
         // this.x = x
         // this.y = y
+        let tex: PIXI.Texture = resources['/images/pinwheel.png'].texture
+        super(tex)
+        
         this.origin = new Vector2(x, y)
         this.radius = radius
 
-        // this.appplyTexture()
+        this.bounds = this.getBounds()
+        this.width = this.bounds.width
+        this.height = this.bounds.height
+        this.pivot.x = this.width / 2
+        this.pivot.y = this.height / 2  
+        
+        this.degree = 0
+
     }
 
-    draw(stage: PIXI.Container){
-        this.beginFill(0xFF0000, 1);
-        this.drawCircle(0, 0, this.radius); // drawCircle(x, y, radius)
-        this.endFill();    
+    draw(parent: PIXI.Container){
+        // this.beginFill(0xFF0000, 1);
+        // this.drawCircle(0, 0, this.radius); // drawCircle(x, y, radius)
+        // this.endFill();    
         
+        // x y 等 pos 坐标因为 pivot 而改变
+        // 原本 x y 是指图片的左上角
+        // 现在 x y 是图片的中心点
+        this.x = this.origin.x// - this.width/2
+        this.y = this.origin.y// - this.height/2
 
-        this.x = this.origin.x
-        this.y = this.origin.y
+        
         // this.beginFill(0xFF0000, 1);
         // this.lineStyle(0, 0xFF0000, 1);
         // this.moveTo(200, 200);
@@ -175,7 +188,7 @@ class CircleTable extends PIXI.Graphics {
         // this.lineTo(300, 300)        
 
         // stage.addChild(this.applyTexture())
-        stage.addChild(this)
+        parent.addChild(this)
     }
 
 
@@ -208,8 +221,11 @@ class CircleTable extends PIXI.Graphics {
 
 
     startSpin(delta) {
-        this.degree += 1
-        this.rotation -= 0.01 * delta;
+        this.degree += delta    
+        // angle 为正是顺时针旋转
+
+        this.angle = -this.degree
+        // this.rotation -= 0.01 * delta;
         
     }
 
@@ -273,30 +289,33 @@ class EatGame {
         this.app = app;
 
         this.makeScene = this.makeScene.bind(this)
-
         document.body.appendChild(app.view);
-        this.loadRes(this.makeScene)
-
-        this.foodList = new Array<Food>();
-        this.foodMovingList = new Array<Food>();
 
 
-        let ct = new CircleTable(stageWidth/2, stageHeight, 200)
-        ct.draw(this.app.stage)   
-        this.table = ct
+        this.loadRes( ()=> {
+            this.makeScene()
+            this.foodList = new Array<Food>();
+            this.foodMovingList = new Array<Food>();
+    
+    
+            let ct = new CircleTable(stageWidth/2, stageHeight, 200)
+            ct.draw(this.app.stage)   
+            this.table = ct
+    
+    
+            // 初始化
+            let defaultPos = new Vector2(-100, -100)
+            this.mouth = new Mouth(defaultPos, defaultPos, defaultPos)
+            this.app.stage.addChild(this.mouth);
+    
+            // this.score = 0
+            this.renderScore()
+    
+            
+            // 收尾
+            this.renderTestText()
 
-
-        // 初始化
-        let defaultPos = new Vector2(-100, -100)
-        this.mouth = new Mouth(defaultPos, defaultPos, defaultPos)
-        this.app.stage.addChild(this.mouth);
-
-        // this.score = 0
-        this.renderScore()
-
-        
-        // 收尾
-        this.renderTestText()
+        })
     }
     testTween(){
         let resourceMap = resources["/images/animals.json"].textures;
@@ -395,6 +414,7 @@ class EatGame {
     loadRes(callback) {
         loader
             .add("/images/animals.json")
+            .add('/images/pinwheel.png')
             .load(callback);
     }
 
@@ -450,6 +470,7 @@ class EatGame {
         }
         for (let food of this.foodList) {
 
+            // 逆时针旋转
             if(foodInTable(food)) {
                 food.degree += delta
 
@@ -526,6 +547,8 @@ class EatGame {
     }
 
     finishEating() {
+
+
         this.score++;    
         this.renderScore();
     }

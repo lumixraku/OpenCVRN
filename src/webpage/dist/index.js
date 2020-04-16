@@ -284,28 +284,38 @@
         __extends(CircleTable, _super);
         // x y 表示圆桌在画布上的位置
         function CircleTable(x, y, radius) {
-            var _this = _super.call(this) || this;
+            var _this = this;
             // 这样会改变在画布中的额位置
             // this.x = x
             // this.y = y
+            var tex = resources['/images/pinwheel.png'].texture;
+            _this = _super.call(this, tex) || this;
             _this.origin = new Vector2(x, y);
             _this.radius = radius;
+            _this.bounds = _this.getBounds();
+            _this.width = _this.bounds.width;
+            _this.height = _this.bounds.height;
+            _this.pivot.x = _this.width / 2;
+            _this.pivot.y = _this.height / 2;
+            _this.degree = 0;
             return _this;
-            // this.appplyTexture()
         }
-        CircleTable.prototype.draw = function (stage) {
-            this.beginFill(0xFF0000, 1);
-            this.drawCircle(0, 0, this.radius); // drawCircle(x, y, radius)
-            this.endFill();
-            this.x = this.origin.x;
-            this.y = this.origin.y;
+        CircleTable.prototype.draw = function (parent) {
+            // this.beginFill(0xFF0000, 1);
+            // this.drawCircle(0, 0, this.radius); // drawCircle(x, y, radius)
+            // this.endFill();    
+            // x y 等 pos 坐标因为 pivot 而改变
+            // 原本 x y 是指图片的左上角
+            // 现在 x y 是图片的中心点
+            this.x = this.origin.x; // - this.width/2
+            this.y = this.origin.y; // - this.height/2
             // this.beginFill(0xFF0000, 1);
             // this.lineStyle(0, 0xFF0000, 1);
             // this.moveTo(200, 200);
             // this.lineTo(200, 300);
             // this.lineTo(300, 300)        
             // stage.addChild(this.applyTexture())
-            stage.addChild(this);
+            parent.addChild(this);
         };
         CircleTable.prototype.create = function () {
             var newG = new PIXI.Graphics();
@@ -328,8 +338,10 @@
             return tilingSprite;
         };
         CircleTable.prototype.startSpin = function (delta) {
-            this.degree += 1;
-            this.rotation -= 0.01 * delta;
+            this.degree += delta;
+            // angle 为正是顺时针旋转
+            this.angle = -this.degree;
+            // this.rotation -= 0.01 * delta;
         };
         CircleTable.prototype.degreeToPos = function (deg) {
             // Math.cos(x) 这里默认是弧度制
@@ -359,9 +371,10 @@
             return gamePos;
         };
         return CircleTable;
-    }(PIXI.Graphics));
+    }(PIXI.Sprite));
     var EatGame = /** @class */ (function () {
         function EatGame() {
+            var _this = this;
             this.score = 0;
             this.elapse = 0;
             this.genFoodGap = 60;
@@ -376,20 +389,22 @@
             this.app = app;
             this.makeScene = this.makeScene.bind(this);
             document.body.appendChild(app.view);
-            this.loadRes(this.makeScene);
-            this.foodList = new Array();
-            this.foodMovingList = new Array();
-            var ct = new CircleTable(stageWidth / 2, stageHeight, 200);
-            ct.draw(this.app.stage);
-            this.table = ct;
-            // 初始化
-            var defaultPos = new Vector2(-100, -100);
-            this.mouth = new Mouth(defaultPos, defaultPos, defaultPos);
-            this.app.stage.addChild(this.mouth);
-            // this.score = 0
-            this.renderScore();
-            // 收尾
-            this.renderTestText();
+            this.loadRes(function () {
+                _this.makeScene();
+                _this.foodList = new Array();
+                _this.foodMovingList = new Array();
+                var ct = new CircleTable(stageWidth / 2, stageHeight, 200);
+                ct.draw(_this.app.stage);
+                _this.table = ct;
+                // 初始化
+                var defaultPos = new Vector2(-100, -100);
+                _this.mouth = new Mouth(defaultPos, defaultPos, defaultPos);
+                _this.app.stage.addChild(_this.mouth);
+                // this.score = 0
+                _this.renderScore();
+                // 收尾
+                _this.renderTestText();
+            });
         }
         EatGame.prototype.testTween = function () {
             var _this = this;
@@ -464,6 +479,7 @@
         EatGame.prototype.loadRes = function (callback) {
             loader
                 .add("/images/animals.json")
+                .add('/images/pinwheel.png')
                 .load(callback);
         };
         EatGame.prototype.addMoreFood = function () {
@@ -507,6 +523,7 @@
             };
             for (var _i = 0, _a = this.foodList; _i < _a.length; _i++) {
                 var food = _a[_i];
+                // 逆时针旋转
                 if (foodInTable(food)) {
                     food.degree += delta;
                     var pos = this.table.degreeToPos(food.degree);
@@ -643,6 +660,7 @@
             window["ReactNativeWebView"].postMessage("Hello! From JS");
         }
     }, false);
+    //# sourceMappingURL=index.js.map
 
 }(PIXI, TWEEN));
 //# sourceMappingURL=index.js.map
