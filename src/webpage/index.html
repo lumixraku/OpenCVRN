@@ -124,24 +124,24 @@
       }
       i = 1
 
-      movingmouth()
+      // movingmouth()
 
-      function movingmouth(){
+      function movingmouth() {
         let d = 1
         setInterval(() => {
           if (faceData.leftMouthPosition.x > 390) {
-              d = -1
-          } else if(faceData.leftMouthPosition.x < 290){
+            d = -1
+          } else if (faceData.leftMouthPosition.x < 290) {
             d = 1
           }
 
-          faceData.leftMouthPosition.x = faceData.leftMouthPosition.x +d
-          faceData.rightMouthPosition.x = faceData.rightMouthPosition.x +d
-          faceData.bottomMouthPosition.x = faceData.bottomMouthPosition.x +d
+          faceData.leftMouthPosition.x = faceData.leftMouthPosition.x + d
+          faceData.rightMouthPosition.x = faceData.rightMouthPosition.x + d
+          faceData.bottomMouthPosition.x = faceData.bottomMouthPosition.x + d
           window.postMessage(faceData)
-  
+
           i++;
-  
+
         }, 100)
       }
     }, false)

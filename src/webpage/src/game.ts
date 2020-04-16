@@ -29,6 +29,7 @@ class Mouth extends PIXI.Graphics {
     leftPos: Vector2
     rightPos: Vector2
     bottomPos: Vector2
+    openThreshold: number = 40
     constructor(leftPos: Vector2, rightPos: Vector2, bottomPos: Vector2){
         super()
         this.leftPos = leftPos
@@ -77,6 +78,14 @@ class Mouth extends PIXI.Graphics {
         return this.bottomPos.y;
             
         
+    }
+    checkOpenRs() {
+        let bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y) 
+        let topY = Math.min(this.leftPos.y, this.rightPos.y) 
+        return {
+            rs: bottomY - topY > this.openThreshold,
+            val: bottomY - topY 
+        }
     }
 
 }
@@ -244,7 +253,7 @@ class EatGame {
     app: PIXI.Application;
     foodList: Array<Food>;
     foodMovingList: Array<Food> //移动向嘴巴的列表
-    mouthOpen: boolean;
+    // mouthOpen: boolean;
     mouthText: PIXI.Text;
     mouth: Mouth;
     table: CircleTable;
@@ -364,7 +373,7 @@ class EatGame {
         if (this.frameCount > this.genFoodGap) {
 
             this.addMoreFood()
-            this.changeMouthState()
+            this.checkMouthState()
 
             this.frameCount = 0
         }
@@ -465,7 +474,7 @@ class EatGame {
 
     // call Each Frame
     shouldIEat() {        
-        if (this.mouth && this.mouthOpen) {
+        if (this.mouth && this.mouth.checkOpenRs().rs) {
             for (var i = 0; i < this.foodList.length; i++) {
                 let food = this.foodList[i]
                 if (food && food.transform ) {
@@ -503,15 +512,17 @@ class EatGame {
             })
     }
 
-    changeMouthState() {
-            // 这里还会有一些其他条件  待补充
-            if  (Math.random() > 0.4) {
-                this.mouthText.text = "OPEN"
-                this.mouthOpen = true;
-            }else {
-                this.mouthText.text = "CLOSE"
-                this.mouthOpen = false;
-            }
+    checkMouthState() {
+        // 这里还会有一些其他条件  待补充
+        // if  (Math.random() > 0.4) {
+        //     this.mouthText.text = "OPEN"
+        //     this.mouthOpen = true;
+        // }else {
+        //     this.mouthText.text = "CLOSE"
+        //     this.mouthOpen = false;
+        // }
+        let rs = this.mouth.checkOpenRs()
+        this.mouthText.text = ""+ rs.val
     }
 
     finishEating() {

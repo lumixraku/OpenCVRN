@@ -196,6 +196,7 @@
         __extends(Mouth, _super);
         function Mouth(leftPos, rightPos, bottomPos) {
             var _this = _super.call(this) || this;
+            _this.openThreshold = 40;
             _this.leftPos = leftPos;
             _this.rightPos = rightPos;
             _this.bottomPos = bottomPos;
@@ -232,6 +233,14 @@
         Mouth.prototype.getYPos = function () {
             // return (this.getTopLine() + this.getBottomLine() )/2
             return this.bottomPos.y;
+        };
+        Mouth.prototype.checkOpenRs = function () {
+            var bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y);
+            var topY = Math.min(this.leftPos.y, this.rightPos.y);
+            return {
+                rs: bottomY - topY > this.openThreshold,
+                val: bottomY - topY
+            };
         };
         return Mouth;
     }(PIXI.Graphics));
@@ -438,7 +447,7 @@
             //60帧 加一次食物
             if (this.frameCount > this.genFoodGap) {
                 this.addMoreFood();
-                this.changeMouthState();
+                this.checkMouthState();
                 this.frameCount = 0;
             }
             this.reachBottomLineCat();
@@ -517,7 +526,7 @@
         };
         // call Each Frame
         EatGame.prototype.shouldIEat = function () {
-            if (this.mouth && this.mouthOpen) {
+            if (this.mouth && this.mouth.checkOpenRs().rs) {
                 for (var i = 0; i < this.foodList.length; i++) {
                     var food = this.foodList[i];
                     if (food && food.transform) {
@@ -552,16 +561,17 @@
                 _this.finishEating();
             });
         };
-        EatGame.prototype.changeMouthState = function () {
+        EatGame.prototype.checkMouthState = function () {
             // 这里还会有一些其他条件  待补充
-            if (Math.random() > 0.4) {
-                this.mouthText.text = "OPEN";
-                this.mouthOpen = true;
-            }
-            else {
-                this.mouthText.text = "CLOSE";
-                this.mouthOpen = false;
-            }
+            // if  (Math.random() > 0.4) {
+            //     this.mouthText.text = "OPEN"
+            //     this.mouthOpen = true;
+            // }else {
+            //     this.mouthText.text = "CLOSE"
+            //     this.mouthOpen = false;
+            // }
+            var rs = this.mouth.checkOpenRs();
+            this.mouthText.text = "" + rs.val;
         };
         EatGame.prototype.finishEating = function () {
             this.score++;
