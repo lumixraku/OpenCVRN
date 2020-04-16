@@ -1,3 +1,5 @@
+import { Vector2 } from "./Vector";
+
 export interface BottomMouthPosition {
     x: number;
     y: number;
@@ -74,22 +76,22 @@ export interface RightMouthPosition {
 }
 
 export interface FaceData {
-    bottomMouthPosition?: BottomMouthPosition;
+    bottomMouthPosition?: Vector2;
     bounds: Bounds;
     faceID: number;
-    leftCheekPosition?: LeftCheekPosition;
-    leftEarPosition?: LeftEarPosition;
-    leftEarTipPosition?: LeftEarTipPosition;
+    leftCheekPosition?: Vector2;
+    leftEarPosition?: Vector2;
+    leftEarTipPosition?: Vector2;
     leftEyeOpenProbability?: number;
-    leftEyePosition?: LeftEyePosition;
-    leftMouthPosition?: LeftMouthPosition;
-    noseBasePosition?: NoseBasePosition;
-    rightCheekPosition?: RightCheekPosition;
-    rightEarPosition?: RightEarPosition;
-    rightEarTipPosition?: RightEarTipPosition;
+    leftEyePosition?: Vector2;
+    leftMouthPosition?: Vector2;
+    noseBasePosition?: Vector2;
+    rightCheekPosition?: Vector2;
+    rightEarPosition?: Vector2;
+    rightEarTipPosition?: Vector2;
     rightEyeOpenProbability?: number;
-    rightEyePosition?: RightEyePosition;
-    rightMouthPosition?: RightMouthPosition;
+    rightEyePosition?: Vector2;
+    rightMouthPosition?: Vector2;
     rollAngle: number;
     smilingProbability?: number;
     yawAngle: number;

@@ -6,6 +6,11 @@ class Vector2 {
         this.y = y
     }
 
+    add(v: Vector2) {
+        this.x = this.x + v.x
+        this.y = this.y + v.y
+    }
+
 }
 
 export { Vector2 }

@@ -175,6 +175,10 @@
             this.x = x;
             this.y = y;
         }
+        Vector2.prototype.add = function (v) {
+            this.x = this.x + v.x;
+            this.y = this.y + v.y;
+        };
         return Vector2;
     }());
     //# sourceMappingURL=Vector.js.map
@@ -184,6 +188,7 @@
     var TextureCache = PIXI.utils.TextureCache;
     var Sprite = PIXI.Sprite;
     var stageHeight = document.body.clientHeight;
+    var stageWidth = document.body.clientWidth;
     // 这两个点的位置应该由嘴巴来决定
     // const eatPosSY = stageHeight / 2 - 100; //超过这个点还没有吃到的话  视为miss
     // const eatPosEY = stageHeight / 2 + 100; //超过这个点还没有吃到的话  视为miss
@@ -236,23 +241,117 @@
             _this.bounds = _this.getBounds();
             _this.width = _this.bounds.width;
             _this.height = _this.bounds.height;
+            _this.pivot.x = _this.width / 2;
+            _this.pivot.y = _this.height / 2;
+            _this.degree = 0;
             return _this;
         }
         Food.prototype.changeTexture = function () {
             this.texture = this.textures["hedgehog.png"];
         };
-        Food.prototype.setCenterPos = function (x, y) {
-            this.x = x - this.width / 2;
-            this.y = y - this.height / 2;
-        };
+        // 用 pivot 代替
+        // setCenterPos(x: number, y: number) {
+        //     this.x = x - this.width/2
+        //     this.y = y - this.height/2
+        // }
         Food.prototype.centerPosToLeftTopPos = function (x, y) {
             return new Vector2(x - this.width / 2, y - this.height / 2);
         };
         return Food;
     }(PIXI.Sprite));
+    var TT = /** @class */ (function (_super) {
+        __extends(TT, _super);
+        function TT() {
+            return _super.call(this) || this;
+        }
+        return TT;
+    }(PIXI.Graphics));
+    var CircleTable = /** @class */ (function (_super) {
+        __extends(CircleTable, _super);
+        // x y 表示圆桌在画布上的位置
+        function CircleTable(x, y, radius) {
+            var _this = _super.call(this) || this;
+            // 这样会改变在画布中的额位置
+            // this.x = x
+            // this.y = y
+            _this.origin = new Vector2(x, y);
+            _this.radius = radius;
+            return _this;
+            // this.appplyTexture()
+        }
+        CircleTable.prototype.draw = function (stage) {
+            // 不生效???????????
+            this.beginFill(0xFF0000, 1);
+            this.drawCircle(0, 0, this.radius); // drawCircle(x, y, radius)
+            this.endFill();
+            this.x = this.origin.x;
+            this.y = this.origin.y;
+            // this.beginFill(0xFF0000, 1);
+            // this.lineStyle(0, 0xFF0000, 1);
+            // this.moveTo(200, 200);
+            // this.lineTo(200, 300);
+            // this.lineTo(300, 300)        
+            // stage.addChild(this.applyTexture())
+            stage.addChild(this);
+        };
+        CircleTable.prototype.create = function () {
+            var newG = new PIXI.Graphics();
+            newG.beginFill(0xe74c3c); // Red
+            newG.drawCircle(this.x, this.y, this.radius);
+            newG.endFill();
+            this.graph = newG;
+            return newG;
+        };
+        // 这个好像不对 
+        // 这是在底部挖了一个洞  当graphic 移动的时候 纹理却没有移动
+        CircleTable.prototype.apppplyTexture = function () {
+            //create a texture
+            var img = new Image();
+            img.src = '/images/logo.png';
+            var base = new PIXI.BaseTexture(img);
+            var texture = new PIXI.Texture(base); // return you the texture        
+            var tilingSprite = new PIXI.TilingSprite(texture, 0, 0);
+            tilingSprite.mask = this;
+            return tilingSprite;
+        };
+        CircleTable.prototype.startSpin = function (delta) {
+            this.degree += 1;
+            this.rotation -= 0.01 * delta;
+        };
+        CircleTable.prototype.degreeToPos = function (deg) {
+            // Math.cos(x) 这里默认是弧度制
+            deg = Math.PI / 180 * deg;
+            var r = this.radius;
+            var pos;
+            if (deg >= 0 && deg <= 90) {
+                pos = new Vector2(Math.cos(deg) * r, Math.sin(deg) * r);
+            }
+            else if (deg > 90 && deg <= 180) {
+                deg = 180 - deg;
+                pos = new Vector2(-Math.cos(deg) * r, Math.sin(deg) * r);
+            }
+            else if (deg > 180 && deg <= 270) {
+                deg = deg - 180;
+                pos = new Vector2(-Math.cos(deg) * r, -Math.sin(deg) * r);
+            }
+            else if (deg > 270 && deg <= 360) {
+                deg = 360 - deg;
+                pos = new Vector2(Math.cos(deg) * r, -Math.sin(deg) * r);
+            }
+            // 和数学中的坐标系不一样哎                    
+            // pos.add(this.origin)
+            var gamePos = new Vector2(0, 0);
+            gamePos.y = this.origin.y - pos.y;
+            gamePos.x = this.origin.x + pos.x;
+            return gamePos;
+        };
+        return CircleTable;
+    }(PIXI.Graphics));
     var EatGame = /** @class */ (function () {
         function EatGame() {
             this.elapse = 0;
+            this.genFoodGap = 60;
+            this.frameCount = 0;
             var app = new PIXI.Application({
                 width: document.body.clientWidth,
                 height: document.body.clientHeight,
@@ -266,6 +365,13 @@
             this.loadRes(this.makeScene);
             this.foodList = new Array();
             this.foodMovingList = new Array();
+            var ct = new CircleTable(stageWidth / 2, 200, 200);
+            ct.draw(this.app.stage);
+            this.table = ct;
+            // 初始化
+            var defaultPos = new Vector2(-100, -100);
+            this.mouth = new Mouth(defaultPos, defaultPos, defaultPos);
+            this.app.stage.addChild(this.mouth);
             this.renderText();
         }
         EatGame.prototype.testTween = function () {
@@ -291,20 +397,47 @@
                 _this.app.stage.removeChild(cat);
             });
         };
+        EatGame.prototype.testSpin = function () {
+            var _this = this;
+            var resourceMap = resources["/images/animals.json"].textures;
+            //The cat
+            var cat = new Sprite(resourceMap["cat.png"]);
+            cat.position.x = 16;
+            cat.position.y = 16;
+            this.app.stage.addChild(cat);
+            cat.pivot.x = cat.getBounds().x;
+            cat.pivot.y = cat.getBounds().y;
+            var rotation = 0;
+            var setPosFn = function (deg) {
+                var pos = _this.table.degreeToPos(deg);
+                console.log("px", deg, pos);
+                // let deg = 315
+                cat.x = pos.x;
+                cat.y = pos.y;
+            };
+            this.app.ticker.add(function (delta) {
+                rotation += 0.1 * delta;
+                var deg = rotation % 360;
+                setPosFn(deg);
+            });
+        };
         EatGame.prototype.makeScene = function () {
             var _this = this;
-            // this.addCat()
-            this.testTween();
             this.app.ticker.add(function (delta) { return _this.gameLoop(delta); });
+            // this.testSpin()
         };
         EatGame.prototype.gameLoop = function (delta) {
             TWEEN.update();
+            this.table.startSpin(delta);
             this.elapse++;
-            this.movingFood();
-            if (this.elapse > 60) {
-                this.elapse = 0;
+            this.frameCount++;
+            // this.movingFood()
+            this.movingFoodOnTable(delta);
+            //60帧 加一次食物
+            if (this.frameCount > this.genFoodGap) {
                 this.addMoreFood();
                 this.changeMouthState();
+                this.frameCount = 0;
             }
             this.reachBottomLineCat();
             this.shouldIEat();
@@ -315,10 +448,15 @@
                 .load(callback);
         };
         EatGame.prototype.addMoreFood = function () {
+            // 桌上最多 6个 食物
+            if (this.foodList.length >= 6) {
+                return;
+            }
             var app = this.app;
             var food = new Food();
-            food.x = 16;
-            food.y = 16 + Math.random() * 30;
+            food.x = -1000;
+            food.y = -1000 + Math.random() * 30;
+            // food.visible = false
             this.foodList.push(food);
             app.stage.addChild(food);
         };
@@ -340,6 +478,22 @@
                 }
             }
         };
+        EatGame.prototype.movingFoodOnTable = function (delta) {
+            // for(let i=0; i< this.foodList.length; i++) {
+            // }
+            var foodInTable = function (food) {
+                return food.transform && !food.eating;
+            };
+            for (var _i = 0, _a = this.foodList; _i < _a.length; _i++) {
+                var food = _a[_i];
+                if (foodInTable(food)) {
+                    food.degree += delta;
+                    var pos = this.table.degreeToPos(food.degree);
+                    food.position.x = pos.x;
+                    food.position.y = pos.y;
+                }
+            }
+        };
         EatGame.prototype.reachBottomLineCat = function () {
             for (var i = 0; i < this.foodList.length; i++) {
                 var food = this.foodList[i];
@@ -351,7 +505,7 @@
         };
         // call Each Frame
         EatGame.prototype.shouldIEat = function () {
-            if (this.mouthOpen) {
+            if (this.mouth && this.mouthOpen) {
                 for (var i = 0; i < this.foodList.length; i++) {
                     var food = this.foodList[i];
                     if (food && food.transform) {
@@ -371,7 +525,7 @@
             // 注意应该使图片的中心位置移动到 dest
             food.eating = true;
             new TWEEN.Tween({ x: food.x, y: food.y })
-                .to({ x: leftTopPos.x, y: leftTopPos.y }, 1000)
+                .to({ x: dest.x, y: dest.y }, 1000)
                 .onUpdate(function (o) {
                 food.y = o.y;
                 food.x = o.x;
@@ -456,6 +610,7 @@
             window["ReactNativeWebView"].postMessage("Hello! From JS");
         }
     }, false);
+    //# sourceMappingURL=index.js.map
 
 }(PIXI, TWEEN));
 //# sourceMappingURL=index.js.map
