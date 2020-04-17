@@ -30,7 +30,7 @@ class Mouth extends PIXI.Graphics {
     rightPos: Vector2
     bottomPos: Vector2
     openThreshold: number = 40
-    constructor(leftPos: Vector2, rightPos: Vector2, bottomPos: Vector2){
+    constructor(leftPos: Vector2, rightPos: Vector2, bottomPos: Vector2) {
         super()
         this.leftPos = leftPos
         this.rightPos = rightPos
@@ -48,8 +48,8 @@ class Mouth extends PIXI.Graphics {
         this.moveTo(rightPos.x, rightPos.y);
         this.lineTo(leftPos.x, leftPos.y);
         this.lineTo(bottomPos.x, bottomPos.y);
-        
-        
+
+
         //draw Top Line & bottom Line
         this.beginFill(0x00FF00, 1)
         this.lineStyle(3, 0x00FF00, 1);
@@ -57,7 +57,7 @@ class Mouth extends PIXI.Graphics {
         this.lineTo(rightPos.x, rightPos.y + 100)
 
         this.endFill();
-    }    
+    }
 
     getTopLine() {
         let topY = Math.min(this.leftPos.y, this.rightPos.y) - 100
@@ -65,26 +65,26 @@ class Mouth extends PIXI.Graphics {
     }
 
     getBottomLine() {
-        let bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y)  + 100
-        return bottomY;           
+        let bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y) + 100
+        return bottomY;
     }
 
     getXPos() {
         return this.bottomPos.x
     }
 
-    getYPos(){
+    getYPos() {
         // return (this.getTopLine() + this.getBottomLine() )/2
         return this.bottomPos.y;
-            
-        
+
+
     }
     checkOpenRs() {
-        let bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y) 
-        let topY = Math.min(this.leftPos.y, this.rightPos.y) 
+        let bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y)
+        let topY = Math.min(this.leftPos.y, this.rightPos.y)
         return {
             rs: bottomY - topY > this.openThreshold,
-            val: bottomY - topY 
+            val: bottomY - topY
         }
     }
 
@@ -92,9 +92,9 @@ class Mouth extends PIXI.Graphics {
 
 class CircleShape {
     constructor() {
-        let p = new  PIXI.Circle()
+        let p = new PIXI.Circle()
         // p.
-    }   
+    }
 }
 
 class Food extends PIXI.Sprite {
@@ -115,8 +115,8 @@ class Food extends PIXI.Sprite {
         this.bounds = this.getBounds()
         this.width = this.bounds.width
         this.height = this.bounds.height
-        this.pivot.x = this.width/2
-        this.pivot.y = this.height/2
+        this.pivot.x = this.width / 2
+        this.pivot.y = this.height / 2
 
         this.degree = 0
     }
@@ -129,15 +129,15 @@ class Food extends PIXI.Sprite {
     // setCenterPos(x: number, y: number) {
     //     this.x = x - this.width/2
     //     this.y = y - this.height/2
-        
+
     // }
 
-    centerPosToLeftTopPos(x: number, y: number): Vector2{
+    centerPosToLeftTopPos(x: number, y: number): Vector2 {
         return new Vector2(x - this.width / 2, y - this.height / 2)
     }
 }
 class TT extends PIXI.Graphics {
-    constructor(){
+    constructor() {
         super()
     }
 }
@@ -155,7 +155,7 @@ class CircleTable extends PIXI.Sprite {
         // this.y = y
         let tex: PIXI.Texture = resources['/images/pinwheel.png'].texture
         super(tex)
-        
+
         this.origin = new Vector2(x, y)
         this.radius = radius
 
@@ -163,24 +163,24 @@ class CircleTable extends PIXI.Sprite {
         this.width = this.bounds.width
         this.height = this.bounds.height
         this.pivot.x = this.width / 2
-        this.pivot.y = this.height / 2  
-        
+        this.pivot.y = this.height / 2
+
         this.degree = 0
 
     }
 
-    draw(parent: PIXI.Container){
+    draw(parent: PIXI.Container) {
         // this.beginFill(0xFF0000, 1);
         // this.drawCircle(0, 0, this.radius); // drawCircle(x, y, radius)
         // this.endFill();    
-        
+
         // x y 等 pos 坐标因为 pivot 而改变
         // 原本 x y 是指图片的左上角
         // 现在 x y 是图片的中心点
         this.x = this.origin.x// - this.width/2
         this.y = this.origin.y// - this.height/2
 
-        
+
         // this.beginFill(0xFF0000, 1);
         // this.lineStyle(0, 0xFF0000, 1);
         // this.moveTo(200, 200);
@@ -197,18 +197,18 @@ class CircleTable extends PIXI.Sprite {
 
         let newG = new PIXI.Graphics()
         newG.beginFill(0xe74c3c); // Red
-        newG.drawCircle(this.x, this.y, this.radius); 
-        newG.endFill();  
+        newG.drawCircle(this.x, this.y, this.radius);
+        newG.endFill();
         this.graph = newG
-        return newG         
+        return newG
     }
 
     // 这个好像不对 
     // 这是在底部挖了一个洞  当graphic 移动的时候 纹理却没有移动
     apppplyTexture() {
         //create a texture
-        let img = new Image(); 
-        img.src = '/images/logo.png'; 
+        let img = new Image();
+        img.src = '/images/logo.png';
         let base = new PIXI.BaseTexture(img)
         let texture = new PIXI.Texture(base);// return you the texture        
 
@@ -221,48 +221,46 @@ class CircleTable extends PIXI.Sprite {
 
 
     startSpin(delta) {
-        this.degree += delta    
+        this.degree += delta
         // angle 为正是顺时针旋转
 
         this.angle = -this.degree
         // this.rotation -= 0.01 * delta;
-        
+
     }
 
     degreeToPos(deg: number): Vector2 {
         // Math.cos(x) 这里默认是弧度制
-        deg = Math.PI/180 * deg
+        // 而参数中的 deg 是角度
+        // 所以要把角度转为弧度
+        deg = Math.PI / 180 * deg
         let r = this.radius
         let pos: Vector2
         if (deg >= 0 && deg <= 90) {
             pos = new Vector2(Math.cos(deg) * r, Math.sin(deg) * r)
-        } else
+        } else if (deg > 90 && deg <= 180) {
+            deg = 180 - deg
+            pos = new Vector2(-Math.cos(deg) * r, Math.sin(deg) * r)
+        } else if (deg > 180 && deg <= 270) {
+            deg = deg - 180
+            pos = new Vector2(-Math.cos(deg) * r, -Math.sin(deg) * r)
 
-            if (deg > 90 && deg <= 180) {
-                deg = 180 - deg
-                pos = new Vector2(-Math.cos(deg) * r, Math.sin(deg) * r)
-            } else
-                if (deg > 180 && deg <= 270) {
-                    deg = deg - 180
-                    pos = new Vector2(-Math.cos(deg) * r, -Math.sin(deg) * r)
+        } else if (deg > 270 && deg <= 360) {
+            deg = 360 - deg
+            pos = new Vector2(Math.cos(deg) * r, -Math.sin(deg) * r)
+        }
 
-                } else
-                    if (deg > 270 && deg <= 360) {
-                        deg = 360 - deg
-                        pos = new Vector2(Math.cos(deg) * r, -Math.sin(deg) * r)
-                    }       
-                    
         // 和数学中的坐标系不一样哎                    
         // pos.add(this.origin)
-        let gamePos  = new  Vector2(0,0)
-            gamePos.y = this.origin.y - pos.y
-            gamePos.x = this.origin.x + pos.x
+        let gamePos = new Vector2(0, 0)
+        gamePos.y = this.origin.y - pos.y
+        gamePos.x = this.origin.x + pos.x
 
-        
+
 
         return gamePos
 
-    }    
+    }
 }
 
 class EatGame {
@@ -292,32 +290,32 @@ class EatGame {
         document.body.appendChild(app.view);
 
 
-        this.loadRes( ()=> {
+        this.loadRes(() => {
             this.makeScene()
             this.foodList = new Array<Food>();
             this.foodMovingList = new Array<Food>();
-    
-    
-            let ct = new CircleTable(stageWidth/2, stageHeight, 200)
-            ct.draw(this.app.stage)   
+
+
+            let ct = new CircleTable(stageWidth / 2, stageHeight, 200)
+            ct.draw(this.app.stage)
             this.table = ct
-    
-    
+
+
             // 初始化
             let defaultPos = new Vector2(-100, -100)
             this.mouth = new Mouth(defaultPos, defaultPos, defaultPos)
             this.app.stage.addChild(this.mouth);
-    
+
             // this.score = 0
             this.renderScore()
-    
-            
+
+
             // 收尾
             this.renderTestText()
 
         })
     }
-    testTween(){
+    testTween() {
         let resourceMap = resources["/images/animals.json"].textures;
         //The cat
         let cat = new Sprite(resourceMap["cat.png"]);
@@ -342,7 +340,7 @@ class EatGame {
     }
 
 
-    testSpin(){
+    testSpin() {
         let resourceMap = resources["/images/animals.json"].textures;
         //The cat
         let cat = new Sprite(resourceMap["cat.png"]);
@@ -351,28 +349,28 @@ class EatGame {
         this.app.stage.addChild(cat)
         cat.pivot.x = cat.getBounds().x
         cat.pivot.y = cat.getBounds().y
-        
+
         let rotation = 0
 
-        let count =0
+        let count = 0
         let setPosFn = (deg) => {
 
-                let pos = this.table.degreeToPos(deg)
-                // let deg = 315
-                cat.x = pos.x
-                cat.y = pos.y
+            let pos = this.table.degreeToPos(deg)
+            // let deg = 315
+            cat.x = pos.x
+            cat.y = pos.y
 
-        }        
+        }
         this.app.ticker.add(delta => {
             rotation += 0.1 * delta;
-        
-            let deg = rotation%360
+
+            let deg = rotation % 360
             setPosFn(deg)
         });
 
 
-        
-        
+
+
     }
 
     elapse = 0
@@ -380,7 +378,7 @@ class EatGame {
     frameCount = 0
     makeScene() {
         this.app.ticker.add(delta => this.gameUILoop(delta));
-        this.app.ticker.add(delta=> this.gameCheckLoop(delta));
+        this.app.ticker.add(delta => this.gameCheckLoop(delta));
         // this.testSpin()
 
     }
@@ -403,7 +401,7 @@ class EatGame {
 
     gameUILoop(delta) {
         this.elapse++;
-        this.frameCount++;        
+        this.frameCount++;
 
         TWEEN.update();
         this.table.startSpin(delta)
@@ -425,7 +423,7 @@ class EatGame {
         console.log("more food")
         // 桌上最多 6个 食物
         if (this.foodList.length >= 6) {
-            return 
+            return
         }
 
         let app = this.app
@@ -445,13 +443,13 @@ class EatGame {
         for (let food of this.foodList) {
             if (food.transform) {
                 if (!food.eating) {
-                    food.y += (3 + Math.random()* 3)
+                    food.y += (3 + Math.random() * 3)
 
                 }
             }
 
             //miss
-            if (food.y > this.mouth.getBottomLine() && !food.miss ) {
+            if (food.y > this.mouth.getBottomLine() && !food.miss) {
                 food.miss = true
                 food.changeTexture()
                 // let resourceMap = resources["/images/animals.json"].textures;
@@ -465,21 +463,21 @@ class EatGame {
      * @param delta 
      */
     movingFoodOnTable(delta) {
-        const foodInTable = (food):boolean => {
+        const foodInTable = (food): boolean => {
             return food.transform && !food.eating
         }
         for (let food of this.foodList) {
 
             // 逆时针旋转
-            if(foodInTable(food)) {
+            if (foodInTable(food)) {
                 food.degree += delta
 
-                let pos =  this.table.degreeToPos(food.degree)
+                let pos = this.table.degreeToPos(food.degree)
                 food.position.x = pos.x
                 food.position.y = pos.y
             }
         }
-        
+
     }
 
     reachBottomLineCat() {
@@ -494,17 +492,17 @@ class EatGame {
     }
 
     // call Each Frame
-    shouldIEat() {        
+    shouldIEat() {
         if (this.mouth && this.mouth.checkOpenRs().rs) {
             for (var i = 0; i < this.foodList.length; i++) {
                 let food = this.foodList[i]
-                if (food && food.transform ) {
+                if (food && food.transform) {
                     // 调用过 sprite.destroy 之后 sprite下的transform 就是空了
-                    if ( food.y > this.mouth.getTopLine() && food.y < this.mouth.getBottomLine()) {
+                    if (food.y > this.mouth.getTopLine() && food.y < this.mouth.getBottomLine()) {
                         this.foodList.splice(i--, 1);
                         let mouthPos = new Vector2(this.mouth.getXPos(), this.mouth.getYPos())
                         this.eatingFood(food, mouthPos)
-    
+
                     }
                 }
             }
@@ -521,7 +519,7 @@ class EatGame {
                 food.y = o.y
                 food.x = o.x
             })
-            .easing(TWEEN.Easing.Quintic.Out )
+            .easing(TWEEN.Easing.Quintic.Out)
             // .repeat(Infinity)
             // .yoyo(true) //到了终点之后 再动画返回原点
             .start()
@@ -543,13 +541,13 @@ class EatGame {
         //     this.mouthOpen = false;
         // }
         let rs = this.mouth.checkOpenRs()
-        this.mouthText.text = ""+ rs.val
+        this.mouthText.text = "" + rs.val
     }
 
     finishEating() {
 
 
-        this.score++;    
+        this.score++;
         this.renderScore();
     }
 
@@ -563,34 +561,34 @@ class EatGame {
             this.scoreText.x = stageWidth - 100
             this.scoreText.y = 25
             this.app.stage.addChild(this.scoreText)
-        }else{
+        } else {
             this.scoreText.text = `Score: ${this.score}`
         }
     }
 
 
     renderTestText() {
-                
+
         let mouthText = new PIXI.Text("The End");
         this.mouthText = mouthText
         mouthText.x = 15
         mouthText.y = 15
 
-        this.app.stage.addChild( mouthText)
+        this.app.stage.addChild(mouthText)
     }
 
 
-    public setMouthPos(faceData: FaceData){
+    public setMouthPos(faceData: FaceData) {
         let rightPos = faceData.rightMouthPosition
         let leftPos = faceData.leftMouthPosition
         let bottomPos = faceData.bottomMouthPosition
-        if (!this.mouth) {            
-            this.mouth = new Mouth(leftPos,  rightPos, bottomPos)
+        if (!this.mouth) {
+            this.mouth = new Mouth(leftPos, rightPos, bottomPos)
             this.app.stage.addChild(this.mouth);
-        }else{
+        } else {
             this.mouth.refreshByNewPoint(leftPos, rightPos, bottomPos)
         }
-        
+
     }
 }
 

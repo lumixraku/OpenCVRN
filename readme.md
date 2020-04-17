@@ -44,6 +44,20 @@ Demo face data
 ```
 
 
+## Read More
+### create your own rn package
+https://reactnative.dev/docs/native-modules-setup
+
+https://medium.com/wix-engineering/creating-a-native-module-in-react-native-93bab0123e46
+
+https://juejin.im/entry/5b908229f265da0a92238a93 (教程稍微有些旧了 至少上面的英文教程没有提到手动创建 RNxxxManager)
+
+掘金教程中出现的 react-native-create-library 已经被  create-react-native-module 取代
+
+create-react-native-module MyLibrary 将会创建 react-native-my-library 这样一个目录
+
+另外中文教程中的 `4.2 调试本地代码` 中提到的 `yarn link` 方法不再适用于 metro 管理的包
+
 
 ## Trouble shooting
 

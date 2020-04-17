@@ -345,6 +345,8 @@
         };
         CircleTable.prototype.degreeToPos = function (deg) {
             // Math.cos(x) 这里默认是弧度制
+            // 而参数中的 deg 是角度
+            // 所以要把角度转为弧度
             deg = Math.PI / 180 * deg;
             var r = this.radius;
             var pos;
@@ -660,7 +662,6 @@
             window["ReactNativeWebView"].postMessage("Hello! From JS");
         }
     }, false);
-    //# sourceMappingURL=index.js.map
 
 }(PIXI, TWEEN));
 //# sourceMappingURL=index.js.map
