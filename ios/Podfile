@@ -57,6 +57,8 @@ target 'cv2' do
 
   pod 'react-native-camera', :path => '../node_modules/react-native-camera'
 
+  pod 'react-native-my-library', :path => '../node_modules/react-native-my-library'
+
   target 'cv2Tests' do
     inherit! :complete
     # Pods for testing
