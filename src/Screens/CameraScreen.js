@@ -1,3 +1,5 @@
+import { WebView } from 'react-native-webview';
+
 import React, {Component} from 'react';
 import {
   AppRegistry,
@@ -11,7 +13,6 @@ import {Svg, Circle} from 'react-native-svg';
 
 import {RNCamera} from 'react-native-camera';
 import Toast, {DURATION} from 'react-native-easy-toast';
-import {WebView} from 'react-native-webview';
 
 import styles from '../Styles/Screens/CameraScreen';
 import OpenCV from '../NativeModules/OpenCV';
@@ -20,8 +21,16 @@ import CircleWithinCircle from '../assets/svg/CircleWithinCircle';
 
 import {postToWebview} from '../util/util';
 
+import CardV from 'react-native-cardv'
+console.log("LogDemo::22222222:::::", CardV)
+
+setTimeout(() => {
+  CardV.show("........AAAA..........")
+}, 1000)
+
+
 // var webviewURL = 'http://192.168.8.242:5001/';
-var webviewURL = 'http://10.12.167.120:5001/';
+var webviewURL = 'http://10.12.166.248:5001/';
 
 const landmarkSize = 5;
 
@@ -52,7 +61,7 @@ export default class CameraScreen extends Component {
     setTimeout(() => {
       // this.refs.toast.show('Action!', DURATION.LENGTH_SHORT);
       // console.log('MLkit  is null ???', MLkit); // 需要卸载然后安装 不然总是 null
-      MLkit.show('Awesome', MLkit.SHORT);
+      // MLkit.show('Awesome', MLkit.SHORT);
       // this.callDetectFace();
     }, 1000);
 
@@ -255,6 +264,8 @@ export default class CameraScreen extends Component {
     var now = +new Date;
     console.log("date:::", now - this.lastTime)
     this.lastTime = now
+    console.log("face data", faceData);
+
     postToWebview(this.webref,  faceData);
     return (
       <View
@@ -327,43 +338,6 @@ export default class CameraScreen extends Component {
   }
 
   render() {
-    if (this.state.photoAsBase64.isPhotoPreview) {
-      return (
-        <View style={styles.container}>
-          <Toast ref="toast" position="center" />
-          <Image
-            source={{
-              uri: `data:image/png;base64,${this.state.photoAsBase64.content}`,
-            }}
-            style={styles.imagePreview}
-          />
-
-          <View style={styles.absView}>
-            <WebView
-              ref={(r) => (this.webref = r)}
-              style={styles.webview}
-              onMessage={this.onMessage}
-              source={{
-                uri: webviewURL,
-              }}
-            />
-          </View>
-
-          <View style={styles.repeatPhotoContainer}>
-            <TouchableOpacity onPress={this.repeatPhoto}>
-              <Text style={styles.photoPreviewRepeatPhotoText}>
-                Repeat photo
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.usePhotoContainer}>
-            <TouchableOpacity onPress={this.usePhoto}>
-              <Text style={styles.photoPreviewUsePhotoText}>Use photo</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      );
-    }
 
     return (
       <View style={styles.container}>
@@ -382,10 +356,10 @@ export default class CameraScreen extends Component {
           trackingEnabled
           onFacesDetected={this.facesDetected}
           faceDetectionLandmarks={
-           RNCamera.Constants.FaceDetection.Landmarks.all
+           RNCamera.Constants.FaceDetection.Landmarks.none
           }
           faceDetectionClassifications={
-            RNCamera.Constants.FaceDetection.Classifications.all
+            RNCamera.Constants.FaceDetection.Classifications.none
           }
           >
           <View style={styles.takePictureContainer}>
@@ -445,7 +419,7 @@ export default class CameraScreen extends Component {
             </TouchableOpacity>
           </View>
           { this.renderFaces() }
-          { this.renderLandmarks()}
+          {/* { this.renderLandmarks() } */}
         </RNCamera>
         <View style={styles.absView}>
           <WebView

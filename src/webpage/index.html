@@ -23,12 +23,24 @@
       left: 0;
       z-index: -1;
     }
+    .btn-refresh {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      top: 0;
+      left: 0;
+      background-color: cornflowerblue;
+    }
   </style>
 </head>
 
 <body>
   <!-- <img id="immmg" src="" alt=""> -->
   <canvas id="canvas"></canvas>
+  <div class="btn-refresh">
+    refresh
+  </div>
+
   <script>
     window.GLOBAL_VAR = {}
   </script>
@@ -38,6 +50,10 @@
       new VConsole();
 
     }
+
+    document.querySelector(".btn-refresh").addEventListener('click', ()=> {
+        location.reload();
+    }, false)
   </script>
 
 
@@ -59,116 +75,60 @@
     // }, 1000)
     window.addEventListener("load", () => {
 
-      let faceData = {
-        "leftCheekPosition": {
-          "x": 355.9078252883184,
-          "y": 681.4967607770648
-        },
-        "leftEarPosition": {
-          "x": 361.86075846354163,
-          "y": 616.0107477097284
-        },
-        "rightEarTipPosition": {
-          "x": 149.14392671130952,
-          "y": 702.045501999628
-        },
-        "leftEarTipPosition": {
-          "x": 369.99365234375,
-          "y": 667.5836274646578
-        },
-        "rightMouthPosition": {
-          "x": 283.3239281063988,
-          "y": 520.2501168387278
-        },
-        "bottomMouthPosition": {
-          "x": 305.8128720238095,
-          "y": 534.4208568754651
-        },
-        "noseBasePosition": {
-          "x": 315.1540120442708,
-          "y": 643.8741925920759
-        },
-        "rightEyePosition": {
-          "x": 259.7449544270833,
-          "y": 609.1072396414621
-        },
-        "yawAngle": -14.202940940856934,
-        "faceID": 1,
-        "bounds": {
-          "origin": {
-            "y": 436.2311186290923,
-            "x": 195.90651739211307
-          },
-          "size": {
-            "height": 453.92333039783296,
-            "width": 311.7069847470238
-          }
-        },
-        "rightCheekPosition": {
-          "x": 252.9186779203869,
-          "y": 688.181330217634
-        },
-        "rightEarPosition": {
-          "x": 134.14071800595238,
-          "y": 645.0122942243304
-        },
-        "leftMouthPosition": {
-          "x": 334.3867013113839,
-          "y": 504.8980698358446
-        },
-        "leftEyePosition": {
-          "x": 340.8810860770089,
-          "y": 608.3679408482143
-        },
-        "rollAngle": -5.588932037353516
-      }
-      i = 1
+      fetch('/dist/sampleLandMarks.json').then((resp) => {
+        return resp.json()
+      }).then( data=> {
+        let faceData = data
+        let i = 1
 
+        let movingmouth = () => {
+          let d = 1
+          setInterval(() => {
+            if (faceData.leftMouthPosition.x > 390) {
+              d = -1
+            } else if (faceData.leftMouthPosition.x < 290) {
+              d = 1
+            }
+
+            faceData.leftMouthPosition.x = faceData.leftMouthPosition.x + d
+            faceData.rightMouthPosition.x = faceData.rightMouthPosition.x + d
+            faceData.bottomMouthPosition.x = faceData.bottomMouthPosition.x + d
+            window.postMessage(faceData)
+
+            i++;
+
+          }, 100)
+        }
+      })
       // movingmouth()
-
-      function movingmouth() {
-        let d = 1
-        setInterval(() => {
-          if (faceData.leftMouthPosition.x > 390) {
-            d = -1
-          } else if (faceData.leftMouthPosition.x < 290) {
-            d = 1
-          }
-
-          faceData.leftMouthPosition.x = faceData.leftMouthPosition.x + d
-          faceData.rightMouthPosition.x = faceData.rightMouthPosition.x + d
-          faceData.bottomMouthPosition.x = faceData.bottomMouthPosition.x + d
-          window.postMessage(faceData)
-
-          i++;
-
-        }, 100)
-      }
     }, false)
 
 
   </script>
 
-  <script>
 
+
+  <script>
+    //contours sample data
+    window.addEventListener("load", () => {
+      fetch('/dist/sampleContours.json').then(resp => {
+        return resp.json()
+      }).then(data => {
+
+        
+        // let i = 0
+        // setInterval( ()=> {
+        //   i = ( ++i % data.length) 
+        //   window.postMessage(data[i])
+
+        // }, 100)
+
+      })
+    }, false)
 
 
   </script>
 
-
-  <script>
-  // var myImage = document.querySelector('#immmg');
-
-  // fetch('./grid_bg.jpg').then(function (response) {
-  //   return response.blob();
-  // }).then(function (myBlob) {
-  //   console.log(myBlob)
-  //   var objectURL = URL.createObjectURL(myBlob);
-  //   myImage.src = objectURL;
-
-  // });
-
-  </script>
 </body>
 
 </html>

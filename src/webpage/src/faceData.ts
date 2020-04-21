@@ -76,9 +76,10 @@ export interface RightMouthPosition {
 }
 
 export interface FaceData {
-    bottomMouthPosition?: Vector2;
     bounds: Bounds;
     faceID: number;
+    // LandMarks
+    bottomMouthPosition?: Vector2;
     leftCheekPosition?: Vector2;
     leftEarPosition?: Vector2;
     leftEarTipPosition?: Vector2;
@@ -92,7 +93,14 @@ export interface FaceData {
     rightEyeOpenProbability?: number;
     rightEyePosition?: Vector2;
     rightMouthPosition?: Vector2;
-    rollAngle: number;
     smilingProbability?: number;
+
+
+    //contours
+    face? : Vector2[];
+
+
+    rollAngle: number;
     yawAngle: number;
+
 }
