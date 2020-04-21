@@ -9,13 +9,14 @@
     "test": "jest",
     "lint": "eslint ."
   },
-"dependencies": {
+  "dependencies": {
     "react": "16.11.0",
     "react-native": "0.62.1",
-    "react-native-camera": "git+https://github.com/lumixraku/react-native-camera.git",
+    "react-native-camera": "/Users/lilin/repos/RN/react-native-camera",
+    "react-native-cardv": "/Users/lilin/repos/RN/react-native-cardv",
     "react-native-easy-toast": "1.2.0",
     "react-native-svg": "^12.0.3",
-    "react-native-webview": "^9.1.1",
+    "react-native-webview": "9.1.1",
     "underscore": "^1.10.2"
   },
   "devDependencies": {

@@ -83,3 +83,41 @@ What mentioned above is not a good choice, you would lost reload if you do that.
 
 ### can not set resolution of RNCamera
 https://github.com/react-native-community/react-native-camera/issues/1271
+
+
+
+### React-Native Module HMRClinet is not a registered callable module(calling enable)
+https://thetopsites.net/article/50618528.shtml
+https://stackoverflow.com/questions/54935132/module-hmrclient-is-not-registered-react-native-why-is-this-happening-and-how-t
+https://stackoverflow.com/questions/53220633/module-hmrclient-is-not-a-registered-callable-module-calling-enable-in-linux
+
+
+### React Native:Module RCTDeviceEventEmitter is not a registered callable module (calling emit)
+
+https://github.com/facebook/react-native/issues/27193
+
+https://github.com/joltup/react-native-threads/issues/40
+
+### pod install error
+https://github.com/react-native-community/react-native-maps/issues/2290
+
+### link local module
+https://stackoverflow.com/questions/44061155/react-native-npm-link-local-dependency-unable-to-resolve-module
+
+### error Unknown dependency.
+
+Make sure that the package you are trying to link is already installed in your "node_modules" and present in your "package.json" dependencies
+
+package.json 中一定要有这个包的引用, 不然即使把这个包放在node_modules 中也会报错.
+
+### gradle
+新建的 RN Package 本身要gradle sync  引用这个包的项目也要 gradle sync
+
+
+
+### link local module
+https://stackoverflow.com/questions/44061155/react-native-npm-link-local-dependency-unable-to-resolve-module
+No newline at end of file
+
+### webview getRandomValue not supported
+https://github.com/react-native-community/react-native-webview/issues/1312

@@ -26,17 +26,42 @@ const stageWidth = document.body.clientWidth;
 
 
 class Mouth extends PIXI.Graphics {
-    leftPos: Vector2
-    rightPos: Vector2
-    bottomPos: Vector2
+    leftPos: Vector2  = new Vector2(0, 0)
+    rightPos: Vector2 = new Vector2(0, 0)
+    bottomPos: Vector2 = new Vector2(0, 0)
     openThreshold: number = 40
-    constructor(leftPos: Vector2, rightPos: Vector2, bottomPos: Vector2) {
+
+    points: Vector2[]
+
+    // constructor(leftPos: Vector2, rightPos: Vector2, bottomPos: Vector2) {
+    //     super()
+    //     this.leftPos = leftPos
+    //     this.rightPos = rightPos
+    //     this.bottomPos = bottomPos
+    // }
+    constructor(points: Vector2[]) {
         super()
-        this.leftPos = leftPos
-        this.rightPos = rightPos
-        this.bottomPos = bottomPos
+        this.points = points
     }
 
+
+    refreshByNewContours(points: Vector2[] ) {
+        this.clear()
+
+        this.points = points
+        // this.beginFill(0xFF0000, 1);
+        this.lineStyle(1, 0xFF0000, 1);
+
+        let idx = 0;
+        for (let p of points) {
+            if (idx ==0 ) {
+                this.moveTo(p.x, p.y)
+            }
+            this.lineTo(p.x, p.y);
+            idx++
+        }
+        // this.endFill();
+    }
 
     refreshByNewPoint(leftPos: Vector2, rightPos: Vector2, bottomPos: Vector2) {
         this.clear()
@@ -60,12 +85,14 @@ class Mouth extends PIXI.Graphics {
     }
 
     getTopLine() {
-        let topY = Math.min(this.leftPos.y, this.rightPos.y) - 100
+        let topY = 0
+        // let topY = Math.min(this.leftPos.    y, this.rightPos.y) - 100
         return topY
     }
 
     getBottomLine() {
-        let bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y) + 100
+        let bottomY = 0
+        // let bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y) + 100
         return bottomY;
     }
 
@@ -73,7 +100,7 @@ class Mouth extends PIXI.Graphics {
         return this.bottomPos.x
     }
 
-    getYPos() {
+    getYPos() {        
         // return (this.getTopLine() + this.getBottomLine() )/2
         return this.bottomPos.y;
 
@@ -88,6 +115,12 @@ class Mouth extends PIXI.Graphics {
         }
     }
 
+    checkMouthByContour() {
+        return {
+            rs: true,
+            val: 0
+        }
+    }
 }
 
 class CircleShape {
@@ -303,7 +336,9 @@ class EatGame {
 
             // 初始化
             let defaultPos = new Vector2(-100, -100)
-            this.mouth = new Mouth(defaultPos, defaultPos, defaultPos)
+            // this.mouth = new Mouth(defaultPos, defaultPos, defaultPos)
+            this.mouth = new Mouth([])
+
             this.app.stage.addChild(this.mouth);
 
             // this.score = 0
@@ -493,7 +528,7 @@ class EatGame {
 
     // call Each Frame
     shouldIEat() {
-        if (this.mouth && this.mouth.checkOpenRs().rs) {
+        if (this.mouth && this.mouth.checkMouthByContour().rs) {
             for (var i = 0; i < this.foodList.length; i++) {
                 let food = this.foodList[i]
                 if (food && food.transform) {
@@ -540,8 +575,8 @@ class EatGame {
         //     this.mouthText.text = "CLOSE"
         //     this.mouthOpen = false;
         // }
-        let rs = this.mouth.checkOpenRs()
-        this.mouthText.text = "" + rs.val
+        // let rs = this.mouth.checkOpenRs()
+        // this.mouthText.text = "" + rs.val
     }
 
     finishEating() {
@@ -579,14 +614,19 @@ class EatGame {
 
 
     public setMouthPos(faceData: FaceData) {
+        // when landmarks
         let rightPos = faceData.rightMouthPosition
         let leftPos = faceData.leftMouthPosition
         let bottomPos = faceData.bottomMouthPosition
+        
+        // when contour
+
         if (!this.mouth) {
-            this.mouth = new Mouth(leftPos, rightPos, bottomPos)
+            // this.mouth = new Mouth(leftPos, rightPos, bottomPos)
+            this.mouth = new Mouth([])
             this.app.stage.addChild(this.mouth);
         } else {
-            this.mouth.refreshByNewPoint(leftPos, rightPos, bottomPos)
+            this.mouth.refreshByNewContours(faceData.face)
         }
 
     }

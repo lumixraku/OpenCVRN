@@ -194,14 +194,37 @@
     // const eatPosEY = stageHeight / 2 + 100; //超过这个点还没有吃到的话  视为miss
     var Mouth = /** @class */ (function (_super) {
         __extends(Mouth, _super);
-        function Mouth(leftPos, rightPos, bottomPos) {
+        // constructor(leftPos: Vector2, rightPos: Vector2, bottomPos: Vector2) {
+        //     super()
+        //     this.leftPos = leftPos
+        //     this.rightPos = rightPos
+        //     this.bottomPos = bottomPos
+        // }
+        function Mouth(points) {
             var _this = _super.call(this) || this;
+            _this.leftPos = new Vector2(0, 0);
+            _this.rightPos = new Vector2(0, 0);
+            _this.bottomPos = new Vector2(0, 0);
             _this.openThreshold = 40;
-            _this.leftPos = leftPos;
-            _this.rightPos = rightPos;
-            _this.bottomPos = bottomPos;
+            _this.points = points;
             return _this;
         }
+        Mouth.prototype.refreshByNewContours = function (points) {
+            this.clear();
+            this.points = points;
+            // this.beginFill(0xFF0000, 1);
+            this.lineStyle(1, 0xFF0000, 1);
+            var idx = 0;
+            for (var _i = 0, points_1 = points; _i < points_1.length; _i++) {
+                var p = points_1[_i];
+                if (idx == 0) {
+                    this.moveTo(p.x, p.y);
+                }
+                this.lineTo(p.x, p.y);
+                idx++;
+            }
+            // this.endFill();
+        };
         Mouth.prototype.refreshByNewPoint = function (leftPos, rightPos, bottomPos) {
             this.clear();
             this.leftPos = leftPos;
@@ -220,11 +243,13 @@
             this.endFill();
         };
         Mouth.prototype.getTopLine = function () {
-            var topY = Math.min(this.leftPos.y, this.rightPos.y) - 100;
+            var topY = 0;
+            // let topY = Math.min(this.leftPos.    y, this.rightPos.y) - 100
             return topY;
         };
         Mouth.prototype.getBottomLine = function () {
-            var bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y) + 100;
+            var bottomY = 0;
+            // let bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y) + 100
             return bottomY;
         };
         Mouth.prototype.getXPos = function () {
@@ -240,6 +265,12 @@
             return {
                 rs: bottomY - topY > this.openThreshold,
                 val: bottomY - topY
+            };
+        };
+        Mouth.prototype.checkMouthByContour = function () {
+            return {
+                rs: true,
+                val: 0
             };
         };
         return Mouth;
@@ -398,9 +429,8 @@
                 var ct = new CircleTable(stageWidth / 2, stageHeight, 200);
                 ct.draw(_this.app.stage);
                 _this.table = ct;
-                // 初始化
-                var defaultPos = new Vector2(-100, -100);
-                _this.mouth = new Mouth(defaultPos, defaultPos, defaultPos);
+                // this.mouth = new Mouth(defaultPos, defaultPos, defaultPos)
+                _this.mouth = new Mouth([]);
                 _this.app.stage.addChild(_this.mouth);
                 // this.score = 0
                 _this.renderScore();
@@ -545,7 +575,7 @@
         };
         // call Each Frame
         EatGame.prototype.shouldIEat = function () {
-            if (this.mouth && this.mouth.checkOpenRs().rs) {
+            if (this.mouth && this.mouth.checkMouthByContour().rs) {
                 for (var i = 0; i < this.foodList.length; i++) {
                     var food = this.foodList[i];
                     if (food && food.transform) {
@@ -589,8 +619,8 @@
             //     this.mouthText.text = "CLOSE"
             //     this.mouthOpen = false;
             // }
-            var rs = this.mouth.checkOpenRs();
-            this.mouthText.text = "" + rs.val;
+            // let rs = this.mouth.checkOpenRs()
+            // this.mouthText.text = "" + rs.val
         };
         EatGame.prototype.finishEating = function () {
             this.score++;
@@ -619,15 +649,18 @@
             this.app.stage.addChild(mouthText);
         };
         EatGame.prototype.setMouthPos = function (faceData) {
+            // when landmarks
             var rightPos = faceData.rightMouthPosition;
             var leftPos = faceData.leftMouthPosition;
             var bottomPos = faceData.bottomMouthPosition;
+            // when contour
             if (!this.mouth) {
-                this.mouth = new Mouth(leftPos, rightPos, bottomPos);
+                // this.mouth = new Mouth(leftPos, rightPos, bottomPos)
+                this.mouth = new Mouth([]);
                 this.app.stage.addChild(this.mouth);
             }
             else {
-                this.mouth.refreshByNewPoint(leftPos, rightPos, bottomPos);
+                this.mouth.refreshByNewContours(faceData.face);
             }
         };
         return EatGame;
