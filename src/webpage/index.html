@@ -115,13 +115,19 @@
         return resp.json()
       }).then(data => {
 
-        
-        // let i = 0
-        // setInterval( ()=> {
-        //   i = ( ++i % data.length) 
-        //   window.postMessage(data[i])
 
-        // }, 100)
+        // 在PC上调试
+        if (window.navigator.userAgent.indexOf("ONEPLUS") == -1) {
+          new VConsole();
+          let i = 0
+          setInterval( ()=> {
+            i = ( ++i % data.length) 
+            window.postMessage(data[i])
+  
+          }, 100)
+
+        }        
+
 
       })
     }, false)

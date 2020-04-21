@@ -170,6 +170,14 @@
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     }
 
+    function __spreadArrays() {
+        for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+        for (var r = Array(s), k = 0, i = 0; i < il; i++)
+            for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+                r[k] = a[j];
+        return r;
+    }
+
     var Vector2 = /** @class */ (function () {
         function Vector2(x, y) {
             this.x = x;
@@ -202,27 +210,38 @@
         // }
         function Mouth(points) {
             var _this = _super.call(this) || this;
+            // 适用于特征点
             _this.leftPos = new Vector2(0, 0);
             _this.rightPos = new Vector2(0, 0);
             _this.bottomPos = new Vector2(0, 0);
-            _this.openThreshold = 40;
+            // 适用于轮廓线
+            _this.lowerLipBottom = [];
+            _this.lowerLipTop = [];
+            _this.upperLipTop = []; // 上嘴唇有 11 个点  其他都是 9个点
+            _this.upperLipBottom = [];
+            _this.openThreshold = 90;
             _this.points = points;
             return _this;
         }
-        Mouth.prototype.refreshByNewContours = function (points) {
+        Mouth.prototype.refreshByNewContours = function (face) {
             this.clear();
-            this.points = points;
+            this.lowerLipBottom = face.lowerLipBottom;
+            this.lowerLipTop = face.lowerLipTop;
+            this.upperLipTop = face.upperLipTop;
+            this.upperLipBottom = face.upperLipBottom;
+            this.points = __spreadArrays(face.lowerLipBottom, face.lowerLipTop, face.upperLipTop, face.upperLipBottom);
             // this.beginFill(0xFF0000, 1);
-            this.lineStyle(1, 0xFF0000, 1);
+            this.lineStyle(5, 0xFF0000, 1);
             var idx = 0;
-            for (var _i = 0, points_1 = points; _i < points_1.length; _i++) {
-                var p = points_1[_i];
+            for (var _i = 0, _a = this.points; _i < _a.length; _i++) {
+                var p = _a[_i];
                 if (idx == 0) {
                     this.moveTo(p.x, p.y);
                 }
                 this.lineTo(p.x, p.y);
                 idx++;
             }
+            this.calcMouthRect();
             // this.endFill();
         };
         Mouth.prototype.refreshByNewPoint = function (leftPos, rightPos, bottomPos) {
@@ -242,22 +261,38 @@
             this.lineTo(rightPos.x, rightPos.y + 100);
             this.endFill();
         };
-        Mouth.prototype.getTopLine = function () {
+        Mouth.prototype.calcMouthRect = function () {
             var topY = 0;
-            // let topY = Math.min(this.leftPos.    y, this.rightPos.y) - 100
+            var bottomY = 0;
+            var upperY = this.upperLipTop.map(function (v) {
+                return v.y;
+            });
+            var lowerY = this.lowerLipBottom.map(function (v) {
+                return v.y;
+            });
+            topY = Math.min.apply(Math, upperY);
+            bottomY = Math.max.apply(Math, lowerY);
+            var top = topY;
+            var left = this.upperLipTop[0].x;
+            var right = this.upperLipTop[10].x;
+            var width = right - left;
+            var height = bottomY - topY;
+            this.mouthRect = new PIXI.Rectangle(left, top, width, height);
+            topY = Math.min.apply(Math, upperY) - 100;
             return topY;
         };
-        Mouth.prototype.getBottomLine = function () {
-            var bottomY = 0;
-            // let bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y) + 100
-            return bottomY;
+        Mouth.prototype.getMouthRect = function () {
+            return this.mouthRect;
         };
-        Mouth.prototype.getXPos = function () {
-            return this.bottomPos.x;
-        };
-        Mouth.prototype.getYPos = function () {
-            // return (this.getTopLine() + this.getBottomLine() )/2
-            return this.bottomPos.y;
+        // https://firebase.google.com/docs/ml-kit/images/examples/face_contours.svg
+        Mouth.prototype.getMouthCenter = function () {
+            if (this.upperLipTop.length == 0) {
+                return;
+            }
+            var avg = function (arr) { return arr.reduce(function (acc, val) { return acc + val; }, 0) / arr.length; };
+            var x = avg([this.upperLipTop[4].x, this.upperLipTop[5].x, this.upperLipTop[6].x]);
+            var y = avg([this.upperLipTop[5].y, this.upperLipBottom[4].y, this.lowerLipTop[4].y, this.lowerLipBottom[4].y]);
+            return new Vector2(x, y);
         };
         Mouth.prototype.checkOpenRs = function () {
             var bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y);
@@ -267,11 +302,30 @@
                 val: bottomY - topY
             };
         };
-        Mouth.prototype.checkMouthByContour = function () {
+        Mouth.prototype.checkMouthOpenByContour = function () {
+            if (!this.mouthRect) {
+                return {
+                    rs: false
+                };
+            }
             return {
-                rs: true,
-                val: 0
+                rs: this.mouthRect.height > this.openThreshold,
+                // rs: true,
+                val: this.mouthRect.height
             };
+        };
+        Mouth.prototype.isNearMouth = function (food) {
+            var rect = this.mouthRect;
+            if ((food.y < rect.top + rect.height + 100) && (food.y > rect.top - 100)) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+        Mouth.prototype.missedFood = function (food) {
+            var rect = this.mouthRect;
+            return (food.y > rect.top + rect.height + 100);
         };
         return Mouth;
     }(PIXI.Graphics));
@@ -294,11 +348,6 @@
         Food.prototype.changeTexture = function () {
             this.texture = this.textures["hedgehog.png"];
         };
-        // 用 pivot 代替
-        // setCenterPos(x: number, y: number) {
-        //     this.x = x - this.width/2
-        //     this.y = y - this.height/2
-        // }
         Food.prototype.centerPosToLeftTopPos = function (x, y) {
             return new Vector2(x - this.width / 2, y - this.height / 2);
         };
@@ -537,7 +586,7 @@
                     }
                 }
                 //miss
-                if (food.y > this.mouth.getBottomLine() && !food.miss) {
+                if (this.mouth.missedFood(new Vector2(food.x, food.y)) && !food.miss) {
                     food.miss = true;
                     food.changeTexture();
                     // let resourceMap = resources["/images/animals.json"].textures;
@@ -575,15 +624,17 @@
         };
         // call Each Frame
         EatGame.prototype.shouldIEat = function () {
-            if (this.mouth && this.mouth.checkMouthByContour().rs) {
+            if (this.mouth && this.mouth.checkMouthOpenByContour().rs) {
+                console.log("open heihgt", this.mouth.checkMouthOpenByContour().val);
                 for (var i = 0; i < this.foodList.length; i++) {
                     var food = this.foodList[i];
                     if (food && food.transform) {
                         // 调用过 sprite.destroy 之后 sprite下的transform 就是空了
-                        if (food.y > this.mouth.getTopLine() && food.y < this.mouth.getBottomLine()) {
+                        var mouthRect = this.mouth.getMouthRect();
+                        if (this.mouth.isNearMouth(new Vector2(food.x, food.y)) && !food.eating) {
                             this.foodList.splice(i--, 1);
-                            var mouthPos = new Vector2(this.mouth.getXPos(), this.mouth.getYPos());
-                            this.eatingFood(food, mouthPos);
+                            var mouthCenter = this.mouth.getMouthCenter();
+                            this.eatingFood(food, mouthCenter);
                         }
                     }
                 }
@@ -660,7 +711,8 @@
                 this.app.stage.addChild(this.mouth);
             }
             else {
-                this.mouth.refreshByNewContours(faceData.face);
+                // this.mouth.refreshByNewContours(faceData.face)
+                this.mouth.refreshByNewContours(faceData);
             }
         };
         return EatGame;

@@ -26,10 +26,20 @@ const stageWidth = document.body.clientWidth;
 
 
 class Mouth extends PIXI.Graphics {
+    // 适用于特征点
     leftPos: Vector2  = new Vector2(0, 0)
     rightPos: Vector2 = new Vector2(0, 0)
     bottomPos: Vector2 = new Vector2(0, 0)
-    openThreshold: number = 40
+
+    // 适用于轮廓线
+    lowerLipBottom: Vector2[] = []
+    lowerLipTop: Vector2[] = []
+    upperLipTop: Vector2[] = [] // 上嘴唇有 11 个点  其他都是 9个点
+    upperLipBottom: Vector2[] = []
+
+    mouthRect: PIXI.Rectangle
+
+    openThreshold: number = 90
 
     points: Vector2[]
 
@@ -45,21 +55,27 @@ class Mouth extends PIXI.Graphics {
     }
 
 
-    refreshByNewContours(points: Vector2[] ) {
+    refreshByNewContours(face: FaceData) {
         this.clear()
+        this.lowerLipBottom = face.lowerLipBottom
+        this.lowerLipTop = face.lowerLipTop
+        this.upperLipTop = face.upperLipTop
+        this.upperLipBottom = face.upperLipBottom
 
-        this.points = points
+
+        this.points = [...face.lowerLipBottom, ...face.lowerLipTop, ...face.upperLipTop,...face.upperLipBottom ]
         // this.beginFill(0xFF0000, 1);
-        this.lineStyle(1, 0xFF0000, 1);
+        this.lineStyle(5, 0xFF0000, 1);
 
         let idx = 0;
-        for (let p of points) {
+        for (let p of this.points) {
             if (idx ==0 ) {
                 this.moveTo(p.x, p.y)
             }
             this.lineTo(p.x, p.y);
             idx++
         }
+        this.calcMouthRect()
         // this.endFill();
     }
 
@@ -84,28 +100,49 @@ class Mouth extends PIXI.Graphics {
         this.endFill();
     }
 
-    getTopLine() {
+    calcMouthRect() {
         let topY = 0
-        // let topY = Math.min(this.leftPos.    y, this.rightPos.y) - 100
-        return topY
-    }
-
-    getBottomLine() {
         let bottomY = 0
-        // let bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y) + 100
-        return bottomY;
+        let upperY = this.upperLipTop.map((v: Vector2) => {
+            return v.y
+        })
+        
+        let lowerY = this.lowerLipBottom.map((v: Vector2) => {
+            return v.y
+        })
+        
+        topY = Math.min(...upperY)
+        bottomY = Math.max(...lowerY)
+
+        let top = topY
+        let left = this.upperLipTop[0].x
+        let right = this.upperLipTop[10].x
+        let width = right - left;
+        let height = bottomY - topY
+        
+
+        this.mouthRect =  new PIXI.Rectangle(left, top, width, height)
+        topY = Math.min(...upperY) - 100
+        return topY        
     }
 
-    getXPos() {
-        return this.bottomPos.x
+    getMouthRect(): PIXI.Rectangle {
+        return this.mouthRect
     }
 
-    getYPos() {        
-        // return (this.getTopLine() + this.getBottomLine() )/2
-        return this.bottomPos.y;
 
-
+    // https://firebase.google.com/docs/ml-kit/images/examples/face_contours.svg
+    getMouthCenter() {
+        if (this.upperLipTop.length == 0) {
+            return 
+        }
+       const avg = arr => arr.reduce((acc, val) => acc + val, 0) / arr.length;
+       
+        let x = avg([this.upperLipTop[4].x, this.upperLipTop[5].x, this.upperLipTop[6].x])
+        let y = avg([this.upperLipTop[5].y, this.upperLipBottom[4].y, this.lowerLipTop[4].y, this.lowerLipBottom[4].y])
+        return new Vector2(x, y)            
     }
+
     checkOpenRs() {
         let bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y)
         let topY = Math.min(this.leftPos.y, this.rightPos.y)
@@ -115,11 +152,33 @@ class Mouth extends PIXI.Graphics {
         }
     }
 
-    checkMouthByContour() {
-        return {
-            rs: true,
-            val: 0
+    checkMouthOpenByContour() {
+        if (!this.mouthRect) {
+            return {
+                rs: false
+            }
         }
+
+
+        return {
+            rs: this.mouthRect.height > this.openThreshold,
+            // rs: true,
+            val: this.mouthRect.height
+        }
+    }
+
+    isNearMouth( food:Vector2) {
+        let rect = this.mouthRect
+        if (( food.y < rect.top + rect.height + 100) && (food.y > rect.top - 100) ) {
+            return true
+        }else {
+            return false
+        }
+    }
+
+    missedFood( food: Vector2) {
+        let rect = this.mouthRect
+        return (food.y > rect.top + rect.height + 100) 
     }
 }
 
@@ -157,13 +216,6 @@ class Food extends PIXI.Sprite {
     changeTexture() {
         this.texture = this.textures["hedgehog.png"]
     }
-
-    // 用 pivot 代替
-    // setCenterPos(x: number, y: number) {
-    //     this.x = x - this.width/2
-    //     this.y = y - this.height/2
-
-    // }
 
     centerPosToLeftTopPos(x: number, y: number): Vector2 {
         return new Vector2(x - this.width / 2, y - this.height / 2)
@@ -306,7 +358,7 @@ class EatGame {
     table: CircleTable;
 
     score: number = 0;
-    scoreText: PIXI.Text;
+        scoreText: PIXI.Text;
 
     constructor() {
         let app = new PIXI.Application({
@@ -484,7 +536,7 @@ class EatGame {
             }
 
             //miss
-            if (food.y > this.mouth.getBottomLine() && !food.miss) {
+            if (this.mouth.missedFood(new Vector2(food.x, food.y) ) && !food.miss) {
                 food.miss = true
                 food.changeTexture()
                 // let resourceMap = resources["/images/animals.json"].textures;
@@ -528,15 +580,19 @@ class EatGame {
 
     // call Each Frame
     shouldIEat() {
-        if (this.mouth && this.mouth.checkMouthByContour().rs) {
+        if (this.mouth && this.mouth.checkMouthOpenByContour().rs) {
+
+            console.log("open heihgt", this.mouth.checkMouthOpenByContour().val)
             for (var i = 0; i < this.foodList.length; i++) {
                 let food = this.foodList[i]
                 if (food && food.transform) {
                     // 调用过 sprite.destroy 之后 sprite下的transform 就是空了
-                    if (food.y > this.mouth.getTopLine() && food.y < this.mouth.getBottomLine()) {
+                    let mouthRect = this.mouth.getMouthRect()
+                    
+                    if ( this.mouth.isNearMouth( new Vector2(food.x, food.y) ) && !food.eating) {
                         this.foodList.splice(i--, 1);
-                        let mouthPos = new Vector2(this.mouth.getXPos(), this.mouth.getYPos())
-                        this.eatingFood(food, mouthPos)
+                        let mouthCenter = this.mouth.getMouthCenter()                        
+                        this.eatingFood(food, mouthCenter)
 
                     }
                 }
@@ -626,7 +682,8 @@ class EatGame {
             this.mouth = new Mouth([])
             this.app.stage.addChild(this.mouth);
         } else {
-            this.mouth.refreshByNewContours(faceData.face)
+            // this.mouth.refreshByNewContours(faceData.face)
+            this.mouth.refreshByNewContours(faceData)
         }
 
     }
