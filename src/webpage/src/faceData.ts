@@ -98,6 +98,10 @@ export interface FaceData {
 
     //contours
     face? : Vector2[];
+    lowerLipBottom?: Vector2[];
+    lowerLipTop?: Vector2[];
+    upperLipBottom?: Vector2[];
+    upperLipTop?: Vector2[];    
 
 
     rollAngle: number;
