@@ -1,5 +1,5 @@
 import { Circle } from "pixi.js";
-import { Vector2 } from "./Vector";
+import { Vector2 } from '@game/Vector'
 
 
 

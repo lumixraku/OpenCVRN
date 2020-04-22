@@ -30,7 +30,7 @@ setTimeout(() => {
 
 
 // var webviewURL = 'http://192.168.8.242:5001/';
-var webviewURL = 'http://10.12.166.248:5001/';
+var webviewURL = 'http://10.12.166.254:5001/';
 
 const landmarkSize = 5;
 

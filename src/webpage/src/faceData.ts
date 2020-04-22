@@ -1,4 +1,4 @@
-import { Vector2 } from "./Vector";
+import { Vector2 } from "./game/Vector";
 
 export interface BottomMouthPosition {
     x: number;

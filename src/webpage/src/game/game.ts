@@ -1,11 +1,11 @@
 import * as PIXI from 'pixi.js'
 import * as TWEEN from '@tweenjs/tween.js'
-import { Vector2 } from './Vector'
-import { FaceData } from './faceData';
+import { Vector2 } from '@game/Vector'
+import { FaceData } from '@root/faceData'
 import { IResourceDictionary, ITextureDictionary } from 'pixi.js';
-
-
-
+import CircleTable from '@game/CircleTable'
+import Mouth from '@game/Mouth'
+import Food from '@game/Food'
 
 const Application = PIXI.Application;
 const Container = PIXI.Container;
@@ -14,339 +14,9 @@ const resources = PIXI.loader.resources;
 const TextureCache = PIXI.utils.TextureCache;
 const Sprite = PIXI.Sprite;
 
-
-
-
 const stageHeight = document.body.clientHeight;
 const stageWidth = document.body.clientWidth;
 
-// 这两个点的位置应该由嘴巴来决定
-// const eatPosSY = stageHeight / 2 - 100; //超过这个点还没有吃到的话  视为miss
-// const eatPosEY = stageHeight / 2 + 100; //超过这个点还没有吃到的话  视为miss
-
-
-class Mouth extends PIXI.Graphics {
-    // 适用于特征点
-    leftPos: Vector2  = new Vector2(0, 0)
-    rightPos: Vector2 = new Vector2(0, 0)
-    bottomPos: Vector2 = new Vector2(0, 0)
-
-    // 适用于轮廓线
-    lowerLipBottom: Vector2[] = []
-    lowerLipTop: Vector2[] = []
-    upperLipTop: Vector2[] = [] // 上嘴唇有 11 个点  其他都是 9个点
-    upperLipBottom: Vector2[] = []
-
-    mouthRect: PIXI.Rectangle
-
-    openThreshold: number = 90
-
-    points: Vector2[]
-
-    // constructor(leftPos: Vector2, rightPos: Vector2, bottomPos: Vector2) {
-    //     super()
-    //     this.leftPos = leftPos
-    //     this.rightPos = rightPos
-    //     this.bottomPos = bottomPos
-    // }
-    constructor(points: Vector2[]) {
-        super()
-        this.points = points
-    }
-
-
-    refreshByNewContours(face: FaceData) {
-        this.clear()
-        this.lowerLipBottom = face.lowerLipBottom
-        this.lowerLipTop = face.lowerLipTop
-        this.upperLipTop = face.upperLipTop
-        this.upperLipBottom = face.upperLipBottom
-
-
-        this.points = [...face.lowerLipBottom, ...face.lowerLipTop, ...face.upperLipTop,...face.upperLipBottom ]
-        // this.beginFill(0xFF0000, 1);
-        this.lineStyle(5, 0xFF0000, 1);
-
-        let idx = 0;
-        for (let p of this.points) {
-            if (idx ==0 ) {
-                this.moveTo(p.x, p.y)
-            }
-            this.lineTo(p.x, p.y);
-            idx++
-        }
-        this.calcMouthRect()
-        // this.endFill();
-    }
-
-    refreshByNewPoint(leftPos: Vector2, rightPos: Vector2, bottomPos: Vector2) {
-        this.clear()
-        this.leftPos = leftPos
-        this.rightPos = rightPos
-        this.bottomPos = bottomPos
-        this.beginFill(0xFF0000, 1);
-        this.lineStyle(0, 0xFF0000, 1);
-        this.moveTo(rightPos.x, rightPos.y);
-        this.lineTo(leftPos.x, leftPos.y);
-        this.lineTo(bottomPos.x, bottomPos.y);
-
-
-        //draw Top Line & bottom Line
-        this.beginFill(0x00FF00, 1)
-        this.lineStyle(3, 0x00FF00, 1);
-        this.moveTo(rightPos.x, rightPos.y - 100)
-        this.lineTo(rightPos.x, rightPos.y + 100)
-
-        this.endFill();
-    }
-
-    calcMouthRect() {
-        let topY = 0
-        let bottomY = 0
-        let upperY = this.upperLipTop.map((v: Vector2) => {
-            return v.y
-        })
-        
-        let lowerY = this.lowerLipBottom.map((v: Vector2) => {
-            return v.y
-        })
-        
-        topY = Math.min(...upperY)
-        bottomY = Math.max(...lowerY)
-
-        let top = topY
-        let left = this.upperLipTop[0].x
-        let right = this.upperLipTop[10].x
-        let width = right - left;
-        let height = bottomY - topY
-        
-
-        this.mouthRect =  new PIXI.Rectangle(left, top, width, height)
-        topY = Math.min(...upperY) - 100
-        return topY        
-    }
-
-    getMouthRect(): PIXI.Rectangle {
-        return this.mouthRect
-    }
-
-
-    // https://firebase.google.com/docs/ml-kit/images/examples/face_contours.svg
-    getMouthCenter() {
-        if (this.upperLipTop.length == 0) {
-            return 
-        }
-       const avg = arr => arr.reduce((acc, val) => acc + val, 0) / arr.length;
-       
-        let x = avg([this.upperLipTop[4].x, this.upperLipTop[5].x, this.upperLipTop[6].x])
-        let y = avg([this.upperLipTop[5].y, this.upperLipBottom[4].y, this.lowerLipTop[4].y, this.lowerLipBottom[4].y])
-        return new Vector2(x, y)            
-    }
-
-    checkOpenRs() {
-        let bottomY = Math.max(Math.max(this.leftPos.y, this.rightPos.y), this.bottomPos.y)
-        let topY = Math.min(this.leftPos.y, this.rightPos.y)
-        return {
-            rs: bottomY - topY > this.openThreshold,
-            val: bottomY - topY
-        }
-    }
-
-    checkMouthOpenByContour() {
-        if (!this.mouthRect) {
-            return {
-                rs: false
-            }
-        }
-
-
-        return {
-            rs: this.mouthRect.height > this.openThreshold,
-            // rs: true,
-            val: this.mouthRect.height
-        }
-    }
-
-    isNearMouth( food:Vector2) {
-        let rect = this.mouthRect
-        if (( food.y < rect.top + rect.height + 100) && (food.y > rect.top - 100) ) {
-            return true
-        }else {
-            return false
-        }
-    }
-
-    missedFood( food: Vector2) {
-        let rect = this.mouthRect
-        return (food.y > rect.top + rect.height + 100) 
-    }
-}
-
-class CircleShape {
-    constructor() {
-        let p = new PIXI.Circle()
-        // p.
-    }
-}
-
-class Food extends PIXI.Sprite {
-    eating: boolean
-    moving: boolean
-    miss: boolean
-    textures: ITextureDictionary
-    width: number
-    height: number
-    bounds: PIXI.Rectangle
-    degree: number; //弧度制 45° 就用数字45 表示
-
-    constructor() {
-        let resourceMap = resources["/images/animals.json"].textures;
-        super(resourceMap["cat.png"]);
-        this.textures = resourceMap
-        // new Sprite(resourceMap["cat.png"]);
-        this.bounds = this.getBounds()
-        this.width = this.bounds.width
-        this.height = this.bounds.height
-        this.pivot.x = this.width / 2
-        this.pivot.y = this.height / 2
-
-        this.degree = 0
-    }
-
-    changeTexture() {
-        this.texture = this.textures["hedgehog.png"]
-    }
-
-    centerPosToLeftTopPos(x: number, y: number): Vector2 {
-        return new Vector2(x - this.width / 2, y - this.height / 2)
-    }
-}
-class TT extends PIXI.Graphics {
-    constructor() {
-        super()
-    }
-}
-class CircleTable extends PIXI.Sprite {
-    origin: Vector2
-    radius: number
-    degree: number
-    graph: PIXI.Graphics
-    bounds: PIXI.Rectangle
-
-    // x y 表示圆桌在画布上的位置
-    constructor(x: number, y: number, radius: number) {
-        // 这样会改变在画布中的额位置
-        // this.x = x
-        // this.y = y
-        let tex: PIXI.Texture = resources['/images/pinwheel.png'].texture
-        super(tex)
-
-        this.origin = new Vector2(x, y)
-        this.radius = radius
-
-        this.bounds = this.getBounds()
-        this.width = this.bounds.width
-        this.height = this.bounds.height
-        this.pivot.x = this.width / 2
-        this.pivot.y = this.height / 2
-
-        this.degree = 0
-
-    }
-
-    draw(parent: PIXI.Container) {
-        // this.beginFill(0xFF0000, 1);
-        // this.drawCircle(0, 0, this.radius); // drawCircle(x, y, radius)
-        // this.endFill();    
-
-        // x y 等 pos 坐标因为 pivot 而改变
-        // 原本 x y 是指图片的左上角
-        // 现在 x y 是图片的中心点
-        this.x = this.origin.x// - this.width/2
-        this.y = this.origin.y// - this.height/2
-
-
-        // this.beginFill(0xFF0000, 1);
-        // this.lineStyle(0, 0xFF0000, 1);
-        // this.moveTo(200, 200);
-        // this.lineTo(200, 300);
-        // this.lineTo(300, 300)        
-
-        // stage.addChild(this.applyTexture())
-        parent.addChild(this)
-    }
-
-
-    create(): PIXI.Graphics {
-
-
-        let newG = new PIXI.Graphics()
-        newG.beginFill(0xe74c3c); // Red
-        newG.drawCircle(this.x, this.y, this.radius);
-        newG.endFill();
-        this.graph = newG
-        return newG
-    }
-
-    // 这个好像不对 
-    // 这是在底部挖了一个洞  当graphic 移动的时候 纹理却没有移动
-    apppplyTexture() {
-        //create a texture
-        let img = new Image();
-        img.src = '/images/logo.png';
-        let base = new PIXI.BaseTexture(img)
-        let texture = new PIXI.Texture(base);// return you the texture        
-
-        let tilingSprite = new PIXI.TilingSprite(texture, 0, 0);
-
-        tilingSprite.mask = this;
-        return tilingSprite
-
-    }
-
-
-    startSpin(delta) {
-        this.degree += delta
-        // angle 为正是顺时针旋转
-
-        this.angle = -this.degree
-        // this.rotation -= 0.01 * delta;
-
-    }
-
-    degreeToPos(deg: number): Vector2 {
-        // Math.cos(x) 这里默认是弧度制
-        // 而参数中的 deg 是角度
-        // 所以要把角度转为弧度
-        deg = Math.PI / 180 * deg
-        let r = this.radius
-        let pos: Vector2
-        if (deg >= 0 && deg <= 90) {
-            pos = new Vector2(Math.cos(deg) * r, Math.sin(deg) * r)
-        } else if (deg > 90 && deg <= 180) {
-            deg = 180 - deg
-            pos = new Vector2(-Math.cos(deg) * r, Math.sin(deg) * r)
-        } else if (deg > 180 && deg <= 270) {
-            deg = deg - 180
-            pos = new Vector2(-Math.cos(deg) * r, -Math.sin(deg) * r)
-
-        } else if (deg > 270 && deg <= 360) {
-            deg = 360 - deg
-            pos = new Vector2(Math.cos(deg) * r, -Math.sin(deg) * r)
-        }
-
-        // 和数学中的坐标系不一样哎                    
-        // pos.add(this.origin)
-        let gamePos = new Vector2(0, 0)
-        gamePos.y = this.origin.y - pos.y
-        gamePos.x = this.origin.x + pos.x
-
-
-
-        return gamePos
-
-    }
-}
 
 class EatGame {
     app: PIXI.Application;
@@ -477,7 +147,7 @@ class EatGame {
         if (this.frameCount > this.genFoodGap) {
 
             this.addMoreFood()
-            this.checkMouthState()
+            this.updateMouthState()
 
             this.frameCount = 0
         }
@@ -622,7 +292,7 @@ class EatGame {
             })
     }
 
-    checkMouthState() {
+    updateMouthState() {
         // 这里还会有一些其他条件  待补充
         // if  (Math.random() > 0.4) {
         //     this.mouthText.text = "OPEN"
