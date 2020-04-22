@@ -141,6 +141,19 @@
         }
     };
 
+    var Vector2 = /** @class */ (function () {
+        function Vector2(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        Vector2.prototype.add = function (v) {
+            this.x = this.x + v.x;
+            this.y = this.y + v.y;
+        };
+        return Vector2;
+    }());
+    //# sourceMappingURL=Vector.js.map
+
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
     Licensed under the Apache License, Version 2.0 (the "License"); you may not use
@@ -178,28 +191,106 @@
         return r;
     }
 
-    var Vector2 = /** @class */ (function () {
-        function Vector2(x, y) {
-            this.x = x;
-            this.y = y;
-        }
-        Vector2.prototype.add = function (v) {
-            this.x = this.x + v.x;
-            this.y = this.y + v.y;
-        };
-        return Vector2;
-    }());
-    //# sourceMappingURL=Vector.js.map
-
-    var loader = PIXI.loader;
     var resources = PIXI.loader.resources;
     var TextureCache = PIXI.utils.TextureCache;
-    var Sprite = PIXI.Sprite;
-    var stageHeight = document.body.clientHeight;
-    var stageWidth = document.body.clientWidth;
-    // 这两个点的位置应该由嘴巴来决定
-    // const eatPosSY = stageHeight / 2 - 100; //超过这个点还没有吃到的话  视为miss
-    // const eatPosEY = stageHeight / 2 + 100; //超过这个点还没有吃到的话  视为miss
+    var CircleTable = /** @class */ (function (_super) {
+        __extends(CircleTable, _super);
+        // x y 表示圆桌在画布上的位置
+        function CircleTable(x, y, radius) {
+            var _this = this;
+            // 这样会改变在画布中的额位置
+            // this.x = x
+            // this.y = y
+            var tex = resources['/images/pinwheel.png'].texture;
+            _this = _super.call(this, tex) || this;
+            _this.origin = new Vector2(x, y);
+            _this.radius = radius;
+            _this.bounds = _this.getBounds();
+            _this.width = _this.bounds.width;
+            _this.height = _this.bounds.height;
+            _this.pivot.x = _this.width / 2;
+            _this.pivot.y = _this.height / 2;
+            _this.degree = 0;
+            return _this;
+        }
+        CircleTable.prototype.draw = function (parent) {
+            // this.beginFill(0xFF0000, 1);
+            // this.drawCircle(0, 0, this.radius); // drawCircle(x, y, radius)
+            // this.endFill();    
+            // x y 等 pos 坐标因为 pivot 而改变
+            // 原本 x y 是指图片的左上角
+            // 现在 x y 是图片的中心点
+            this.x = this.origin.x; // - this.width/2
+            this.y = this.origin.y; // - this.height/2
+            // this.beginFill(0xFF0000, 1);
+            // this.lineStyle(0, 0xFF0000, 1);
+            // this.moveTo(200, 200);
+            // this.lineTo(200, 300);
+            // this.lineTo(300, 300)        
+            // stage.addChild(this.applyTexture())
+            parent.addChild(this);
+        };
+        CircleTable.prototype.create = function () {
+            var newG = new PIXI.Graphics();
+            newG.beginFill(0xe74c3c); // Red
+            newG.drawCircle(this.x, this.y, this.radius);
+            newG.endFill();
+            this.graph = newG;
+            return newG;
+        };
+        // 这个好像不对 
+        // 这是在底部挖了一个洞  当graphic 移动的时候 纹理却没有移动
+        CircleTable.prototype.apppplyTexture = function () {
+            //create a texture
+            var img = new Image();
+            img.src = '/images/logo.png';
+            var base = new PIXI.BaseTexture(img);
+            var texture = new PIXI.Texture(base); // return you the texture        
+            var tilingSprite = new PIXI.TilingSprite(texture, 0, 0);
+            tilingSprite.mask = this;
+            return tilingSprite;
+        };
+        CircleTable.prototype.startSpin = function (delta) {
+            this.degree += delta;
+            // angle 为正是顺时针旋转
+            this.angle = -this.degree;
+            // this.rotation -= 0.01 * delta;
+        };
+        CircleTable.prototype.degreeToPos = function (deg) {
+            // Math.cos(x) 这里默认是弧度制
+            // 而参数中的 deg 是角度
+            // 所以要把角度转为弧度
+            deg = Math.PI / 180 * deg;
+            var r = this.radius;
+            var pos;
+            if (deg >= 0 && deg <= 90) {
+                pos = new Vector2(Math.cos(deg) * r, Math.sin(deg) * r);
+            }
+            else if (deg > 90 && deg <= 180) {
+                deg = 180 - deg;
+                pos = new Vector2(-Math.cos(deg) * r, Math.sin(deg) * r);
+            }
+            else if (deg > 180 && deg <= 270) {
+                deg = deg - 180;
+                pos = new Vector2(-Math.cos(deg) * r, -Math.sin(deg) * r);
+            }
+            else if (deg > 270 && deg <= 360) {
+                deg = 360 - deg;
+                pos = new Vector2(Math.cos(deg) * r, -Math.sin(deg) * r);
+            }
+            // 和数学中的坐标系不一样哎                    
+            // pos.add(this.origin)
+            var gamePos = new Vector2(0, 0);
+            gamePos.y = this.origin.y - pos.y;
+            gamePos.x = this.origin.x + pos.x;
+            return gamePos;
+        };
+        return CircleTable;
+    }(PIXI.Sprite));
+    //# sourceMappingURL=CircleTable.js.map
+
+    var resources$1 = PIXI.loader.resources;
+    var TextureCache$1 = PIXI.utils.TextureCache;
     var Mouth = /** @class */ (function (_super) {
         __extends(Mouth, _super);
         // constructor(leftPos: Vector2, rightPos: Vector2, bottomPos: Vector2) {
@@ -221,6 +312,9 @@
             _this.upperLipBottom = [];
             _this.openThreshold = 90;
             _this.points = points;
+            if (window.navigator.userAgent.indexOf("ONEPLUS") == -1) {
+                _this.openThreshold = 0;
+            }
             return _this;
         }
         Mouth.prototype.refreshByNewContours = function (face) {
@@ -329,11 +423,15 @@
         };
         return Mouth;
     }(PIXI.Graphics));
+    //# sourceMappingURL=Mouth.js.map
+
+    var resources$2 = PIXI.loader.resources;
+    var TextureCache$2 = PIXI.utils.TextureCache;
     var Food = /** @class */ (function (_super) {
         __extends(Food, _super);
         function Food() {
             var _this = this;
-            var resourceMap = resources["/images/animals.json"].textures;
+            var resourceMap = resources$2["/images/animals.json"].textures;
             _this = _super.call(this, resourceMap["cat.png"]) || this;
             _this.textures = resourceMap;
             // new Sprite(resourceMap["cat.png"]);
@@ -353,107 +451,14 @@
         };
         return Food;
     }(PIXI.Sprite));
-    var TT = /** @class */ (function (_super) {
-        __extends(TT, _super);
-        function TT() {
-            return _super.call(this) || this;
-        }
-        return TT;
-    }(PIXI.Graphics));
-    var CircleTable = /** @class */ (function (_super) {
-        __extends(CircleTable, _super);
-        // x y 表示圆桌在画布上的位置
-        function CircleTable(x, y, radius) {
-            var _this = this;
-            // 这样会改变在画布中的额位置
-            // this.x = x
-            // this.y = y
-            var tex = resources['/images/pinwheel.png'].texture;
-            _this = _super.call(this, tex) || this;
-            _this.origin = new Vector2(x, y);
-            _this.radius = radius;
-            _this.bounds = _this.getBounds();
-            _this.width = _this.bounds.width;
-            _this.height = _this.bounds.height;
-            _this.pivot.x = _this.width / 2;
-            _this.pivot.y = _this.height / 2;
-            _this.degree = 0;
-            return _this;
-        }
-        CircleTable.prototype.draw = function (parent) {
-            // this.beginFill(0xFF0000, 1);
-            // this.drawCircle(0, 0, this.radius); // drawCircle(x, y, radius)
-            // this.endFill();    
-            // x y 等 pos 坐标因为 pivot 而改变
-            // 原本 x y 是指图片的左上角
-            // 现在 x y 是图片的中心点
-            this.x = this.origin.x; // - this.width/2
-            this.y = this.origin.y; // - this.height/2
-            // this.beginFill(0xFF0000, 1);
-            // this.lineStyle(0, 0xFF0000, 1);
-            // this.moveTo(200, 200);
-            // this.lineTo(200, 300);
-            // this.lineTo(300, 300)        
-            // stage.addChild(this.applyTexture())
-            parent.addChild(this);
-        };
-        CircleTable.prototype.create = function () {
-            var newG = new PIXI.Graphics();
-            newG.beginFill(0xe74c3c); // Red
-            newG.drawCircle(this.x, this.y, this.radius);
-            newG.endFill();
-            this.graph = newG;
-            return newG;
-        };
-        // 这个好像不对 
-        // 这是在底部挖了一个洞  当graphic 移动的时候 纹理却没有移动
-        CircleTable.prototype.apppplyTexture = function () {
-            //create a texture
-            var img = new Image();
-            img.src = '/images/logo.png';
-            var base = new PIXI.BaseTexture(img);
-            var texture = new PIXI.Texture(base); // return you the texture        
-            var tilingSprite = new PIXI.TilingSprite(texture, 0, 0);
-            tilingSprite.mask = this;
-            return tilingSprite;
-        };
-        CircleTable.prototype.startSpin = function (delta) {
-            this.degree += delta;
-            // angle 为正是顺时针旋转
-            this.angle = -this.degree;
-            // this.rotation -= 0.01 * delta;
-        };
-        CircleTable.prototype.degreeToPos = function (deg) {
-            // Math.cos(x) 这里默认是弧度制
-            // 而参数中的 deg 是角度
-            // 所以要把角度转为弧度
-            deg = Math.PI / 180 * deg;
-            var r = this.radius;
-            var pos;
-            if (deg >= 0 && deg <= 90) {
-                pos = new Vector2(Math.cos(deg) * r, Math.sin(deg) * r);
-            }
-            else if (deg > 90 && deg <= 180) {
-                deg = 180 - deg;
-                pos = new Vector2(-Math.cos(deg) * r, Math.sin(deg) * r);
-            }
-            else if (deg > 180 && deg <= 270) {
-                deg = deg - 180;
-                pos = new Vector2(-Math.cos(deg) * r, -Math.sin(deg) * r);
-            }
-            else if (deg > 270 && deg <= 360) {
-                deg = 360 - deg;
-                pos = new Vector2(Math.cos(deg) * r, -Math.sin(deg) * r);
-            }
-            // 和数学中的坐标系不一样哎                    
-            // pos.add(this.origin)
-            var gamePos = new Vector2(0, 0);
-            gamePos.y = this.origin.y - pos.y;
-            gamePos.x = this.origin.x + pos.x;
-            return gamePos;
-        };
-        return CircleTable;
-    }(PIXI.Sprite));
+    //# sourceMappingURL=Food.js.map
+
+    var loader = PIXI.loader;
+    var resources$3 = PIXI.loader.resources;
+    var TextureCache$3 = PIXI.utils.TextureCache;
+    var Sprite = PIXI.Sprite;
+    var stageHeight = document.body.clientHeight;
+    var stageWidth = document.body.clientWidth;
     var EatGame = /** @class */ (function () {
         function EatGame() {
             var _this = this;
@@ -489,7 +494,7 @@
         }
         EatGame.prototype.testTween = function () {
             var _this = this;
-            var resourceMap = resources["/images/animals.json"].textures;
+            var resourceMap = resources$3["/images/animals.json"].textures;
             //The cat
             var cat = new Sprite(resourceMap["cat.png"]);
             cat.position.x = 16;
@@ -512,7 +517,7 @@
         };
         EatGame.prototype.testSpin = function () {
             var _this = this;
-            var resourceMap = resources["/images/animals.json"].textures;
+            var resourceMap = resources$3["/images/animals.json"].textures;
             //The cat
             var cat = new Sprite(resourceMap["cat.png"]);
             cat.position.x = 16;
@@ -543,7 +548,7 @@
             //60帧 加一次食物
             if (this.frameCount > this.genFoodGap) {
                 this.addMoreFood();
-                this.checkMouthState();
+                this.updateMouthState();
                 this.frameCount = 0;
             }
             this.reachBottomLineCat();
@@ -661,7 +666,7 @@
                 _this.finishEating();
             });
         };
-        EatGame.prototype.checkMouthState = function () {
+        EatGame.prototype.updateMouthState = function () {
             // 这里还会有一些其他条件  待补充
             // if  (Math.random() > 0.4) {
             //     this.mouthText.text = "OPEN"
@@ -717,7 +722,6 @@
         };
         return EatGame;
     }());
-    //# sourceMappingURL=game.js.map
 
     var c = document.getElementById('canvas');
     var ctx = c.getContext('2d');

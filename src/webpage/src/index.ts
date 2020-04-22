@@ -1,10 +1,10 @@
 
 
-import Drawing from './drawing'
-import { Queue } from './queue.js'
-import EatGame from './game'
+import Drawing from '@root/drawing'
+import { Queue } from './queue'
+import EatGame from '@game/game'
+import { FaceData } from '@root/faceData'
 
-import { FaceData } from './faceData'
 var c:HTMLCanvasElement = <HTMLCanvasElement>document.getElementById('canvas');
 var ctx = c.getContext('2d');
 c.width = document.body.clientWidth;
