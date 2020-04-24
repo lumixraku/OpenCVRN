@@ -252,7 +252,6 @@ class EatGame {
     shouldIEat() {
         if (this.mouth && this.mouth.checkMouthOpenByContour().rs) {
 
-            console.log("open heihgt", this.mouth.checkMouthOpenByContour().val)
             for (var i = 0; i < this.foodList.length; i++) {
                 let food = this.foodList[i]
                 if (food && food.transform) {

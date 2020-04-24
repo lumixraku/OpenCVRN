@@ -6,6 +6,8 @@ import { StyleSheet, Dimensions } from 'react-native';
 var stageWidth = Dimensions.get('window').width; //full width
 var stageHeight = Dimensions.get('window').height; //full height
 
+let lasttime = +new Date
+
 const	postToWebview = (webview, data) => {
 	  // Ok postMessage 可以放对象
 		// var runJS = `
@@ -18,7 +20,11 @@ const	postToWebview = (webview, data) => {
 		// 这么做实际上是 window.postMessage([object Object])
 
 		var dataStr = ""
-		console.log("post to webview", data)
+
+		console.log("time", (+new Date) - lasttime)
+		lasttime = +new Date
+
+		// console.log("post to webview", data)
 		if ( typeof(data) != "string" ) {
 			dataStr = JSON.stringify(data)
 		}else{
@@ -28,7 +34,6 @@ const	postToWebview = (webview, data) => {
 			window.postMessage(${dataStr})
 		`;
 		console.log(stageHeight, stageWidth)
-		// console.log("LogDemo :::: runJS ", runJS);
 		webview.injectJavaScript(runJS);
   }
 

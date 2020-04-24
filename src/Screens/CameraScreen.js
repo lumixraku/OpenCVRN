@@ -30,15 +30,19 @@ setTimeout(() => {
 
 
 // var webviewURL = 'http://192.168.8.242:5001/';
-var webviewURL = 'http://10.12.166.254:5001/';
+var webviewURL = 'http://10.12.167.1:5001/';
 
 const landmarkSize = 5;
 
 export default class CameraScreen extends Component {
+
   constructor(props) {
     super(props);
     // this.webview = this.props.webview;// failed!
+    this.webref = React.createRef();
 
+
+    let _self = this;
     this.takePicture = this.takePicture.bind(this);
     this.takeVideo = this.takeVideo.bind(this);
     this.checkForBlurryImage = this.checkForBlurryImage.bind(this);
@@ -63,13 +67,21 @@ export default class CameraScreen extends Component {
       // console.log('MLkit  is null ???', MLkit); // 需要卸载然后安装 不然总是 null
       // MLkit.show('Awesome', MLkit.SHORT);
       // this.callDetectFace();
-    }, 1000);
+      if (this.webref.current){
+        console.log("webref", this.webref.style)
+        this.setState({
+          'webviewBG': 'transparent'
+        })
+
+      }
+    }, 2000);
 
     this.state.cameraType = 'front';
     this.state.mirrorMode = false;
   }
 
   state = {
+    webviewBG: '#fff',
     cameraPermission: false,
     photoAsBase64: {
       content: '',
@@ -112,7 +124,6 @@ export default class CameraScreen extends Component {
     }).then((data) => {
       console.log('LogDemo react JS get data', data);
       console.log('this webref2', _this.webref);
-      // postToWebview(_this.webref, data);
     });
 
   }
@@ -251,8 +262,8 @@ export default class CameraScreen extends Component {
     }
   }
 
+
   facesDetected( detectData ){
-    // console.log("face data", detectData)
     this.setState({
       faces: detectData.faces
     })
@@ -261,10 +272,6 @@ export default class CameraScreen extends Component {
 
   renderFace(faceData){
     let { bounds, faceID, rollAngle, yawAngle } = faceData;
-    var now = +new Date;
-    console.log("date:::", now - this.lastTime)
-    this.lastTime = now
-    console.log("face data", faceData);
 
     postToWebview(this.webref,  faceData);
     return (
@@ -423,8 +430,10 @@ export default class CameraScreen extends Component {
         </RNCamera>
         <View style={styles.absView}>
           <WebView
-            ref={(r) => (this.webref = r)}
-            style={styles.webview}
+            ref={this.webref}
+            // ref={(r) => (this.webref = r)}
+            style={[ styles.webview , { backgroundColor: this.state.webviewBG } ]}
+
             onMessage={this.onMessage}
             source={{
               uri: webviewURL,

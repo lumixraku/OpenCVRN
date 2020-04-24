@@ -423,7 +423,6 @@
         };
         return Mouth;
     }(PIXI.Graphics));
-    //# sourceMappingURL=Mouth.js.map
 
     var resources$2 = PIXI.loader.resources;
     var TextureCache$2 = PIXI.utils.TextureCache;
@@ -630,7 +629,6 @@
         // call Each Frame
         EatGame.prototype.shouldIEat = function () {
             if (this.mouth && this.mouth.checkMouthOpenByContour().rs) {
-                console.log("open heihgt", this.mouth.checkMouthOpenByContour().val);
                 for (var i = 0; i < this.foodList.length; i++) {
                     var food = this.foodList[i];
                     if (food && food.transform) {
@@ -735,6 +733,7 @@
     setTimeout(function () {
         console.log("width  height", document.body.clientWidth, document.body.clientHeight);
     }, 1000);
+    var lasttime = +new Date;
     window.addEventListener("message", function (event) {
         // For Chrome, the origin property is in the event.originalEvent
         // object.
@@ -743,10 +742,12 @@
         var origin = event.origin;
         // console.log("screen size:::", c.clientWidth, c.clientHeight)
         // console.log("event FROM RN::::", typeof(event.data),  event.data)
-        ctx.clearRect(0, 0, c.width, c.height);
+        // ctx.clearRect(0, 0, c.width, c.height)
         var faceData = event.data;
         faceDataQueue.enqueue(faceData);
         game.setMouthPos(faceData);
+        console.log("time", (+new Date) - lasttime);
+        lasttime = +new Date;
         if (window["ReactNativeWebView"]) {
             window["ReactNativeWebView"].postMessage("Hello! From JS");
         }

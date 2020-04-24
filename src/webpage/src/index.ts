@@ -25,7 +25,7 @@ setTimeout( function(){
 	console.log("width  height", document.body.clientWidth, document.body.clientHeight);
 }, 1000);
 
-
+let lasttime = +new Date
 window.addEventListener("message", (event: MessageEvent)=> {
     
 	// For Chrome, the origin property is in the event.originalEvent
@@ -36,10 +36,14 @@ window.addEventListener("message", (event: MessageEvent)=> {
 	// console.log("screen size:::", c.clientWidth, c.clientHeight)
 	// console.log("event FROM RN::::", typeof(event.data),  event.data)
 
-	ctx.clearRect(0, 0, c.width, c.height)
+	// ctx.clearRect(0, 0, c.width, c.height)
 	let faceData = event.data as FaceData
 	faceDataQueue.enqueue(faceData)
 	game.setMouthPos(faceData)
+
+	console.log("time", (+new Date) - lasttime )
+	lasttime = +new Date
+
 
 	if (window["ReactNativeWebView"]) {
 		window["ReactNativeWebView"].postMessage("Hello! From JS");

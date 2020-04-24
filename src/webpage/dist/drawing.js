@@ -23,7 +23,6 @@ class Drawing {
         var i = 0;
         faceDataQueue.iterate((data) => {
             mouthOpenHeight[i] = this.calcMouthOpenHeight(data);
-            // console.log("open height", mouthOpenHeight[i])
             if (i > 0) {
                 if (mouthOpenHeight[i] > mouthOpenHeight[i - 1] || mouthOpenHeight[i] > 50) {
                     mouthOpenDirection.push("+");
