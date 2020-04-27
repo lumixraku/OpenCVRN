@@ -24,7 +24,6 @@ const	postToWebview = (webview, data) => {
 		console.log("time", (+new Date) - lasttime)
 		lasttime = +new Date
 
-		// console.log("post to webview", data)
 		if ( typeof(data) != "string" ) {
 			dataStr = JSON.stringify(data)
 		}else{
@@ -33,7 +32,8 @@ const	postToWebview = (webview, data) => {
 		var runJS = `
 			window.postMessage(${dataStr})
 		`;
-		console.log(stageHeight, stageWidth)
+
+		// console.log( dataStr )
 		webview.injectJavaScript(runJS);
   }
 

@@ -1,0 +1,301 @@
+(function (VConsole) {
+    'use strict';
+
+    var global = window;
+
+    VConsole = VConsole && VConsole.hasOwnProperty('default') ? VConsole['default'] : VConsole;
+
+    /*! *****************************************************************************
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+    this file except in compliance with the License. You may obtain a copy of the
+    License at http://www.apache.org/licenses/LICENSE-2.0
+
+    THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+    WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+    MERCHANTABLITY OR NON-INFRINGEMENT.
+
+    See the Apache Version 2.0 License for specific language governing permissions
+    and limitations under the License.
+    ***************************************************************************** */
+    /* global Reflect, Promise */
+
+    var extendStatics = function(d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+
+    function __extends(d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    }
+
+    function __spreadArrays() {
+        for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+        for (var r = Array(s), k = 0, i = 0; i < il; i++)
+            for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+                r[k] = a[j];
+        return r;
+    }
+
+    var Point = Phaser.Geom.Point;
+    var Rectagle = Phaser.Geom.Rectangle;
+    var stageWidth = document.body.clientWidth;
+    var stageHeight = document.body.clientHeight;
+    var angle2Rad = function (angle) {
+        return (Math.PI / 180) * angle;
+    };
+    var Demo = /** @class */ (function (_super) {
+        __extends(Demo, _super);
+        function Demo() {
+            var _this = _super.call(this, 'demo') || this;
+            _this.distanceAngle = 60; //食物和食物之间的间隔(角度)
+            _this.tableCapacity = 360 / _this.distanceAngle; //根据间隔计算得到的桌面容量
+            _this.foodList = __spreadArrays(Array(_this.tableCapacity)).map(function (_) { return null; });
+            _this.mouth = new Rectagle(0, 0, 0, 0);
+            _this.circleRadius = stageWidth / 2.5;
+            _this.frameCounter = 0;
+            _this.addCounter = 0;
+            return _this;
+        }
+        Demo.prototype.preload = function () {
+            // yarn run dev 的时候 这个资源也还是从 dist 中读取的
+            this.load.image('pinWheel', 'assets/pinWheel.png');
+            this.load.image('light', 'assets/light.png');
+            this.load.image('food0', 'assets/burger.png');
+            this.load.image('food1', 'assets/burrito.png');
+            this.load.image('food2', 'assets/cheese-burger.png');
+            this.load.image('food3', 'assets/chicken-leg.png');
+            this.load.image('food4', 'assets/french-fries.png');
+            this.load.image('food5', 'assets/donut.png');
+            this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
+            this.load.glsl('stars', 'assets/starfields.glsl.js');
+        };
+        Demo.prototype.create = function () {
+            this.circleCenter = new Point(stageWidth / 2, stageHeight - this.circleRadius / 2);
+            // this.add.shader('RGB Shift Field', 0, 0, 800, 600).setOrigin(0);
+            // this.add.shader('Plasma', 0, 412, 800, 172).setOrigin(0);
+            // this.tweens.add({
+            //     targets: logo,
+            //     y: 350,
+            //     duration: 1500,
+            //     ease: 'Sine.inOut',
+            //     yoyo: true,
+            //     repeat: -1
+            // })
+            this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, 200);
+            this.spSpin = this.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
+            // this.light = this.add.image(0, 0, 'light');
+            // this.point = new Phaser.Geom.Point(this.light.x, this.light.y)
+            this.refreshMouth([]);
+            this.messageListener();
+        };
+        Demo.prototype.update = function (time, delta) {
+            this.rotateTable();
+            this.movingFoodOnTable();
+            this.checkIfCouldEat();
+            // Phaser.Geom.Circle.CircumferencePoint(this.circle, this.spSpin.rotation,  this.point);
+            // this.light.x = this.point.x
+            // this.light.y = this.point.y
+            this.frameCounter += 1;
+            if (this.frameCounter >= 60) {
+                this.frameCounter = 0;
+                this.update60Frame();
+            }
+        };
+        Demo.prototype.update60Frame = function () {
+        };
+        Demo.prototype.rotateTable = function () {
+            // 右手顺时针
+            this.spSpin.angle += 0.8;
+            // rotate 是使用的弧度
+            this.addFoodIfNeed();
+        };
+        Demo.prototype.addFoodIfNeed = function () {
+            for (var i = 0; i < this.foodList.length; i++) {
+                // i = 0 angle 0
+                // i = 1 angle 60
+                // 盘子是空的, 且恰好转到合适的位置. 就添加食物
+                if (!this.foodList[i]) {
+                    //
+                    //               +
+                    //               |
+                    //               |
+                    //               |
+                    //   -90 ~ -180  |    0 ~ -90
+                    //               |
+                    //               |
+                    //               |
+                    //               |
+                    // +-----------------------------+
+                    //               |
+                    //               |
+                    //               |
+                    //     90 - 180  |     0 - 90
+                    //               |
+                    //               |
+                    //               |
+                    //               |
+                    //               +
+                    // 由于phaser 的坐标不是连续的, 因此为了按照顺时针旋转一周得到 360 的角度, 需要做下面的处理
+                    var mathAngle = this.spSpin.angle < 0 ? 360 + this.spSpin.angle : this.spSpin.angle;
+                    // 根据目前的采样率 得不到 mathAngle 为 1 的情况, 最接近1 是 1.79°
+                    if (Math.abs(mathAngle - i * this.distanceAngle) < 2) {
+                        var foodTextureKey = "food" + i;
+                        var food = this.add.image(0, 0, foodTextureKey);
+                        food.name = "Food" + i;
+                        food.setScale(2, 2);
+                        this.foodList[i] = food;
+                        console.log("angle add", this.spSpin.angle, mathAngle, food.name);
+                        // this.foodList.push(food)
+                    }
+                }
+            }
+        };
+        Demo.prototype.movingFoodOnTable = function () {
+            for (var i = 0; i < this.foodList.length; i++) {
+                var food = this.foodList[i];
+                if (!food) {
+                    continue;
+                }
+                var point = new Phaser.Geom.Point(0, 0);
+                // 只在圆圈的 0° 这个位置(也就是坐标系 x )这个位置生成新的元素.
+                var angle = this.spSpin.angle + this.distanceAngle * (this.tableCapacity - i);
+                // 另外注意一下这里的 angle 按照正始终顺序旋转 在第一象限是 0 ~ -90  第二象限是 -90 ~ -180
+                // 第四象限是 0 ~ 90  第三象限是 90 ~ 180
+                Phaser.Geom.Circle.CircumferencePoint(this.circle, angle2Rad(angle), point);
+                food.x = point.x;
+                food.y = point.y;
+            }
+        };
+        Demo.prototype.refreshMouth = function (points) {
+            var xVals = points.map(function (p) {
+                return p.x;
+            });
+            var yVals = points.map(function (p) {
+                return p.y;
+            });
+            var minX = Math.min.apply(Math, xVals);
+            var maxX = Math.max.apply(Math, xVals);
+            var minY = Math.min.apply(Math, yVals);
+            var maxY = Math.max.apply(Math, yVals);
+            this.mouth.setPosition(minX, minY);
+            this.mouth.setSize(maxX - minX, maxY - minY);
+            if (!this.mouthColor) {
+                this.mouthColor = this.add.graphics({ fillStyle: { color: 0x0000ff } });
+            }
+            this.mouthColor.clear();
+            this.mouthColor.fillStyle(0x0000ff);
+            this.mouthColor.fillRectShape(this.mouth);
+        };
+        Demo.prototype.messageListener = function () {
+            var _this = this;
+            window.addEventListener("message", function (event) {
+                var oneFaceData = event.data;
+                var mouthPoints = __spreadArrays(oneFaceData.upperLipBottom, oneFaceData.upperLipTop, oneFaceData.lowerLipBottom, oneFaceData.lowerLipTop);
+                _this.refreshMouth(mouthPoints);
+            }, false);
+        };
+        Demo.prototype.checkIfCouldEat = function () {
+            var mouthCenterX = this.mouth.x + this.mouth.width / 2;
+            var mouthCenterY = this.mouth.y + this.mouth.width / 2;
+            var destPos = new Point(mouthCenterX, mouthCenterY);
+            for (var i = 0; i < this.foodList.length; i++) {
+                var food = this.foodList[i];
+                if (!food) {
+                    continue;
+                }
+                if (food.eating) {
+                    continue;
+                }
+                var foodx = food.x;
+                var foody = food.y;
+                if ((this.mouth.x < foodx && foodx < this.mouth.x + this.mouth.width) &&
+                    (this.mouth.y < food.y && foody < this.mouth.y + this.mouth.height) &&
+                    !food.eating) {
+                    // this.foodList.splice(i--, 1)
+                    this.foodList[i] = null;
+                    this.eatingAnimation(food, destPos);
+                    break;
+                }
+            }
+        };
+        Demo.prototype.eatingAnimation = function (food, dest) {
+            food.eating = true;
+            var tween = this.tweens.add({
+                targets: food,
+                x: dest.x,
+                y: dest.y,
+                scale: 0,
+                duration: 400,
+                ease: 'Power3',
+                onComplete: function () {
+                    food.destroy();
+                }
+            });
+        };
+        return Demo;
+    }(Phaser.Scene));
+    //# sourceMappingURL=game.js.map
+
+    // 测试嘴巴位置
+    function changeMouth(game) {
+        //contours sample data
+        window.addEventListener("load", function () {
+            var movingDown = function (points) {
+                for (var _i = 0, points_1 = points; _i < points_1.length; _i++) {
+                    var p = points_1[_i];
+                    p.y = p.y += 1;
+                }
+            };
+            fetch('/assets/sampleContours.json').then(function (resp) {
+                return resp.json();
+            }).then(function (data) {
+                new VConsole();
+                // 在PC上调试
+                if (window.navigator.userAgent.indexOf("ONEPLUS") == -1) {
+                    var oneFace_1 = data[0];
+                    setInterval(function () {
+                        movingDown(oneFace_1.lowerLipBottom);
+                        movingDown(oneFace_1.lowerLipTop);
+                        movingDown(oneFace_1.upperLipBottom);
+                        movingDown(oneFace_1.upperLipTop);
+                        window.postMessage(oneFace_1, "*");
+                    }, 100);
+                }
+            });
+        }, false);
+        // let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
+    }
+    //# sourceMappingURL=test.js.map
+
+    console.log(Phaser.AUTO);
+    console.log(Phaser.AUTO);
+    console.log('.................');
+    var stageWidth$1 = document.body.clientWidth;
+    var stageHeight$1 = document.body.clientHeight;
+    var config = {
+        type: Phaser.AUTO,
+        parent: 'phaser-example',
+        width: stageWidth$1,
+        height: stageHeight$1,
+        scene: Demo,
+        transparent: true,
+        physics: {
+            "default": 'arcade',
+            arcade: {
+                gravity: { y: 300 },
+                debug: false
+            }
+        },
+    };
+    console.log("...............");
+    var game = new Phaser.Game(config);
+    changeMouth();
+
+}(VConsole));
+//# sourceMappingURL=game.js.map

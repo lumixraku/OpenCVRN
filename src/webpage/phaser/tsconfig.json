@@ -1,0 +1,37 @@
+{
+    "compilerOptions": {
+        "noEmitHelpers": false,
+        "sourceMap": true,
+        "typeRoots": [
+            "./node_modules/@types",
+            "./node_modules/phaser/types"
+        ],
+        "baseUrl": "src",
+        "paths": {
+            "@root/*": [
+                "*"
+            ],
+            "@game/*": [
+                "game/*"
+            ],
+            "actions/*": [
+                "app/actions/*"
+            ],
+            "selectors/*": [
+                "app/selectors/*"
+            ],
+            "ui/*": [
+                "app/ui/*"
+            ],
+            "logger": [
+                "util/logger"
+            ],
+        }
+    },
+    "include": [
+        "./src"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
