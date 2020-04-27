@@ -26,22 +26,31 @@ export default class Demo extends Phaser.Scene {
     public tableCapacity: number = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
 
     public foodList: Food[] = [...Array(this.tableCapacity)].map(_ => null);
-    public mouth: Rectagle = new Rectagle(0, 0, 0, 0);
+
+    // mouth
+    public mouthRect: Rectagle = new Rectagle(0, 0, 0, 0);
+    public mouthContourPoints: Point[];
+    public mouthContour: Graphics;
     private mouthColor: Graphics;
 
 
     // 旋转圆心
-    public circleCenter: Phaser.Geom.Point;
-    public circleRadius: number = stageWidth/ 2.5
+    public circleRadius: number = stageWidth
+    public circleCenter: Point = new Point(stageWidth / 2, stageHeight + this.circleRadius/1.8);
 
+    // background
+    public bg: Graphics;
+    public bgImg: Image;
 
     constructor() {
         super('demo');
+
     }
 
     preload() {
 
         // yarn run dev 的时候 这个资源也还是从 dist 中读取的
+        this.load.image('bgImg', 'assets/kitchen.png');
         this.load.image('pinWheel', 'assets/pinWheel.png');
         this.load.image('light', 'assets/light.png');
 
@@ -52,13 +61,20 @@ export default class Demo extends Phaser.Scene {
         this.load.image('food4', 'assets/french-fries.png');
         this.load.image('food5', 'assets/donut.png');
 
+        this.load.image('dogFront', 'assets/front.png');
+        this.load.image('dogBack', 'assets/back.png');
+
 
         this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
         this.load.glsl('stars', 'assets/starfields.glsl.js');
+
+        this.mouthContour = this.add.graphics()
+        this.bg = this.add.graphics()
+
     }
 
     create() {
-        this.circleCenter = new Point(stageWidth / 2, stageHeight - this.circleRadius / 2)
+
         // this.add.shader('RGB Shift Field', 0, 0, 800, 600).setOrigin(0);
 
         // this.add.shader('Plasma', 0, 412, 800, 172).setOrigin(0);
@@ -76,9 +92,12 @@ export default class Demo extends Phaser.Scene {
         // })
 
 
-        this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, 200);
 
-        this.spSpin = this.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
+
+        this.drawBackground()
+        this.drawWheel()
+
+
 
         // this.light = this.add.image(0, 0, 'light');
         // this.point = new Phaser.Geom.Point(this.light.x, this.light.y)
@@ -113,12 +132,11 @@ export default class Demo extends Phaser.Scene {
 
     rotateTable() {
         // 右手顺时针
-        this.spSpin.angle += 0.8;
+        this.spSpin.angle += 2.0;
         // rotate 是使用的弧度
         this.addFoodIfNeed()
 
     }
-
 
     addCounter = 0
     addFoodIfNeed() {
@@ -196,10 +214,13 @@ export default class Demo extends Phaser.Scene {
 
 
     refreshMouth(points: Point[]) {
-        let xVals = points.map(p => {
+        this.mouthContourPoints = points
+        let mouthPoints = points;
+
+        let xVals = mouthPoints.map(p => {
             return p.x
         })
-        let yVals = points.map(p => {
+        let yVals = mouthPoints.map(p => {
             return p.y
         })
 
@@ -208,14 +229,33 @@ export default class Demo extends Phaser.Scene {
         let minY = Math.min(...yVals)
         let maxY = Math.max(...yVals)
 
-        this.mouth.setPosition(minX, minY);
-        this.mouth.setSize(maxX - minX, maxY - minY)
-        if (!this.mouthColor) {
-            this.mouthColor = this.add.graphics({ fillStyle: { color: 0x0000ff } });
+        this.mouthContour.clear()
+        this.mouthContour.lineStyle(5, 0xFF00FF, 1.0);
+        this.mouthContour.beginPath();
+
+        let idx = 0
+        for (let p of mouthPoints) {
+            if (idx == 0) {
+                this. mouthContour.moveTo(p.x, p.y);
+            }else {
+                this.mouthContour.lineTo(p.x, p.y);
+            }
+            idx++
+
         }
-        this.mouthColor.clear()
-        this.mouthColor.fillStyle(0x0000ff)
-        this.mouthColor.fillRectShape(this.mouth)
+        this.mouthContour.closePath();
+        this.mouthContour.strokePath();
+
+        this.mouthRect.setPosition(minX, minY);
+        this.mouthRect.setSize(maxX - minX, maxY - minY)
+        // if (!this.mouthColor) {
+        //     this.mouthColor = this.add.graphics({ fillStyle: { color: 0x0000ff } });
+        // }
+
+
+        // this.mouthColor.clear()
+        // this.mouthColor.fillStyle(0x0000ff)
+        // this.mouthColor.fillRectShape(this.mouth)
 
     }
 
@@ -229,9 +269,17 @@ export default class Demo extends Phaser.Scene {
         }, false)
     }
 
+    checkMouthClose() {
+        return this.mouthRect.height < 80 || this.mouthRect.width / this.mouthRect.height > 1.5
+    }
+
     checkIfCouldEat() {
-        let mouthCenterX = this.mouth.x + this.mouth.width / 2;
-        let mouthCenterY = this.mouth.y + this.mouth.width / 2;
+        if (this.checkMouthClose()) {
+            return
+        }
+
+        let mouthCenterX = this.mouthRect.x + this.mouthRect.width / 2;
+        let mouthCenterY = this.mouthRect.y + this.mouthRect.width / 2;
 
         let destPos = new Point(mouthCenterX, mouthCenterY)
         for (let i = 0; i < this.foodList.length; i++) {
@@ -249,9 +297,11 @@ export default class Demo extends Phaser.Scene {
             let foodx = food.x
             let foody = food.y
 
+
+
             if (
-                (this.mouth.x < foodx && foodx < this.mouth.x + this.mouth.width) &&
-                (this.mouth.y < food.y && foody < this.mouth.y + this.mouth.height) &&
+                (this.mouthRect.x  < foodx && foodx < this.mouthRect.x + this.mouthRect.width) &&
+                (this.mouthRect.y - 100 < food.y && foody < this.mouthRect.y + this.mouthRect.height + 100) &&
                 !food.eating
             ) {
                 // this.foodList.splice(i--, 1)
@@ -275,6 +325,53 @@ export default class Demo extends Phaser.Scene {
                 food.destroy()
             }
         })
+    }
+
+    drawHollowBackground() {
+        let faceCenter = new Point(300, 450)
+        let faceRadius = 200
+        this.bg.beginPath()
+        this.bg.moveTo(0,0)
+        this.bg.lineTo(stageWidth, 0)
+        this.bg.lineTo(stageWidth, faceCenter.y)
+        this.bg.lineTo(faceCenter.x + faceRadius, faceCenter.y)
+        this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI , true);
+        this.bg.lineTo(0, faceCenter.y)
+        this.bg.lineTo(0,0)
+        this.bg.fillStyle(0xffeeff)
+        this.bg.fill()
+
+
+        this.bg.moveTo(stageWidth, stageHeight)
+        this.bg.lineTo(stageWidth, faceCenter.y)
+        this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI, false);
+        this.bg.lineTo(0, faceCenter.y)
+        this.bg.lineTo(0, stageHeight)
+        this.bg.lineTo(stageWidth, stageHeight)
+        this.bg.fillStyle(0xffeeff)
+        this.bg.fill()
+    }
+
+    drawBackground(){
+        this.bgImg = this.add.image(0, 0, 'bgImg')
+        let bd: Rectagle = this.bgImg.getBounds()
+
+        this.bgImg.setPosition(0,0)
+        // Phaser 中 Image 的默认 pivot 就是图片的中心点
+
+        this.bgImg.x = stageWidth/2
+        this.bgImg.y = stageHeight/2
+        this.bgImg.setScale(stageWidth/bd.width , stageHeight/bd.height)
+    }
+
+    drawWheel(){
+        this.spSpin = this.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
+        let bds:Rectagle = this.spSpin.getBounds()
+        let width = bds.width
+
+        this.spSpin.setScale(this.circleRadius / (width/2), this.circleRadius / (width/2) )
+
+        this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);
     }
 
 }

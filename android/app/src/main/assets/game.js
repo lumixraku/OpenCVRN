@@ -58,16 +58,13 @@
             _this.foodList = __spreadArrays(Array(_this.tableCapacity)).map(function (_) { return null; });
             // mouth
             _this.mouthRect = new Rectagle(0, 0, 0, 0);
-            // 旋转圆心
-            _this.circleRadius = stageWidth;
-            _this.circleCenter = new Point(stageWidth / 2, stageHeight + _this.circleRadius / 1.8);
+            _this.circleRadius = stageWidth / 2.5;
             _this.frameCounter = 0;
             _this.addCounter = 0;
             return _this;
         }
         Demo.prototype.preload = function () {
             // yarn run dev 的时候 这个资源也还是从 dist 中读取的
-            this.load.image('bgImg', 'assets/kitchen.png');
             this.load.image('pinWheel', 'assets/pinWheel.png');
             this.load.image('light', 'assets/light.png');
             this.load.image('food0', 'assets/burger.png');
@@ -76,14 +73,12 @@
             this.load.image('food3', 'assets/chicken-leg.png');
             this.load.image('food4', 'assets/french-fries.png');
             this.load.image('food5', 'assets/donut.png');
-            this.load.image('dogFront', 'assets/front.png');
-            this.load.image('dogBack', 'assets/back.png');
             this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
             this.load.glsl('stars', 'assets/starfields.glsl.js');
             this.mouthContour = this.add.graphics();
-            this.bg = this.add.graphics();
         };
         Demo.prototype.create = function () {
+            this.circleCenter = new Point(stageWidth / 2, stageHeight - this.circleRadius / 2);
             // this.add.shader('RGB Shift Field', 0, 0, 800, 600).setOrigin(0);
             // this.add.shader('Plasma', 0, 412, 800, 172).setOrigin(0);
             // this.tweens.add({
@@ -94,8 +89,8 @@
             //     yoyo: true,
             //     repeat: -1
             // })
-            this.drawBackground();
-            this.drawWheel();
+            this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, 200);
+            this.spSpin = this.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
             // this.light = this.add.image(0, 0, 'light');
             // this.point = new Phaser.Geom.Point(this.light.x, this.light.y)
             this.refreshMouth([]);
@@ -118,7 +113,7 @@
         };
         Demo.prototype.rotateTable = function () {
             // 右手顺时针
-            this.spSpin.angle += 2.0;
+            this.spSpin.angle += 0.8;
             // rotate 是使用的弧度
             this.addFoodIfNeed();
         };
@@ -246,7 +241,7 @@
                 var foodx = food.x;
                 var foody = food.y;
                 if ((this.mouthRect.x < foodx && foodx < this.mouthRect.x + this.mouthRect.width) &&
-                    (this.mouthRect.y - 100 < food.y && foody < this.mouthRect.y + this.mouthRect.height + 100) &&
+                    (this.mouthRect.y < food.y && foody < this.mouthRect.y + this.mouthRect.height) &&
                     !food.eating) {
                     // this.foodList.splice(i--, 1)
                     this.foodList[i] = null;
@@ -268,44 +263,6 @@
                     food.destroy();
                 }
             });
-        };
-        Demo.prototype.drawHollowBackground = function () {
-            var faceCenter = new Point(300, 450);
-            var faceRadius = 200;
-            this.bg.beginPath();
-            this.bg.moveTo(0, 0);
-            this.bg.lineTo(stageWidth, 0);
-            this.bg.lineTo(stageWidth, faceCenter.y);
-            this.bg.lineTo(faceCenter.x + faceRadius, faceCenter.y);
-            this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI, true);
-            this.bg.lineTo(0, faceCenter.y);
-            this.bg.lineTo(0, 0);
-            this.bg.fillStyle(0xffeeff);
-            this.bg.fill();
-            this.bg.moveTo(stageWidth, stageHeight);
-            this.bg.lineTo(stageWidth, faceCenter.y);
-            this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI, false);
-            this.bg.lineTo(0, faceCenter.y);
-            this.bg.lineTo(0, stageHeight);
-            this.bg.lineTo(stageWidth, stageHeight);
-            this.bg.fillStyle(0xffeeff);
-            this.bg.fill();
-        };
-        Demo.prototype.drawBackground = function () {
-            this.bgImg = this.add.image(0, 0, 'bgImg');
-            var bd = this.bgImg.getBounds();
-            this.bgImg.setPosition(0, 0);
-            // Phaser 中 Image 的默认 pivot 就是图片的中心点
-            this.bgImg.x = stageWidth / 2;
-            this.bgImg.y = stageHeight / 2;
-            this.bgImg.setScale(stageWidth / bd.width, stageHeight / bd.height);
-        };
-        Demo.prototype.drawWheel = function () {
-            this.spSpin = this.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
-            var bds = this.spSpin.getBounds();
-            var width = bds.width;
-            this.spSpin.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2));
-            this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);
         };
         return Demo;
     }(Phaser.Scene));

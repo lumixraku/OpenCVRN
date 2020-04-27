@@ -22,7 +22,6 @@ import CircleWithinCircle from '../assets/svg/CircleWithinCircle';
 import {postToWebview} from '../util/util';
 
 import CardV from 'react-native-cardv'
-console.log("LogDemo::22222222:::::", CardV)
 
 setTimeout(() => {
   CardV.show("........AAAA..........")
@@ -31,6 +30,13 @@ setTimeout(() => {
 
 // var webviewURL = 'http://192.168.8.242:5001/';
 var webviewURL = 'http://10.12.166.254:5001/';
+
+
+// blob 请求无法识别
+var webviewLocal = 'file:///android_asset/index.html'
+
+// 报错
+//var webviewSource = require("../../android/app/src/main/assets/index.html")
 
 const landmarkSize = 5;
 
@@ -379,6 +385,11 @@ export default class CameraScreen extends Component {
             source={{
               uri: webviewURL,
             }}
+            originWhitelist={['*']}
+            // source={{
+            //   baseUrl: '',
+            //   html: webviewSource
+            // }}
           />
         </View>
         <Toast ref="toast" position="center" />
