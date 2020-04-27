@@ -22,7 +22,6 @@ import CircleWithinCircle from '../assets/svg/CircleWithinCircle';
 import {postToWebview} from '../util/util';
 
 import CardV from 'react-native-cardv'
-console.log("LogDemo::22222222:::::", CardV)
 
 setTimeout(() => {
   CardV.show("........AAAA..........")
@@ -30,7 +29,14 @@ setTimeout(() => {
 
 
 // var webviewURL = 'http://192.168.8.242:5001/';
-var webviewURL = 'http://10.12.167.1:5001/';
+var webviewURL = 'http://10.12.166.254:5001/';
+
+
+// blob 请求无法识别
+var webviewLocal = 'file:///android_asset/index.html'
+
+// 报错
+//var webviewSource = require("../../android/app/src/main/assets/index.html")
 
 const landmarkSize = 5;
 
@@ -39,7 +45,7 @@ export default class CameraScreen extends Component {
   constructor(props) {
     super(props);
     // this.webview = this.props.webview;// failed!
-    this.webref = React.createRef();
+    // this.webref = React.createRef();
 
 
     let _self = this;
@@ -67,13 +73,10 @@ export default class CameraScreen extends Component {
       // console.log('MLkit  is null ???', MLkit); // 需要卸载然后安装 不然总是 null
       // MLkit.show('Awesome', MLkit.SHORT);
       // this.callDetectFace();
-      if (this.webref.current){
-        console.log("webref", this.webref.style)
-        this.setState({
-          'webviewBG': 'transparent'
-        })
+      this.setState({
+        'webviewBG': 'transparent'
+      })
 
-      }
     }, 2000);
 
     this.state.cameraType = 'front';
@@ -369,75 +372,24 @@ export default class CameraScreen extends Component {
             RNCamera.Constants.FaceDetection.Classifications.none
           }
           >
-          <View style={styles.takePictureContainer}>
-            <TouchableOpacity onPress={this.takePicture}>
-              <View>
-                <CircleWithinCircle />
-              </View>
-            </TouchableOpacity>
-          </View>
-          <View
-            style={{
-              position: 'absolute',
-              paddingVertical: 20,
-              bottom: 0,
-              left: 20,
-              justifyContent: 'center',
-              alignItems: 'center',
-              flex: 0,
-              backgroundColor: 'yellow',
-            }}>
-            <TouchableOpacity onPress={this.changeCameraType}>
-              <View>
-                <Svg height="68" width="68">
-                  <Circle cx="34" cy="34" fill="#FFF" r="28" />
-                </Svg>
-              </View>
-            </TouchableOpacity>
-          </View>
-          <View
-            style={{
-              position: 'absolute',
-              paddingVertical: 20,
-              bottom: 0,
-              right: 20,
-              justifyContent: 'center',
-              alignItems: 'center',
-              flex: 0,
-              backgroundColor: 'yellow',
-            }}
-          >
-            <TouchableOpacity
-              style={[
-                styles.flipButton,
-                {
-                  flex: 0.3,
-                  alignSelf: 'flex-end',
-                  backgroundColor: this.state.isRecording ? 'white' : 'darkred',
-                },
-              ]}
-              onPress={this.state.isRecording ? () => { } : this.takeVideo}
-            >
-              {this.state.isRecording ? (
-                <Text style={styles.flipText}> ☕ </Text>
-              ) : (
-                  <Text style={styles.flipText}> REC </Text>
-                )}
-            </TouchableOpacity>
-          </View>
           { this.renderFaces() }
           {/* { this.renderLandmarks() } */}
         </RNCamera>
         <View style={styles.absView}>
           <WebView
-            ref={this.webref}
-            // ref={(r) => (this.webref = r)}
+            // ref={this.webref}
+            ref={(r) => (this.webref = r)}
             style={[ styles.webview , { backgroundColor: this.state.webviewBG } ]}
 
             onMessage={this.onMessage}
             source={{
               uri: webviewURL,
             }}
+            originWhitelist={['*']}
+            // source={{
+            //   baseUrl: '',
+            //   html: webviewSource
+            // }}
           />
         </View>
         <Toast ref="toast" position="center" />
