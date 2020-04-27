@@ -4,6 +4,8 @@ import Circle = Phaser.Geom.Circle;
 import Point = Phaser.Geom.Point;
 import Rectagle = Phaser.Geom.Rectangle;
 import Graphics = Phaser.GameObjects.Graphics;
+import Text = Phaser.GameObjects.Text;
+
 
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
@@ -19,8 +21,8 @@ const angle2Rad = (angle: number) => {
 export default class Demo extends Phaser.Scene {
     public spSpin: Sprite;
     public circle: Circle;
-    public point: Point;
-    public light: Image;
+    public spSpinSpeed: number = 1;
+
 
     public distanceAngle: number = 60  //食物和食物之间的间隔(角度)
     public tableCapacity: number = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
@@ -41,6 +43,10 @@ export default class Demo extends Phaser.Scene {
     // background
     public bg: Graphics;
     public bgImg: Image;
+
+
+    //text
+    public mouthStateText: Text;
 
     constructor() {
         super('demo');
@@ -68,12 +74,11 @@ export default class Demo extends Phaser.Scene {
         this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
         this.load.glsl('stars', 'assets/starfields.glsl.js');
 
-        this.mouthContour = this.add.graphics()
-        this.bg = this.add.graphics()
 
     }
 
     create() {
+        this.bg = this.add.graphics()
 
         // this.add.shader('RGB Shift Field', 0, 0, 800, 600).setOrigin(0);
 
@@ -91,9 +96,6 @@ export default class Demo extends Phaser.Scene {
         //     repeat: -1
         // })
 
-
-
-
         this.drawBackground()
         this.drawWheel()
 
@@ -103,6 +105,7 @@ export default class Demo extends Phaser.Scene {
         // this.point = new Phaser.Geom.Point(this.light.x, this.light.y)
         this.refreshMouth([])
         this.messageListener()
+        this.addText();
     }
 
 
@@ -132,7 +135,7 @@ export default class Demo extends Phaser.Scene {
 
     rotateTable() {
         // 右手顺时针
-        this.spSpin.angle += 2.0;
+        this.spSpin.angle += this.spSpinSpeed;
         // rotate 是使用的弧度
         this.addFoodIfNeed()
 
@@ -214,6 +217,13 @@ export default class Demo extends Phaser.Scene {
 
 
     refreshMouth(points: Point[]) {
+        if (!this.mouthContour) {
+            this.mouthContour = this.add.graphics()
+
+        }
+
+
+
         this.mouthContourPoints = points
         let mouthPoints = points;
 
@@ -263,14 +273,23 @@ export default class Demo extends Phaser.Scene {
         window.addEventListener("message", (event) => {
             let oneFaceData: FaceData = event.data
 
-            let mouthPoints = [...oneFaceData.upperLipBottom, ...oneFaceData.upperLipTop, ...oneFaceData.lowerLipBottom, ...oneFaceData.lowerLipTop]
+            let mouthPoints = [...oneFaceData.upperLipBottom, ...oneFaceData.lowerLipTop]
             this.refreshMouth(mouthPoints)
 
         }, false)
     }
 
     checkMouthClose() {
-        return this.mouthRect.height < 80 || this.mouthRect.width / this.mouthRect.height > 1.5
+        // return false
+        let isClose = false
+        if (this.mouthRect.height < 10 && this.mouthRect.height / this.mouthRect.width < 0.5){
+            isClose = true
+        }
+
+        this.mouthStateText.text = "" + this.mouthRect.height //isClose ? "close" : "open"
+
+        return isClose
+
     }
 
     checkIfCouldEat() {
@@ -300,8 +319,8 @@ export default class Demo extends Phaser.Scene {
 
 
             if (
-                (this.mouthRect.x  < foodx && foodx < this.mouthRect.x + this.mouthRect.width) &&
-                (this.mouthRect.y - 100 < food.y && foody < this.mouthRect.y + this.mouthRect.height + 100) &&
+                (this.mouthRect.x - 100  < foodx  && foodx < this.mouthRect.x + this.mouthRect.width + 100) &&
+                (this.mouthRect.y - 200 < food.y && foody < this.mouthRect.y + this.mouthRect.height + 200) &&
                 !food.eating
             ) {
                 // this.foodList.splice(i--, 1)
@@ -374,4 +393,8 @@ export default class Demo extends Phaser.Scene {
         this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);
     }
 
+    addText() {
+        this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+
+    }
 }

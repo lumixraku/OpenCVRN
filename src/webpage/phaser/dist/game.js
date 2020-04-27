@@ -53,6 +53,7 @@
         __extends(Demo, _super);
         function Demo() {
             var _this = _super.call(this, 'demo') || this;
+            _this.spSpinSpeed = 1;
             _this.distanceAngle = 60; //食物和食物之间的间隔(角度)
             _this.tableCapacity = 360 / _this.distanceAngle; //根据间隔计算得到的桌面容量
             _this.foodList = __spreadArrays(Array(_this.tableCapacity)).map(function (_) { return null; });
@@ -80,10 +81,9 @@
             this.load.image('dogBack', 'assets/back.png');
             this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
             this.load.glsl('stars', 'assets/starfields.glsl.js');
-            this.mouthContour = this.add.graphics();
-            this.bg = this.add.graphics();
         };
         Demo.prototype.create = function () {
+            this.bg = this.add.graphics();
             // this.add.shader('RGB Shift Field', 0, 0, 800, 600).setOrigin(0);
             // this.add.shader('Plasma', 0, 412, 800, 172).setOrigin(0);
             // this.tweens.add({
@@ -100,6 +100,7 @@
             // this.point = new Phaser.Geom.Point(this.light.x, this.light.y)
             this.refreshMouth([]);
             this.messageListener();
+            this.addText();
         };
         Demo.prototype.update = function (time, delta) {
             this.rotateTable();
@@ -118,7 +119,7 @@
         };
         Demo.prototype.rotateTable = function () {
             // 右手顺时针
-            this.spSpin.angle += 2.0;
+            this.spSpin.angle += this.spSpinSpeed;
             // rotate 是使用的弧度
             this.addFoodIfNeed();
         };
@@ -180,6 +181,9 @@
             }
         };
         Demo.prototype.refreshMouth = function (points) {
+            if (!this.mouthContour) {
+                this.mouthContour = this.add.graphics();
+            }
             this.mouthContourPoints = points;
             var mouthPoints = points;
             var xVals = mouthPoints.map(function (p) {
@@ -221,12 +225,18 @@
             var _this = this;
             window.addEventListener("message", function (event) {
                 var oneFaceData = event.data;
-                var mouthPoints = __spreadArrays(oneFaceData.upperLipBottom, oneFaceData.upperLipTop, oneFaceData.lowerLipBottom, oneFaceData.lowerLipTop);
+                var mouthPoints = __spreadArrays(oneFaceData.upperLipBottom, oneFaceData.lowerLipTop);
                 _this.refreshMouth(mouthPoints);
             }, false);
         };
         Demo.prototype.checkMouthClose = function () {
-            return this.mouthRect.height < 80 || this.mouthRect.width / this.mouthRect.height > 1.5;
+            // return false
+            var isClose = false;
+            if (this.mouthRect.height < 10 && this.mouthRect.height / this.mouthRect.width < 0.5) {
+                isClose = true;
+            }
+            this.mouthStateText.text = "" + this.mouthRect.height; //isClose ? "close" : "open"
+            return isClose;
         };
         Demo.prototype.checkIfCouldEat = function () {
             if (this.checkMouthClose()) {
@@ -245,8 +255,8 @@
                 }
                 var foodx = food.x;
                 var foody = food.y;
-                if ((this.mouthRect.x < foodx && foodx < this.mouthRect.x + this.mouthRect.width) &&
-                    (this.mouthRect.y - 100 < food.y && foody < this.mouthRect.y + this.mouthRect.height + 100) &&
+                if ((this.mouthRect.x - 100 < foodx && foodx < this.mouthRect.x + this.mouthRect.width + 100) &&
+                    (this.mouthRect.y - 200 < food.y && foody < this.mouthRect.y + this.mouthRect.height + 200) &&
                     !food.eating) {
                     // this.foodList.splice(i--, 1)
                     this.foodList[i] = null;
@@ -306,6 +316,9 @@
             var width = bds.width;
             this.spSpin.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2));
             this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);
+        };
+        Demo.prototype.addText = function () {
+            this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
         };
         return Demo;
     }(Phaser.Scene));
