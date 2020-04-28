@@ -11,6 +11,58 @@ Now only available on Android.
 then open another terminal, `npm run android`
 
 
+### release
+https://reactnative.dev/docs/signed-apk-android
+
+
+```
+keytool -genkey -v -keystore your_key_name.keystore -alias your_key_alias -keyalg RSA -keysize 2048 -validity 10000
+
+
+
+➜ keytool -genkey -v -keystore mykey.keystore -alias mykey -keyalg RSA -keysize 2048 -validity 10000
+```
+Remember your password!
+
+
+change your build.gradle
+```
+android {
+    ...
+    defaultConfig { ... }
+    signingConfigs {
+        release {
+            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+                storeFile file(MYAPP_UPLOAD_STORE_FILE)
+                storePassword MYAPP_UPLOAD_STORE_PASSWORD
+                keyAlias MYAPP_UPLOAD_KEY_ALIAS
+                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+            }
+        }
+    }
+    buildTypes {
+        release {
+            ...
+            signingConfig signingConfigs.release
+        }
+    }
+}
+
+
+```
+
+this command would generate aab
+```
+./gradlew bundleRelease
+```
+
+This command would generate an apkfile, `app-release.apk`
+
+```
+npx react-native run-android --variant=release
+
+```
+
 ## Prepare
 - ~~OpenCV  3.4.10~~
 - Android Pie (SDK 28)
