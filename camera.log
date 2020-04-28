@@ -1,0 +1,26 @@
+LogDemo: width height 1920 1080
+LogDemo: dimension width height 1080 1920
+LogDemo: viewWidth viewHeight 520 924
+LogDemo: mScaleX mScaleY 0.18342151675485008 0.18333333333333332
+LogDemo: density 2.625
+
+
+
+
+LogDemo : width height 960 540
+LogDemo : dimension width height 960 540
+LogDemo : viewWidth viewHeight 520 924
+LogDemo : mScaleX mScaleY 0.20634920634920634 0.6518518518518519
+LogDemo : density 2.625
+
+
+
+LogDemo : getSupportedPreviewSizes 1920 1080
+LogDemo : getSupportedPreviewSizes 1440 1080
+LogDemo : getSupportedPreviewSizes 1280 720
+LogDemo : getSupportedPreviewSizes 1088 1088
+LogDemo : getSupportedPreviewSizes 720 480
+LogDemo : getSupportedPreviewSizes 640 480
+LogDemo : getSupportedPreviewSizes 352 288
+LogDemo : getSupportedPreviewSizes 320 240
+LogDemo : getSupportedPreviewSizes 176 144

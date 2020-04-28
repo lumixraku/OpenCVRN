@@ -150,6 +150,21 @@ adb shell ls -Ral /storage/emulated/0/Pictures/Screenshots
 {"bottomMouthPosition": {"x": 270.27269345238096, "y": 480.5116423107329}, "bounds": {"origin": {"x": 76.46005394345241, "y": 74.11966451009116}, "size": {"height": 601.4217692057292, "width": 412.9934430803571}}, "faceID": 0, "leftCheekPosition": {"x": 329.1755719866071, "y": 349.8769292922247}, "leftEarPosition": {"x": 344.4310128348214, "y": 189.23731391543436}, "leftEarTipPosition": {"x": 361.72421409970235, "y": 273.5698423839751}, "leftEyeOpenProbability": 0.5554949641227722, "leftEyePosition": {"x": 272.0940755208333, "y": 265.4891751970564}, "leftMouthPosition": {"x": 311.18770926339283, "y": 425.8223577590216}, "noseBasePosition": {"x": 240.8182663690476, "y": 378.8622230166481}, "rightCheekPosition": {"x": 173.11481584821428, "y": 466.3295253208706}, "rightEarPosition": {"x": 66.69898623511905, "y": 392.3728966122582}, "rightEarTipPosition": {"x": 105.62802269345238, "y": 457.1561119442895}, "rightEyeOpenProbability": 0.434387743473053, "rightEyePosition": {"x": 153.3656994047619, "y": 353.0205575125558}, "rightMouthPosition": {"x": 221.801025390625, "y": 491.40720810663134}, "rollAngle": -26.673864364624023, "smilingProbability": 0.19892069697380066, "yawAngle": 1.3344969749450684}
 ```
 
+## Scale
+Android has DPR also, it get be get by `getResources().getDisplayMetrics().density`.
+
+
+```
+LogDemo : width height 1920 1080
+LogDemo : dimension width height 1080 1920
+LogDemo : viewWidth viewHeight 520 924
+LogDemo : mScaleX mScaleY 0.18342151675485008 0.18333333333333332
+LogDemo : density 2.625
+
+```
+While I set width and height as (198,352) of camera view in RN Style, android would get it as
+
+
 
 ## Read More
 ### create your own rn package

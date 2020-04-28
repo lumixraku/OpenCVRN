@@ -38,7 +38,7 @@ export default class Demo extends Phaser.Scene {
 
     // 旋转圆心
     public circleRadius: number = stageWidth
-    public circleCenter: Point = new Point(stageWidth / 2, stageHeight + this.circleRadius/1.8);
+    public circleCenter: Point = new Point(stageWidth / 2, stageHeight + this.circleRadius/2.3);
 
     // background
     public bg: Graphics;
@@ -274,10 +274,26 @@ export default class Demo extends Phaser.Scene {
             let oneFaceData: FaceData = event.data
 
             let mouthPoints = [...oneFaceData.upperLipBottom, ...oneFaceData.lowerLipTop]
-            this.refreshMouth(mouthPoints)
+            let newPoints = this.offsetPoints(stageWidth, stageHeight, mouthPoints)
+
+            this.refreshMouth(newPoints)
 
         }, false)
     }
+    private previewWidth = 198
+    private previewHeight = 352
+    private previewOffsetX = 170
+    private previewOffsetY = 250
+    offsetPoints(webviewWidth: number,  webviewHeight, mouthPoints: Point[]) {
+        let scaleX = webviewWidth / this.previewWidth;
+        let scaleY = webviewHeight / this.previewHeight;
+
+        let newPoints = mouthPoints.map( p => {
+            return new Point(p.x + this.previewOffsetX, p.y + this.previewOffsetY )
+        })
+        return newPoints
+    }
+
 
     checkMouthClose() {
         // return false

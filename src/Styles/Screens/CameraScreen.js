@@ -2,6 +2,8 @@ import {StyleSheet, Dimensions} from 'react-native';
 
 var stageWidth = Dimensions.get('window').width; //full width
 var stageHeight = Dimensions.get('window').height; //full height
+console.log("LogDemo", "WH", stageWidth, stageHeight)
+
 var bottomHeight = 20;
 var absViewHeight = stageHeight - bottomHeight;
 
@@ -17,7 +19,7 @@ export default StyleSheet.create({
   },
   container: {
     flex: 1,
-    flexDirection: 'row',
+    // flexDirection: 'row',
   },
   repeatPhotoContainer: {
     position: 'absolute',
@@ -74,11 +76,26 @@ export default StyleSheet.create({
     fontSize: 15,
     marginRight: 10,
   },
+  previewContainer: {
+  },
+
+  box1: {
+    position: 'absolute',
+    top: 240,
+    left: 250,
+    width: 100,
+    height: 100,
+    backgroundColor: 'red'
+  },
   preview: {
-    position: 'relative',
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    position: 'absolute',
+    top: 250,
+    left: 170,
+    width: 198,
+    height: 330,
+    // flex: 1,
+    // justifyContent: 'flex-end',
+    // alignItems: 'center',
   },
   takePictureContainer: {
     position: 'absolute',
@@ -91,7 +108,7 @@ export default StyleSheet.create({
     flex: 0,
     backgroundColor: 'red',
   },
-  absView: {
+  webViewContainer: {
     width: stageWidth,
     height: absViewHeight,
 
@@ -100,6 +117,7 @@ export default StyleSheet.create({
     top: 0,
   },
   webview: {
+    flex:1,
     height: absViewHeight,
     alignSelf: 'stretch',
     backgroundColor: 'transparent',

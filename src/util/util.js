@@ -9,6 +9,9 @@ var stageHeight = Dimensions.get('window').height; //full height
 let lasttime = +new Date
 
 const	postToWebview = (webview, data) => {
+		if (!webview) {
+			return
+		}
 	  // Ok postMessage 可以放对象
 		// var runJS = `
 		// // 	window.postMessage({a: 1})
@@ -20,6 +23,9 @@ const	postToWebview = (webview, data) => {
 		// 这么做实际上是 window.postMessage([object Object])
 
 		var dataStr = ""
+
+		console.log("face data::: ", data)
+
 
 		console.log("time", (+new Date) - lasttime)
 		lasttime = +new Date

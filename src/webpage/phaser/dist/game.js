@@ -61,9 +61,13 @@
             _this.mouthRect = new Rectagle(0, 0, 0, 0);
             // 旋转圆心
             _this.circleRadius = stageWidth;
-            _this.circleCenter = new Point(stageWidth / 2, stageHeight + _this.circleRadius / 1.8);
+            _this.circleCenter = new Point(stageWidth / 2, stageHeight + _this.circleRadius / 2.3);
             _this.frameCounter = 0;
             _this.addCounter = 0;
+            _this.previewWidth = 198;
+            _this.previewHeight = 352;
+            _this.previewOffsetX = 170;
+            _this.previewOffsetY = 250;
             return _this;
         }
         Demo.prototype.preload = function () {
@@ -226,8 +230,18 @@
             window.addEventListener("message", function (event) {
                 var oneFaceData = event.data;
                 var mouthPoints = __spreadArrays(oneFaceData.upperLipBottom, oneFaceData.lowerLipTop);
-                _this.refreshMouth(mouthPoints);
+                var newPoints = _this.offsetPoints(stageWidth, stageHeight, mouthPoints);
+                _this.refreshMouth(newPoints);
             }, false);
+        };
+        Demo.prototype.offsetPoints = function (webviewWidth, webviewHeight, mouthPoints) {
+            var _this = this;
+            var scaleX = webviewWidth / this.previewWidth;
+            var scaleY = webviewHeight / this.previewHeight;
+            var newPoints = mouthPoints.map(function (p) {
+                return new Point(p.x + _this.previewOffsetX, p.y + _this.previewOffsetY);
+            });
+            return newPoints;
         };
         Demo.prototype.checkMouthClose = function () {
             // return false
@@ -322,7 +336,6 @@
         };
         return Demo;
     }(Phaser.Scene));
-    //# sourceMappingURL=game.js.map
 
     // 测试嘴巴位置
     function changeMouth(game) {
