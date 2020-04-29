@@ -13,23 +13,15 @@ import { Svg, Circle } from 'react-native-svg';
 
 import { RNCamera } from 'react-native-camera';
 import Toast, { DURATION } from 'react-native-easy-toast';
-
+import { offsetXPreview, offsetYPreview, previewWidth, previewHeight } from '../Styles/Screens/CameraScreen';
 import styles from '../Styles/Screens/CameraScreen';
-import OpenCV from '../NativeModules/OpenCV';
-import MLkit from '../NativeModules/MLKit';
-import CircleWithinCircle from '../assets/svg/CircleWithinCircle';
 
 import { postToWebview } from '../util/util';
 
-import CardV from 'react-native-cardv'
-
-setTimeout(() => {
-  CardV.show("........AAAA..........")
-}, 1000)
 
 
 // var webviewURL = 'http://192.168.8.242:5001/';
-var webviewURL = 'http://10.12.166.241:5001/';
+var webviewURL = 'http://10.12.166.251:5001/';
 
 
 // blob 请求无法识别
@@ -38,7 +30,6 @@ var webviewLocal = 'file:///android_asset/index.html'
 // 报错
 //var webviewSource = require("../../android/app/src/main/assets/index.html")
 
-const landmarkSize = 5;
 
 export default class CameraScreen extends Component {
 
@@ -51,8 +42,9 @@ export default class CameraScreen extends Component {
     let _self = this;
 
     this.facesDetected = this.facesDetected.bind(this);
-    this.renderFace = this.renderFace.bind(this);
     this.renderFaces = this.renderFaces.bind(this);
+    this.renderFace = this.renderFace.bind(this);
+    this.renderAllContours = this.renderAllContours.bind(this);
     this.renderLandmarks = this.renderLandmarks.bind(this);
 
     this.lastTime = +new Date;
@@ -96,35 +88,12 @@ export default class CameraScreen extends Component {
     }
   };
 
-  callDetectFace(imageAsBase64) {
-    var _this = this;
-    if (!imageAsBase64) {
-      console.log('LogDemo', 'NOt base64');
-    }
-    return new Promise((resolve, reject) => {
-      MLkit.detectFacesByBase64(
-        imageAsBase64,
-        (error) => {
-          // error handling
-        },
-        (msg) => {
-          console.log('LogDemo callback', msg);
-          resolve(msg);
-        },
-      );
-    }).then((data) => {
-      console.log('LogDemo react JS get data', data);
-      console.log('this webref2', _this.webref);
-    });
-
-  }
 
 
 
   onMessage(event) {
     console.log('RCT  recevice event', event.nativeEvent.data);
   }
-
 
 
 
@@ -137,7 +106,6 @@ export default class CameraScreen extends Component {
 
   renderFace(faceData) {
     let { bounds, faceID, rollAngle, yawAngle } = faceData;
-
     postToWebview(this.webref, faceData);
     // return (
     //   <View
@@ -163,7 +131,56 @@ export default class CameraScreen extends Component {
     // )
   }
 
+  renderContourOfFace(faceData) {
+
+    const renderContour = points => {
+      points.push( {x: 0, y: 0})
+
+      let elems = []
+      for (let [idx, p] of points.entries()) {
+        let left =  p.x
+        let top =  p.y
+        console.log("left", left, top);
+        elems.push(
+          <View
+            key={ `${faceData.faceID}${idx}`}
+            style={[styles.landmark, {
+              left: left,
+              top: top,
+              backgroundColor: 'lime'
+          }]}>
+          </View>
+        )
+
+        //PS 这里的absolute 都是相对于父元素而言的 也就是contourPoints
+        //并不是相对 contoursContainer 也不是preview
+      }
+      return elems
+    }
+
+    return (
+      <View
+        key={faceData.faceID}
+        style={{
+          borderWidth: 1,
+          borderRadius: 1,
+          borderColor: 'green',
+          width: previewWidth,
+          height: previewHeight,
+        }}
+        className="contourPoints"
+      >
+        {renderContour(faceData.upperLipTop)}
+        {renderContour(faceData.upperLipBottom)}
+        {renderContour(faceData.lowerLipTop)}
+        {renderContour(faceData.lowerLipBottom)}
+        {renderContour(faceData.face)}
+      </View>
+    )
+  }
+
   renderLandmarksOfFace(face) {
+    const landmarkSize = 5;
     const renderLandmark = position =>
       position && (
         <View
@@ -176,21 +193,25 @@ export default class CameraScreen extends Component {
           ]}
         />
       );
-    return (
-      <View key={`landmarks-${face.faceID}`}>
-        {renderLandmark(face.leftEyePosition)}
-        {renderLandmark(face.rightEyePosition)}
-        {renderLandmark(face.leftEarPosition)}
-        {renderLandmark(face.rightEarPosition)}
-        {renderLandmark(face.leftCheekPosition)}
-        {renderLandmark(face.rightCheekPosition)}
-        {renderLandmark(face.leftMouthPosition)}
-        {renderLandmark(face.mouthPosition)}
-        {renderLandmark(face.rightMouthPosition)}
-        {renderLandmark(face.noseBasePosition)}
-        {renderLandmark(face.bottomMouthPosition)}
-      </View>
-    );
+    if (face.leftCheekPosition) {
+      return (
+        <View key={`landmarks-${face.faceID}`}>
+          {renderLandmark(face.leftEyePosition)}
+          {renderLandmark(face.rightEyePosition)}
+          {renderLandmark(face.leftEarPosition)}
+          {renderLandmark(face.rightEarPosition)}
+          {renderLandmark(face.leftCheekPosition)}
+          {renderLandmark(face.rightCheekPosition)}
+          {renderLandmark(face.leftMouthPosition)}
+          {renderLandmark(face.mouthPosition)}
+          {renderLandmark(face.rightMouthPosition)}
+          {renderLandmark(face.noseBasePosition)}
+          {renderLandmark(face.bottomMouthPosition)}
+        </View>
+      )
+    }
+    return null;
+
   }
 
   renderFaces() {
@@ -209,6 +230,14 @@ export default class CameraScreen extends Component {
     )
   }
 
+  renderAllContours() {
+    return (
+      <View className="contoursContainer" style={styles.facesContainer} pointerEvents="none">
+        {this.state.faces ? this.state.faces.map(this.renderContourOfFace) : null}
+      </View>
+    )
+  }
+
   render() {
 
     return (
@@ -216,45 +245,45 @@ export default class CameraScreen extends Component {
         <View style={styles.previewContainer}>
         </View>
         <View style={styles.box1}></View>
-          <RNCamera
-            ref={(cam) => {
-              this.camera = cam;
-            }}
-            style={styles.preview}
-            permissionDialogTitle={'Permission to use camera'}
-            permissionDialogMessage={
-              'We need your permission to use your camera phone'
-            }
-            ratio="16:9"
-            type={this.state.cameraType}
-            mirrorImage={this.state.mirrorMode}
-            trackingEnabled
-            onFacesDetected={this.facesDetected}
-            faceDetectionLandmarks={
-              RNCamera.Constants.FaceDetection.Landmarks.none
-            }
-            faceDetectionClassifications={
-              RNCamera.Constants.FaceDetection.Classifications.none
-            }
-          >
-            {this.renderFaces()}
-            {/* { this.renderLandmarks() } */}
-          </RNCamera>
+        <RNCamera
+          ref={(cam) => {
+            this.camera = cam;
+          }}
+          style={styles.preview}
+          permissionDialogTitle={'Permission to use camera'}
+          permissionDialogMessage={
+            'We need your permission to use your camera phone'
+          }
+          ratio="16:9"
+          type={this.state.cameraType}
+          mirrorImage={this.state.mirrorMode}
+          trackingEnabled
+          onFacesDetected={this.facesDetected}
+          faceDetectionLandmarks={
+            RNCamera.Constants.FaceDetection.Landmarks.none
+          }
+          faceDetectionClassifications={
+            RNCamera.Constants.FaceDetection.Classifications.none
+          }
+        >
+          {this.renderFaces()}
+          {this.renderAllContours()}
+        </RNCamera>
         <View style={styles.webViewContainer}>
           <WebView
             // ref={this.webref}
             ref={(r) => (this.webref = r)}
-            style={[ styles.webview , { backgroundColor: this.state.webviewBG } ]}
+            style={[styles.webview, { backgroundColor: this.state.webviewBG }]}
 
             onMessage={this.onMessage}
             source={{
               uri: webviewURL,
             }}
             originWhitelist={['*']}
-            // source={{
-            //   baseUrl: '',
-            //   html: webviewSource
-            // }}
+          // source={{
+          //   baseUrl: '',
+          //   html: webviewSource
+          // }}
           />
         </View>
         <Toast ref="toast" position="center" />

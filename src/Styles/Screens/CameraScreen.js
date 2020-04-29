@@ -7,7 +7,21 @@ console.log("LogDemo", "WH", stageWidth, stageHeight)
 var bottomHeight = 20;
 var absViewHeight = stageHeight - bottomHeight;
 
-var landmarkSize = 5
+var landmarkSize = 2
+
+
+// camera preview offset
+var offsetXPreview = 170
+var offsetYPreview = 250
+var previewWidth = 198
+var previewHeight = 352
+
+// var offsetXPreview = 0
+// var offsetYPreview = 0
+// var previewWidth = stageWidth
+// var previewHeight = stageWidth /9 * 16
+
+export { offsetXPreview, offsetYPreview, previewWidth, previewHeight}
 
 export default StyleSheet.create({
   imagePreview: {
@@ -20,6 +34,7 @@ export default StyleSheet.create({
   container: {
     flex: 1,
     // flexDirection: 'row',
+    position:'relative',
   },
   repeatPhotoContainer: {
     position: 'absolute',
@@ -89,10 +104,10 @@ export default StyleSheet.create({
   },
   preview: {
     position: 'absolute',
-    top: 250,
-    left: 170,
-    width: 198,
-    height: 330,
+    top: offsetYPreview,
+    left: offsetXPreview,
+    width: previewWidth,
+    height: previewHeight,
     // flex: 1,
     // justifyContent: 'flex-end',
     // alignItems: 'center',
@@ -111,10 +126,10 @@ export default StyleSheet.create({
   webViewContainer: {
     width: stageWidth,
     height: absViewHeight,
-
-    // backgroundColor: "yellow",
+    backgroundColor: "rgba(255, 255, 0, 0.1)",
     position: 'absolute',
     top: 0,
+    left: 0,
   },
   webview: {
     flex:1,
@@ -128,12 +143,15 @@ export default StyleSheet.create({
     right: 0,
     left: 0,
     top: 0,
+    borderWidth: 2,
+    borderRadius: 2,
+    borderColor: '#FFD700',
   },
   face: {
+    position: 'absolute',
     padding: 10,
     borderWidth: 2,
     borderRadius: 2,
-    position: 'absolute',
     borderColor: '#FFD700',
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.0)',
