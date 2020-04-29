@@ -1,5 +1,4 @@
 import { WebView } from 'react-native-webview';
-
 import React, { Component } from 'react';
 import {
   AppRegistry,
@@ -17,18 +16,14 @@ import { offsetXPreview, offsetYPreview, previewWidth, previewHeight } from '../
 import styles from '../Styles/Screens/CameraScreen';
 
 import { postToWebview } from '../util/util';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM } from '../constant';
 
 
 
+var webviewURL = 'http://10.12.113.158:5001/';
 // var webviewURL = 'http://192.168.8.242:5001/';
-var webviewURL = 'http://10.12.166.251:5001/';
-
-
-// blob 请求无法识别
-var webviewLocal = 'file:///android_asset/index.html'
-
-// 报错
-//var webviewSource = require("../../android/app/src/main/assets/index.html")
+// var webviewLocal = 'file:///android_asset/index.html' // blob 请求无法识别
+// var webviewSource = require("../../android/app/src/main/assets/index.html") // 报错
 
 
 export default class CameraScreen extends Component {
@@ -46,6 +41,8 @@ export default class CameraScreen extends Component {
     this.renderFace = this.renderFace.bind(this);
     this.renderAllContours = this.renderAllContours.bind(this);
     this.renderLandmarks = this.renderLandmarks.bind(this);
+    this.onWebviewLoadEnd = this.onWebviewLoadEnd.bind(this);
+
 
     this.lastTime = +new Date;
     setTimeout(() => {
@@ -91,22 +88,36 @@ export default class CameraScreen extends Component {
 
 
 
-  onMessage(event) {
+  onMessageFromWeb(event) {
     console.log('RCT  recevice event', event.nativeEvent.data);
   }
 
+  onWebviewLoadEnd(event) {
+    postToWebview({
+      previewPos: {
+        top: offsetYPreview,
+        left: offsetXPreview,
+        width: previewWidth,
+        height: previewHeight
+      },
+      messageType:MSG_TYPE_CAM,
+    })
+  }
 
 
   facesDetected(detectData) {
     this.setState({
-      faces: detectData.faces
+      faces: detectData.faces,
     })
   };
 
 
   renderFace(faceData) {
     let { bounds, faceID, rollAngle, yawAngle } = faceData;
-    postToWebview(this.webref, faceData);
+    postToWebview(this.webref, {
+      faceData: faceData,
+      messageType: MSG_TYPE_FACE,
+    });
     // return (
     //   <View
     //     key={faceID}
@@ -274,11 +285,11 @@ export default class CameraScreen extends Component {
             // ref={this.webref}
             ref={(r) => (this.webref = r)}
             style={[styles.webview, { backgroundColor: this.state.webviewBG }]}
-
-            onMessage={this.onMessage}
+            onMessage={this.webviewLoadEnd}
             source={{
               uri: webviewURL,
             }}
+            onLoadEnd={this.webviewLoadEnd}
             originWhitelist={['*']}
           // source={{
           //   baseUrl: '',

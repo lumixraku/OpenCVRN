@@ -1,15 +1,15 @@
-import Image = Phaser.GameObjects.Image;
+import PhaserImage = Phaser.GameObjects.Image;
 import Sprite = Phaser.GameObjects.Sprite;
 import Circle = Phaser.Geom.Circle;
 import Point = Phaser.Geom.Point;
 import Rectagle = Phaser.Geom.Rectangle;
 import Graphics = Phaser.GameObjects.Graphics;
-import Text = Phaser.GameObjects.Text;
-
+import PhaserText = Phaser.GameObjects.Text;
 
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
 
+import Mouth from '@game/mouth'
 import Food from '@game/food'
 import { FaceData } from '@root/faceData';
 
@@ -30,11 +30,11 @@ export default class Demo extends Phaser.Scene {
     public foodList: Food[] = [...Array(this.tableCapacity)].map(_ => null);
 
     // mouth
-    public mouthRect: Rectagle = new Rectagle(0, 0, 0, 0);
-    public mouthContourPoints: Point[];
-    public mouthContour: Graphics;
-    private mouthColor: Graphics;
-
+    // public mouthRect: Rectagle = new Rectagle(0, 0, 0, 0);
+    // public mouthContourPoints: Point[];
+    // public mouthContour: Graphics;
+    // private mouthColor: Graphics;
+    public mouthObj: Mouth;
 
     // 旋转圆心
     public circleRadius: number = stageWidth
@@ -42,15 +42,14 @@ export default class Demo extends Phaser.Scene {
 
     // background
     public bg: Graphics;
-    public bgImg: Image;
+    public bgImg: PhaserImage;
 
 
     //text
-    public mouthStateText: Text;
+    // public mouthStateText: PhaserText;
 
     constructor() {
         super('demo');
-
     }
 
     preload() {
@@ -95,7 +94,6 @@ export default class Demo extends Phaser.Scene {
         //     yoyo: true,
         //     repeat: -1
         // })
-
         this.drawBackground()
         this.drawWheel()
 
@@ -103,7 +101,12 @@ export default class Demo extends Phaser.Scene {
 
         // this.light = this.add.image(0, 0, 'light');
         // this.point = new Phaser.Geom.Point(this.light.x, this.light.y)
-        this.refreshMouth([])
+
+        // Phaser会根据 add 的先后顺序决定层级.
+        this.mouthObj = new Mouth(this);
+        this.refreshMouth([], [], [], [])
+        
+
         this.messageListener()
         this.addText();
     }
@@ -216,48 +219,49 @@ export default class Demo extends Phaser.Scene {
     }
 
 
-    refreshMouth(points: Point[]) {
-        if (!this.mouthContour) {
-            this.mouthContour = this.add.graphics()
+    refreshMouth(upperTop: Point[], upperBottom: Point[], lowerTop: Point[], lowerBottom: Point[]) {
+        this.mouthObj.setMouthContourPoints(upperTop, upperBottom, lowerTop, lowerBottom)
+        // if (!this.mouthContour) {
+        //     this.mouthContour = this.add.graphics()
 
-        }
+        // }
 
 
 
-        this.mouthContourPoints = points
-        let mouthPoints = points;
+        // this.mouthContourPoints = points
+        // let mouthPoints = points;
 
-        let xVals = mouthPoints.map(p => {
-            return p.x
-        })
-        let yVals = mouthPoints.map(p => {
-            return p.y
-        })
+        // let xVals = mouthPoints.map(p => {
+        //     return p.x
+        // })
+        // let yVals = mouthPoints.map(p => {
+        //     return p.y
+        // })
 
-        let minX = Math.min(...xVals)
-        let maxX = Math.max(...xVals)
-        let minY = Math.min(...yVals)
-        let maxY = Math.max(...yVals)
+        // let minX = Math.min(...xVals)
+        // let maxX = Math.max(...xVals)
+        // let minY = Math.min(...yVals)
+        // let maxY = Math.max(...yVals)
 
-        this.mouthContour.clear()
-        this.mouthContour.lineStyle(5, 0xFF00FF, 1.0);
-        this.mouthContour.beginPath();
+        // this.mouthContour.clear()
+        // this.mouthContour.lineStyle(5, 0xFF00FF, 1.0);
+        // this.mouthContour.beginPath();
 
-        let idx = 0
-        for (let p of mouthPoints) {
-            if (idx == 0) {
-                this. mouthContour.moveTo(p.x, p.y);
-            }else {
-                this.mouthContour.lineTo(p.x, p.y);
-            }
-            idx++
+        // let idx = 0
+        // for (let p of mouthPoints) {
+        //     if (idx == 0) {
+        //         this. mouthContour.moveTo(p.x, p.y);
+        //     }else {
+        //         this.mouthContour.lineTo(p.x, p.y);
+        //     }
+        //     idx++
 
-        }
-        this.mouthContour.closePath();
-        this.mouthContour.strokePath();
+        // }
+        // this.mouthContour.closePath();
+        // this.mouthContour.strokePath();
 
-        this.mouthRect.setPosition(minX, minY);
-        this.mouthRect.setSize(maxX - minX, maxY - minY)
+        // this.mouthRect.setPosition(minX, minY);
+        // this.mouthRect.setSize(maxX - minX, maxY - minY)
         // if (!this.mouthColor) {
         //     this.mouthColor = this.add.graphics({ fillStyle: { color: 0x0000ff } });
         // }
@@ -271,12 +275,12 @@ export default class Demo extends Phaser.Scene {
 
     messageListener() {
         window.addEventListener("message", (event) => {
-            let oneFaceData: FaceData = event.data
+            let of: FaceData = event.data
 
-            let mouthPoints = [...oneFaceData.upperLipBottom, ...oneFaceData.lowerLipTop]
+            let mouthPoints = [...of.upperLipBottom, ...of.lowerLipTop]
             let newPoints = this.offsetPoints(stageWidth, stageHeight, mouthPoints)
 
-            this.refreshMouth(newPoints)
+            this.refreshMouth(of.upperLipTop, of.upperLipBottom, of.lowerLipTop, of.lowerLipBottom)
 
         }, false)
     }
@@ -295,28 +299,15 @@ export default class Demo extends Phaser.Scene {
     }
 
 
-    checkMouthClose() {
-        // return false
-        let isClose = false
-        if (this.mouthRect.height < 10 && this.mouthRect.height / this.mouthRect.width < 0.5){
-            isClose = true
-        }
 
-        this.mouthStateText.text = "" + this.mouthRect.height //isClose ? "close" : "open"
-
-        return isClose
-
-    }
 
     checkIfCouldEat() {
-        if (this.checkMouthClose()) {
+        if (this.mouthObj.checkIfMouthClose()) {
             return
         }
 
-        let mouthCenterX = this.mouthRect.x + this.mouthRect.width / 2;
-        let mouthCenterY = this.mouthRect.y + this.mouthRect.width / 2;
 
-        let destPos = new Point(mouthCenterX, mouthCenterY)
+        let destPos = this.mouthObj.getMouthCenter();
         for (let i = 0; i < this.foodList.length; i++) {
 
 
@@ -333,10 +324,13 @@ export default class Demo extends Phaser.Scene {
             let foody = food.y
 
 
-
+            // 重新修改判定条件
+            // 当food 在摄像头范围内就可以吃
             if (
-                (this.mouthRect.x - 100  < foodx  && foodx < this.mouthRect.x + this.mouthRect.width + 100) &&
-                (this.mouthRect.y - 200 < food.y && foody < this.mouthRect.y + this.mouthRect.height + 200) &&
+                ( this.previewOffsetX < food.x &&  food. x < this.previewOffsetX +  this.previewWidth) 
+                &&
+                (this.previewOffsetY < food.y && food.y < this.previewOffsetY + this.previewHeight)
+                &&
                 !food.eating
             ) {
                 // this.foodList.splice(i--, 1)
@@ -397,10 +391,13 @@ export default class Demo extends Phaser.Scene {
         this.bgImg.x = stageWidth/2
         this.bgImg.y = stageHeight/2
         this.bgImg.setScale(stageWidth/bd.width , stageHeight/bd.height)
+        this.bgImg.alpha = 0.5;
     }
 
     drawWheel(){
         this.spSpin = this.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
+        this.spSpin.alpha = 0.5
+
         let bds:Rectagle = this.spSpin.getBounds()
         let width = bds.width
 
@@ -410,7 +407,7 @@ export default class Demo extends Phaser.Scene {
     }
 
     addText() {
-        this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+        // this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
 
     }
 }

@@ -46,22 +46,87 @@
     var Rectagle = Phaser.Geom.Rectangle;
     var stageWidth = document.body.clientWidth;
     var stageHeight = document.body.clientHeight;
+    var Mouth = /** @class */ (function () {
+        // private mouthColor: Graphics;
+        function Mouth(scene) {
+            this.mouthRect = new Rectagle(0, 0, 0, 0);
+            this.mouthContour = scene.add.graphics();
+            this.mouthStateText = scene.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+        }
+        Mouth.prototype.setMouthContourPoints = function (upperTop, upperBottom, lowerTop, lowerBottom) {
+            this.upperTopPoints = upperTop;
+            this.upperBottomPoints = upperBottom;
+            this.lowerTopPoints = lowerTop;
+            this.lowerBottomPoints = lowerBottom;
+            this.mouthAllPoints = __spreadArrays(upperTop, upperBottom, lowerTop, lowerBottom);
+            this.calcMouthRect();
+            this.drawContour();
+        };
+        Mouth.prototype.calcMouthRect = function () {
+            var mouthPoints = this.mouthAllPoints;
+            var xVals = mouthPoints.map(function (p) {
+                return p.x;
+            });
+            var yVals = mouthPoints.map(function (p) {
+                return p.y;
+            });
+            var minX = Math.min.apply(Math, xVals);
+            var maxX = Math.max.apply(Math, xVals);
+            var minY = Math.min.apply(Math, yVals);
+            var maxY = Math.max.apply(Math, yVals);
+            this.mouthRect.setPosition(minX, minY);
+            this.mouthRect.setSize(maxX - minX, maxY - minY);
+        };
+        Mouth.prototype.drawContour = function () {
+            var mouthPoints = this.mouthAllPoints;
+            this.mouthContour.clear();
+            this.mouthContour.lineStyle(5, 0xFF00FF, 1.0);
+            this.mouthContour.beginPath();
+            var idx = 0;
+            for (var _i = 0, mouthPoints_1 = mouthPoints; _i < mouthPoints_1.length; _i++) {
+                var p = mouthPoints_1[_i];
+                if (idx == 0) {
+                    this.mouthContour.moveTo(p.x, p.y);
+                }
+                else {
+                    this.mouthContour.lineTo(p.x, p.y);
+                }
+                idx++;
+            }
+            this.mouthContour.closePath();
+            this.mouthContour.strokePath();
+        };
+        Mouth.prototype.checkIfMouthClose = function () {
+            return false;
+        };
+        // 得到嘴巴中心点 用于确定动画结束的位置
+        Mouth.prototype.getMouthCenter = function () {
+            var mouthCenterX = this.mouthRect.x + this.mouthRect.width / 2;
+            var mouthCenterY = this.mouthRect.y + this.mouthRect.width / 2;
+            return new Point(mouthCenterX, mouthCenterY);
+        };
+        return Mouth;
+    }());
+
+    var Point$1 = Phaser.Geom.Point;
+    var stageWidth$1 = document.body.clientWidth;
+    var stageHeight$1 = document.body.clientHeight;
     var angle2Rad = function (angle) {
         return (Math.PI / 180) * angle;
     };
     var Demo = /** @class */ (function (_super) {
         __extends(Demo, _super);
+        //text
+        // public mouthStateText: PhaserText;
         function Demo() {
             var _this = _super.call(this, 'demo') || this;
             _this.spSpinSpeed = 1;
             _this.distanceAngle = 60; //食物和食物之间的间隔(角度)
             _this.tableCapacity = 360 / _this.distanceAngle; //根据间隔计算得到的桌面容量
             _this.foodList = __spreadArrays(Array(_this.tableCapacity)).map(function (_) { return null; });
-            // mouth
-            _this.mouthRect = new Rectagle(0, 0, 0, 0);
             // 旋转圆心
-            _this.circleRadius = stageWidth;
-            _this.circleCenter = new Point(stageWidth / 2, stageHeight + _this.circleRadius / 2.3);
+            _this.circleRadius = stageWidth$1;
+            _this.circleCenter = new Point$1(stageWidth$1 / 2, stageHeight$1 + _this.circleRadius / 2.3);
             _this.frameCounter = 0;
             _this.addCounter = 0;
             _this.previewWidth = 198;
@@ -102,7 +167,9 @@
             this.drawWheel();
             // this.light = this.add.image(0, 0, 'light');
             // this.point = new Phaser.Geom.Point(this.light.x, this.light.y)
-            this.refreshMouth([]);
+            // Phaser会根据 add 的先后顺序决定层级.
+            this.mouthObj = new Mouth(this);
+            this.refreshMouth([], [], [], []);
             this.messageListener();
             this.addText();
         };
@@ -184,40 +251,39 @@
                 food.y = point.y;
             }
         };
-        Demo.prototype.refreshMouth = function (points) {
-            if (!this.mouthContour) {
-                this.mouthContour = this.add.graphics();
-            }
-            this.mouthContourPoints = points;
-            var mouthPoints = points;
-            var xVals = mouthPoints.map(function (p) {
-                return p.x;
-            });
-            var yVals = mouthPoints.map(function (p) {
-                return p.y;
-            });
-            var minX = Math.min.apply(Math, xVals);
-            var maxX = Math.max.apply(Math, xVals);
-            var minY = Math.min.apply(Math, yVals);
-            var maxY = Math.max.apply(Math, yVals);
-            this.mouthContour.clear();
-            this.mouthContour.lineStyle(5, 0xFF00FF, 1.0);
-            this.mouthContour.beginPath();
-            var idx = 0;
-            for (var _i = 0, mouthPoints_1 = mouthPoints; _i < mouthPoints_1.length; _i++) {
-                var p = mouthPoints_1[_i];
-                if (idx == 0) {
-                    this.mouthContour.moveTo(p.x, p.y);
-                }
-                else {
-                    this.mouthContour.lineTo(p.x, p.y);
-                }
-                idx++;
-            }
-            this.mouthContour.closePath();
-            this.mouthContour.strokePath();
-            this.mouthRect.setPosition(minX, minY);
-            this.mouthRect.setSize(maxX - minX, maxY - minY);
+        Demo.prototype.refreshMouth = function (upperTop, upperBottom, lowerTop, lowerBottom) {
+            this.mouthObj.setMouthContourPoints(upperTop, upperBottom, lowerTop, lowerBottom);
+            // if (!this.mouthContour) {
+            //     this.mouthContour = this.add.graphics()
+            // }
+            // this.mouthContourPoints = points
+            // let mouthPoints = points;
+            // let xVals = mouthPoints.map(p => {
+            //     return p.x
+            // })
+            // let yVals = mouthPoints.map(p => {
+            //     return p.y
+            // })
+            // let minX = Math.min(...xVals)
+            // let maxX = Math.max(...xVals)
+            // let minY = Math.min(...yVals)
+            // let maxY = Math.max(...yVals)
+            // this.mouthContour.clear()
+            // this.mouthContour.lineStyle(5, 0xFF00FF, 1.0);
+            // this.mouthContour.beginPath();
+            // let idx = 0
+            // for (let p of mouthPoints) {
+            //     if (idx == 0) {
+            //         this. mouthContour.moveTo(p.x, p.y);
+            //     }else {
+            //         this.mouthContour.lineTo(p.x, p.y);
+            //     }
+            //     idx++
+            // }
+            // this.mouthContour.closePath();
+            // this.mouthContour.strokePath();
+            // this.mouthRect.setPosition(minX, minY);
+            // this.mouthRect.setSize(maxX - minX, maxY - minY)
             // if (!this.mouthColor) {
             //     this.mouthColor = this.add.graphics({ fillStyle: { color: 0x0000ff } });
             // }
@@ -228,10 +294,10 @@
         Demo.prototype.messageListener = function () {
             var _this = this;
             window.addEventListener("message", function (event) {
-                var oneFaceData = event.data;
-                var mouthPoints = __spreadArrays(oneFaceData.upperLipBottom, oneFaceData.lowerLipTop);
-                var newPoints = _this.offsetPoints(stageWidth, stageHeight, mouthPoints);
-                _this.refreshMouth(newPoints);
+                var of = event.data;
+                var mouthPoints = __spreadArrays(of.upperLipBottom, of.lowerLipTop);
+                var newPoints = _this.offsetPoints(stageWidth$1, stageHeight$1, mouthPoints);
+                _this.refreshMouth(of.upperLipTop, of.upperLipBottom, of.lowerLipTop, of.lowerLipBottom);
             }, false);
         };
         Demo.prototype.offsetPoints = function (webviewWidth, webviewHeight, mouthPoints) {
@@ -239,26 +305,15 @@
             var scaleX = webviewWidth / this.previewWidth;
             var scaleY = webviewHeight / this.previewHeight;
             var newPoints = mouthPoints.map(function (p) {
-                return new Point(p.x + _this.previewOffsetX, p.y + _this.previewOffsetY);
+                return new Point$1(p.x + _this.previewOffsetX, p.y + _this.previewOffsetY);
             });
             return newPoints;
         };
-        Demo.prototype.checkMouthClose = function () {
-            // return false
-            var isClose = false;
-            if (this.mouthRect.height < 10 && this.mouthRect.height / this.mouthRect.width < 0.5) {
-                isClose = true;
-            }
-            this.mouthStateText.text = "" + this.mouthRect.height; //isClose ? "close" : "open"
-            return isClose;
-        };
         Demo.prototype.checkIfCouldEat = function () {
-            if (this.checkMouthClose()) {
+            if (this.mouthObj.checkIfMouthClose()) {
                 return;
             }
-            var mouthCenterX = this.mouthRect.x + this.mouthRect.width / 2;
-            var mouthCenterY = this.mouthRect.y + this.mouthRect.width / 2;
-            var destPos = new Point(mouthCenterX, mouthCenterY);
+            var destPos = this.mouthObj.getMouthCenter();
             for (var i = 0; i < this.foodList.length; i++) {
                 var food = this.foodList[i];
                 if (!food) {
@@ -269,9 +324,13 @@
                 }
                 var foodx = food.x;
                 var foody = food.y;
-                if ((this.mouthRect.x - 100 < foodx && foodx < this.mouthRect.x + this.mouthRect.width + 100) &&
-                    (this.mouthRect.y - 200 < food.y && foody < this.mouthRect.y + this.mouthRect.height + 200) &&
-                    !food.eating) {
+                // 重新修改判定条件
+                // 当food 在摄像头范围内就可以吃
+                if ((this.previewOffsetX < food.x && food.x < this.previewOffsetX + this.previewWidth)
+                    &&
+                        (this.previewOffsetY < food.y && food.y < this.previewOffsetY + this.previewHeight)
+                    &&
+                        !food.eating) {
                     // this.foodList.splice(i--, 1)
                     this.foodList[i] = null;
                     this.eatingAnimation(food, destPos);
@@ -294,24 +353,24 @@
             });
         };
         Demo.prototype.drawHollowBackground = function () {
-            var faceCenter = new Point(300, 450);
+            var faceCenter = new Point$1(300, 450);
             var faceRadius = 200;
             this.bg.beginPath();
             this.bg.moveTo(0, 0);
-            this.bg.lineTo(stageWidth, 0);
-            this.bg.lineTo(stageWidth, faceCenter.y);
+            this.bg.lineTo(stageWidth$1, 0);
+            this.bg.lineTo(stageWidth$1, faceCenter.y);
             this.bg.lineTo(faceCenter.x + faceRadius, faceCenter.y);
             this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI, true);
             this.bg.lineTo(0, faceCenter.y);
             this.bg.lineTo(0, 0);
             this.bg.fillStyle(0xffeeff);
             this.bg.fill();
-            this.bg.moveTo(stageWidth, stageHeight);
-            this.bg.lineTo(stageWidth, faceCenter.y);
+            this.bg.moveTo(stageWidth$1, stageHeight$1);
+            this.bg.lineTo(stageWidth$1, faceCenter.y);
             this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI, false);
             this.bg.lineTo(0, faceCenter.y);
-            this.bg.lineTo(0, stageHeight);
-            this.bg.lineTo(stageWidth, stageHeight);
+            this.bg.lineTo(0, stageHeight$1);
+            this.bg.lineTo(stageWidth$1, stageHeight$1);
             this.bg.fillStyle(0xffeeff);
             this.bg.fill();
         };
@@ -320,19 +379,21 @@
             var bd = this.bgImg.getBounds();
             this.bgImg.setPosition(0, 0);
             // Phaser 中 Image 的默认 pivot 就是图片的中心点
-            this.bgImg.x = stageWidth / 2;
-            this.bgImg.y = stageHeight / 2;
-            this.bgImg.setScale(stageWidth / bd.width, stageHeight / bd.height);
+            this.bgImg.x = stageWidth$1 / 2;
+            this.bgImg.y = stageHeight$1 / 2;
+            this.bgImg.setScale(stageWidth$1 / bd.width, stageHeight$1 / bd.height);
+            this.bgImg.alpha = 0.5;
         };
         Demo.prototype.drawWheel = function () {
             this.spSpin = this.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
+            this.spSpin.alpha = 0.5;
             var bds = this.spSpin.getBounds();
             var width = bds.width;
             this.spSpin.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2));
             this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);
         };
         Demo.prototype.addText = function () {
-            this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+            // this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
         };
         return Demo;
     }(Phaser.Scene));
@@ -371,13 +432,13 @@
     console.log(Phaser.AUTO);
     console.log(Phaser.AUTO);
     console.log('.................');
-    var stageWidth$1 = document.body.clientWidth;
-    var stageHeight$1 = document.body.clientHeight;
+    var stageWidth$2 = document.body.clientWidth;
+    var stageHeight$2 = document.body.clientHeight;
     var config = {
         type: Phaser.AUTO,
         parent: 'phaser-example',
-        width: stageWidth$1,
-        height: stageHeight$1,
+        width: stageWidth$2,
+        height: stageHeight$2,
         scene: Demo,
         transparent: true,
         physics: {
@@ -391,6 +452,7 @@
     console.log("...............");
     var game = new Phaser.Game(config);
     changeMouth();
+    //# sourceMappingURL=index.js.map
 
 }(VConsole));
 //# sourceMappingURL=game.js.map

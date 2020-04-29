@@ -1,20 +1,27 @@
 import {StyleSheet, Dimensions} from 'react-native';
 
+
+// RN 中的高宽就是在webview 中默认得到的高宽(在不处理 dpr 的情况下的值)
 var stageWidth = Dimensions.get('window').width; //full width
 var stageHeight = Dimensions.get('window').height; //full height
+var screenRatio =  stageHeight / stageWidth;
+
+// PS: 不能把屏幕比例直接套用在取景器大小上
+// 例如当前测试机屏幕是 2160 * 1080, 但是摄像头的取景器仅支持 1920 * 1080, 一个是18:9 一个是16:9
+
 console.log("LogDemo", "WH", stageWidth, stageHeight)
 
 var bottomHeight = 20;
 var absViewHeight = stageHeight - bottomHeight;
 
-var landmarkSize = 2
+var landmarkSize = 2;
 
 
 // camera preview offset
 var offsetXPreview = 170
 var offsetYPreview = 250
 var previewWidth = 198
-var previewHeight = 352
+var previewHeight = previewWidth * 16 / 9
 
 // var offsetXPreview = 0
 // var offsetYPreview = 0
