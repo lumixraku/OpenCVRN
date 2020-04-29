@@ -84,7 +84,7 @@ export default class Mouth {
 
         this.mouthStateText.text = "" + this.mouthRect.height //isClose ? "close" : "open"
 
-        return isClose        
+        return isClose
     }
 
     // 得到嘴巴中心点 用于确定动画结束的位置

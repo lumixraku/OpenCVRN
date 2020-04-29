@@ -113,7 +113,6 @@
         };
         return Mouth;
     }());
-    //# sourceMappingURL=mouth.js.map
 
     var Point$1 = Phaser.Geom.Point;
     var stageWidth$1 = document.body.clientWidth;
@@ -170,7 +169,6 @@
         };
         return SpinTable;
     }());
-    //# sourceMappingURL=spinTable.js.map
 
     var Point$2 = Phaser.Geom.Point;
     var stageWidth$2 = document.body.clientWidth;
@@ -531,7 +529,6 @@
             var _b = _a[_i], idx = _b[0], p = _b[1];
         }
     }
-    //# sourceMappingURL=test.js.map
 
     console.log(Phaser.AUTO);
     console.log(Phaser.AUTO);
@@ -556,7 +553,6 @@
     console.log("...............");
     var game = new Phaser.Game(config);
     changeMouth();
-    //# sourceMappingURL=index.js.map
 
 }(VConsole));
 //# sourceMappingURL=game.js.map
