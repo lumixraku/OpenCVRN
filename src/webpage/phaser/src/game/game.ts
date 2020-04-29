@@ -82,7 +82,7 @@ export default class Demo extends Phaser.Scene {
         // Phaser会根据 add 的先后顺序决定层级.
         this.mouthObj = new Mouth(this);
         this.refreshMouth([], [], [], [])
-        
+
 
         this.messageListener()
         this.addText();
@@ -152,7 +152,7 @@ export default class Demo extends Phaser.Scene {
                 // 由于phaser 的坐标不是连续的, 因此为了按照顺时针旋转一周得到 360 的角度, 需要做下面的处理
                 let rawAngle = this.spinTable.getAngle()
                 let mathAngle = rawAngle < 0 ? 360 + rawAngle : rawAngle
-                
+
                 // 只在圆圈的 0° 这个位置(也就是坐标系 x )这个位置生成新的元素.
                 // 根据目前的采样率 得不到 mathAngle 为 1 的情况, 最接近1 是 1.79°
                 if ( Math.abs(mathAngle - i *  this.distanceAngle)  < 2) {
@@ -185,9 +185,9 @@ export default class Demo extends Phaser.Scene {
             // 第四象限是 0 ~ 90  第三象限是 90 ~ 180
             let foodAngle = this.spinTable.calcFoodIAngle(i) //当前食物在桌上的角度
             let point = this.spinTable.calcAngleToPoint(foodAngle)
- 
+
             // Phaser.Geom.Circle.CircumferencePoint(this.circle, angle2Rad(angle) , point);
-            
+
             food.x = point.x
             food.y = point.y
         }
@@ -255,7 +255,7 @@ export default class Demo extends Phaser.Scene {
                 console.log('faceData', of )
                 let mouthPoints = [...of.upperLipBottom, ...of.lowerLipTop]
                 let newPoints = this.offsetPoints(stageWidth, stageHeight, mouthPoints)
-    
+
                 this.refreshMouth(of.upperLipTop, of.upperLipBottom, of.lowerLipTop, of.lowerLipBottom)
 
             }
@@ -305,7 +305,7 @@ export default class Demo extends Phaser.Scene {
             // 重新修改判定条件
             // 当food 在摄像头范围内就可以吃
             if (
-                ( this.previewOffsetX < food.x &&  food. x < this.previewOffsetX +  this.previewWidth) 
+                ( this.previewOffsetX < food.x &&  food. x < this.previewOffsetX +  this.previewWidth)
                 &&
                 (this.previewOffsetY < food.y && food.y < this.previewOffsetY + this.previewHeight)
                 &&
