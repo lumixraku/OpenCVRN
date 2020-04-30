@@ -152,7 +152,6 @@ export default class Demo extends Phaser.Scene {
                 // 由于phaser 的坐标不是连续的, 因此为了按照顺时针旋转一周得到 360 的角度, 需要做下面的处理
                 let rawAngle = this.spinTable.getAngle()
                 let mathAngle = rawAngle < 0 ? 360 + rawAngle : rawAngle
-
                 // 只在圆圈的 0° 这个位置(也就是坐标系 x )这个位置生成新的元素.
                 // 根据目前的采样率 得不到 mathAngle 为 1 的情况, 最接近1 是 1.79°
                 if ( Math.abs(mathAngle - i *  this.distanceAngle)  < 2) {
