@@ -78,7 +78,7 @@ export default class Mouth {
     checkIfMouthClose() {
         // return false
         let isClose = false
-        if (this.mouthRect.height < 20 && this.mouthRect.height / this.mouthRect.width < 0.5) {
+        if (this.mouthRect.height < 30 && this.mouthRect.height / this.mouthRect.width < 0.5) {
             isClose = true
         }
 

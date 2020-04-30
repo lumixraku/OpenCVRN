@@ -11,6 +11,7 @@ let lasttime = +new Date
 
 
 const	postToWebview = (webview, data) => {
+
 		if (!webview) {
 			return
 		}
@@ -26,7 +27,6 @@ const	postToWebview = (webview, data) => {
 
 		var dataStr = ""
 
-		console.log("face data::: ", data)
 		console.log("time", (+new Date) - lasttime)
 		lasttime = +new Date
 
@@ -39,7 +39,7 @@ const	postToWebview = (webview, data) => {
 			window.postMessage(${dataStr})
 		`;
 
-		// console.log( dataStr )
+		console.log( dataStr )
 		webview.injectJavaScript(runJS);
   }
 

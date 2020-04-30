@@ -5,6 +5,7 @@ import Point = Phaser.Geom.Point;
 import Rectagle = Phaser.Geom.Rectangle;
 import VConsole from "vconsole";
 import { FaceData } from "./faceData";
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW } from '@root/constants';
 
 // 使用 namespace 定义的类型可以直接用
 import Coco = MyName.Coco
@@ -16,6 +17,8 @@ var offsetXPreview = 170
 var offsetYPreview = 250
 var previewWidth = 198
 var previewHeight = previewWidth * 16 / 9
+
+export { changeMouth, setPreview }
 
 
 function addOffsetForFaceData(target) {
@@ -58,16 +61,39 @@ function addOffsetForFaceData(target) {
   }
   return result
 }
+// set preview area
+
+ function setPreview() {
+
+   window.addEventListener("load", () => {
+    setTimeout( ()=> {
+
+      window.postMessage({
+        messageType: MSG_TYPE_CAM,
+        previewArea: {
+          y: offsetYPreview,
+          x: offsetXPreview,
+          width: previewWidth,
+          height: previewHeight
+        },
+      }, "*")
+    }, 1000)
+      
+    }, false)
+
+
+ }
+
 
 // 测试嘴巴位置
-export default function changeMouth(game: Phaser.Game) {
+ function changeMouth(game: Phaser.Game) {
 
   //contours sample data
   window.addEventListener("load", () => {
 
     let movingDown = (points: Point[]) => {
       for (let p of points) {
-        p.y = p.y += 1
+        p.y = p.y += 0.5
       }
     }
 
@@ -103,9 +129,8 @@ export default function changeMouth(game: Phaser.Game) {
     })
   }, false)
 
-  let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
-  for(let [idx, p] of Object.entries(points)) {
-    
-  }
+
+  // let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
+
 
 }
