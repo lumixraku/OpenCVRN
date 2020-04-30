@@ -20,7 +20,7 @@ import { MSG_TYPE_FACE, MSG_TYPE_CAM } from '../constant';
 
 
 
-var webviewURL = 'http://10.12.113.158:5001/';
+var webviewURL = 'http://10.12.113.139:5001/';
 // var webviewURL = 'http://192.168.8.242:5001/';
 // var webviewLocal = 'file:///android_asset/index.html' // blob 请求无法识别
 // var webviewSource = require("../../android/app/src/main/assets/index.html") // 报错
@@ -113,34 +113,56 @@ export default class CameraScreen extends Component {
 
 
   renderFace(faceData) {
-    let { bounds, faceID, rollAngle, yawAngle } = faceData;
     postToWebview(this.webref, {
-      faceData: faceData,
+      faceData: this.addOffsetForFaceData(faceData),
       messageType: MSG_TYPE_FACE,
     });
-    // return (
-    //   <View
-    //     key={faceID}
-    //     transform={[
-    //       { perspective: 600 },
-    //       { rotateZ: `${rollAngle.toFixed(0)}deg` },
-    //       { rotateY: `${yawAngle.toFixed(0)}deg` },
-    //     ]}
-    //     style={[
-    //       styles.face,
-    //       {
-    //         ...bounds.size,
-    //         left: bounds.origin.x,
-    //         top: bounds.origin.y,
-    //       },
-    //     ]}
-    //   >
-    //     <Text style={styles.faceText}>ID: {faceID}</Text>
-    //     <Text style={styles.faceText}>rollAngle: {rollAngle.toFixed(0)}</Text>
-    //     <Text style={styles.faceText}>yawAngle: {yawAngle.toFixed(0)}</Text>
-    //   </View>
-    // )
   }
+
+
+ addOffsetForFaceData(target) {
+  const checkedType = (target) => {
+    return Object.prototype.toString.call(target).slice(8, -1)
+  }
+  //判断拷贝的数据类型
+  //初始化变量result 成为最终克隆的数据
+  let result
+  let targetType = checkedType(target)
+  if (targetType === 'Object') {
+    result = {}
+  } else if (targetType === 'Array') {
+    result = []
+  } else {
+    return target
+  }
+
+
+
+  //遍历目标数据  target is {...}
+  for (let [key, value] of Object.entries(target)) {
+    //获取遍历数据结构的每一项值。
+    // let value = target[key]
+    //判断目标结构里的每一值是否存在对象/数组
+    if (checkedType(value) === 'Object' ||
+      checkedType(value) === 'Array') { //对象/数组里嵌套了对象/数组
+      //继续遍历获取到value值
+      result[key] = this.addOffsetForFaceData(value)
+    } else { //获取到value值是基本的数据类型或者是函数。
+
+      if (key == "x") {
+        result[key] = offsetXPreview + (value)
+
+      } else if (key == "y") {
+        result[key] = offsetYPreview + (value)
+
+      } else {
+        result[key] = value;
+
+      }
+    }
+  }
+  return result
+}
 
   renderContourOfFace(faceData) {
 
