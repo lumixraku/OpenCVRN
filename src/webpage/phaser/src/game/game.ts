@@ -1,28 +1,29 @@
-import Image = Phaser.GameObjects.Image;
+import PhaserImage = Phaser.GameObjects.Image;
 import Sprite = Phaser.GameObjects.Sprite;
 import Circle = Phaser.Geom.Circle;
 import Point = Phaser.Geom.Point;
 import Rectagle = Phaser.Geom.Rectangle;
 import Graphics = Phaser.GameObjects.Graphics;
-import Text = Phaser.GameObjects.Text;
-
+import PhaserText = Phaser.GameObjects.Text;
 
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
 
+import Mouth from '@game/mouth'
 import Food from '@game/food'
 import { FaceData } from '@root/faceData';
+import SpinTable from './spinTable';
 
 
 
-const angle2Rad = (angle: number) => {
-    return (Math.PI / 180 ) * angle
-}
 export default class Demo extends Phaser.Scene {
-    public spSpin: Sprite;
-    public circle: Circle;
+    // public spSpin: Sprite;
+    // public circle: Circle;
+    // // 旋转圆心
+    public spinTable: SpinTable
     public spSpinSpeed: number = 1;
-
+    public circleRadius: number = stageWidth
+    public circleCenter: Point = new Point(stageWidth / 2, stageHeight + this.circleRadius / 2.3);
 
     public distanceAngle: number = 60  //食物和食物之间的间隔(角度)
     public tableCapacity: number = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
@@ -30,27 +31,23 @@ export default class Demo extends Phaser.Scene {
     public foodList: Food[] = [...Array(this.tableCapacity)].map(_ => null);
 
     // mouth
-    public mouthRect: Rectagle = new Rectagle(0, 0, 0, 0);
-    public mouthContourPoints: Point[];
-    public mouthContour: Graphics;
-    private mouthColor: Graphics;
+    // public mouthRect: Rectagle = new Rectagle(0, 0, 0, 0);
+    // public mouthContourPoints: Point[];
+    // public mouthContour: Graphics;
+    // private mouthColor: Graphics;
+    public mouthObj: Mouth;
 
-
-    // 旋转圆心
-    public circleRadius: number = stageWidth
-    public circleCenter: Point = new Point(stageWidth / 2, stageHeight + this.circleRadius/2.3);
 
     // background
     public bg: Graphics;
-    public bgImg: Image;
+    public bgImg: PhaserImage;
 
 
     //text
-    public mouthStateText: Text;
+    // public mouthStateText: PhaserText;
 
     constructor() {
         super('demo');
-
     }
 
     preload() {
@@ -79,31 +76,14 @@ export default class Demo extends Phaser.Scene {
 
     create() {
         this.bg = this.add.graphics()
-
-        // this.add.shader('RGB Shift Field', 0, 0, 800, 600).setOrigin(0);
-
-        // this.add.shader('Plasma', 0, 412, 800, 172).setOrigin(0);
-
-
-
-
-        // this.tweens.add({
-        //     targets: logo,
-        //     y: 350,
-        //     duration: 1500,
-        //     ease: 'Sine.inOut',
-        //     yoyo: true,
-        //     repeat: -1
-        // })
-
         this.drawBackground()
         this.drawWheel()
 
+        // Phaser会根据 add 的先后顺序决定层级.
+        this.mouthObj = new Mouth(this);
+        this.refreshMouth([], [], [], [])
+        
 
-
-        // this.light = this.add.image(0, 0, 'light');
-        // this.point = new Phaser.Geom.Point(this.light.x, this.light.y)
-        this.refreshMouth([])
         this.messageListener()
         this.addText();
     }
@@ -113,12 +93,10 @@ export default class Demo extends Phaser.Scene {
     update(time, delta) {
 
         this.rotateTable()
+        this.addFoodIfNeed()
         this.movingFoodOnTable()
         this.checkIfCouldEat()
 
-        // Phaser.Geom.Circle.CircumferencePoint(this.circle, this.spSpin.rotation,  this.point);
-        // this.light.x = this.point.x
-        // this.light.y = this.point.y
 
         this.frameCounter += 1
 
@@ -135,9 +113,8 @@ export default class Demo extends Phaser.Scene {
 
     rotateTable() {
         // 右手顺时针
-        this.spSpin.angle += this.spSpinSpeed;
-        // rotate 是使用的弧度
-        this.addFoodIfNeed()
+        // this.spSpin.angle += this.spSpinSpeed;
+        this.spinTable.rotateTableSlightly()
 
     }
 
@@ -173,8 +150,10 @@ export default class Demo extends Phaser.Scene {
 
 
                 // 由于phaser 的坐标不是连续的, 因此为了按照顺时针旋转一周得到 360 的角度, 需要做下面的处理
-                let mathAngle = this.spSpin.angle < 0 ? 360 + this.spSpin.angle : this.spSpin.angle
-
+                let rawAngle = this.spinTable.getAngle()
+                let mathAngle = rawAngle < 0 ? 360 + rawAngle : rawAngle
+                
+                // 只在圆圈的 0° 这个位置(也就是坐标系 x )这个位置生成新的元素.
                 // 根据目前的采样率 得不到 mathAngle 为 1 的情况, 最接近1 是 1.79°
                 if ( Math.abs(mathAngle - i *  this.distanceAngle)  < 2) {
                     let foodTextureKey = `food${i}`
@@ -185,7 +164,7 @@ export default class Demo extends Phaser.Scene {
 
                     this.foodList[i] = food
 
-                    console.log("angle add", this.spSpin.angle, mathAngle, food.name)
+                    console.log("angle add", rawAngle, mathAngle, food.name)
                     // this.foodList.push(food)
                 }
             }
@@ -200,64 +179,64 @@ export default class Demo extends Phaser.Scene {
                 continue
             }
 
-            let point = new Phaser.Geom.Point(0, 0)
-
-
-            // 只在圆圈的 0° 这个位置(也就是坐标系 x )这个位置生成新的元素.
-            let angle = this.spSpin.angle + this.distanceAngle * (this.tableCapacity  - i)
+            // let rawAngle = this.spinTable.getAngle()
+            // let angle = rawAngle + this.distanceAngle * (this.tableCapacity  - i)
             // 另外注意一下这里的 angle 按照正始终顺序旋转 在第一象限是 0 ~ -90  第二象限是 -90 ~ -180
             // 第四象限是 0 ~ 90  第三象限是 90 ~ 180
-
-            Phaser.Geom.Circle.CircumferencePoint(this.circle, angle2Rad(angle) , point);
-
+            let foodAngle = this.spinTable.calcFoodIAngle(i) //当前食物在桌上的角度
+            let point = this.spinTable.calcAngleToPoint(foodAngle)
+ 
+            // Phaser.Geom.Circle.CircumferencePoint(this.circle, angle2Rad(angle) , point);
+            
             food.x = point.x
             food.y = point.y
         }
     }
 
 
-    refreshMouth(points: Point[]) {
-        if (!this.mouthContour) {
-            this.mouthContour = this.add.graphics()
+    refreshMouth(upperTop: Point[], upperBottom: Point[], lowerTop: Point[], lowerBottom: Point[]) {
+        this.mouthObj.setMouthContourPoints(upperTop, upperBottom, lowerTop, lowerBottom)
+        // if (!this.mouthContour) {
+        //     this.mouthContour = this.add.graphics()
 
-        }
+        // }
 
 
 
-        this.mouthContourPoints = points
-        let mouthPoints = points;
+        // this.mouthContourPoints = points
+        // let mouthPoints = points;
 
-        let xVals = mouthPoints.map(p => {
-            return p.x
-        })
-        let yVals = mouthPoints.map(p => {
-            return p.y
-        })
+        // let xVals = mouthPoints.map(p => {
+        //     return p.x
+        // })
+        // let yVals = mouthPoints.map(p => {
+        //     return p.y
+        // })
 
-        let minX = Math.min(...xVals)
-        let maxX = Math.max(...xVals)
-        let minY = Math.min(...yVals)
-        let maxY = Math.max(...yVals)
+        // let minX = Math.min(...xVals)
+        // let maxX = Math.max(...xVals)
+        // let minY = Math.min(...yVals)
+        // let maxY = Math.max(...yVals)
 
-        this.mouthContour.clear()
-        this.mouthContour.lineStyle(5, 0xFF00FF, 1.0);
-        this.mouthContour.beginPath();
+        // this.mouthContour.clear()
+        // this.mouthContour.lineStyle(5, 0xFF00FF, 1.0);
+        // this.mouthContour.beginPath();
 
-        let idx = 0
-        for (let p of mouthPoints) {
-            if (idx == 0) {
-                this. mouthContour.moveTo(p.x, p.y);
-            }else {
-                this.mouthContour.lineTo(p.x, p.y);
-            }
-            idx++
+        // let idx = 0
+        // for (let p of mouthPoints) {
+        //     if (idx == 0) {
+        //         this. mouthContour.moveTo(p.x, p.y);
+        //     }else {
+        //         this.mouthContour.lineTo(p.x, p.y);
+        //     }
+        //     idx++
 
-        }
-        this.mouthContour.closePath();
-        this.mouthContour.strokePath();
+        // }
+        // this.mouthContour.closePath();
+        // this.mouthContour.strokePath();
 
-        this.mouthRect.setPosition(minX, minY);
-        this.mouthRect.setSize(maxX - minX, maxY - minY)
+        // this.mouthRect.setPosition(minX, minY);
+        // this.mouthRect.setSize(maxX - minX, maxY - minY)
         // if (!this.mouthColor) {
         //     this.mouthColor = this.add.graphics({ fillStyle: { color: 0x0000ff } });
         // }
@@ -271,12 +250,15 @@ export default class Demo extends Phaser.Scene {
 
     messageListener() {
         window.addEventListener("message", (event) => {
-            let oneFaceData: FaceData = event.data
+            if (event.data.messageType == "face") {
+                let of: FaceData = event.data.faceData
+                console.log('faceData', of )
+                let mouthPoints = [...of.upperLipBottom, ...of.lowerLipTop]
+                let newPoints = this.offsetPoints(stageWidth, stageHeight, mouthPoints)
+    
+                this.refreshMouth(of.upperLipTop, of.upperLipBottom, of.lowerLipTop, of.lowerLipBottom)
 
-            let mouthPoints = [...oneFaceData.upperLipBottom, ...oneFaceData.lowerLipTop]
-            let newPoints = this.offsetPoints(stageWidth, stageHeight, mouthPoints)
-
-            this.refreshMouth(newPoints)
+            }
 
         }, false)
     }
@@ -295,28 +277,15 @@ export default class Demo extends Phaser.Scene {
     }
 
 
-    checkMouthClose() {
-        // return false
-        let isClose = false
-        if (this.mouthRect.height < 10 && this.mouthRect.height / this.mouthRect.width < 0.5){
-            isClose = true
-        }
 
-        this.mouthStateText.text = "" + this.mouthRect.height //isClose ? "close" : "open"
-
-        return isClose
-
-    }
 
     checkIfCouldEat() {
-        if (this.checkMouthClose()) {
+        if (this.mouthObj.checkIfMouthClose()) {
             return
         }
 
-        let mouthCenterX = this.mouthRect.x + this.mouthRect.width / 2;
-        let mouthCenterY = this.mouthRect.y + this.mouthRect.width / 2;
 
-        let destPos = new Point(mouthCenterX, mouthCenterY)
+        let destPos = this.mouthObj.getMouthCenter();
         for (let i = 0; i < this.foodList.length; i++) {
 
 
@@ -333,10 +302,13 @@ export default class Demo extends Phaser.Scene {
             let foody = food.y
 
 
-
+            // 重新修改判定条件
+            // 当food 在摄像头范围内就可以吃
             if (
-                (this.mouthRect.x - 100  < foodx  && foodx < this.mouthRect.x + this.mouthRect.width + 100) &&
-                (this.mouthRect.y - 200 < food.y && foody < this.mouthRect.y + this.mouthRect.height + 200) &&
+                ( this.previewOffsetX < food.x &&  food. x < this.previewOffsetX +  this.previewWidth) 
+                &&
+                (this.previewOffsetY < food.y && food.y < this.previewOffsetY + this.previewHeight)
+                &&
                 !food.eating
             ) {
                 // this.foodList.splice(i--, 1)
@@ -397,20 +369,25 @@ export default class Demo extends Phaser.Scene {
         this.bgImg.x = stageWidth/2
         this.bgImg.y = stageHeight/2
         this.bgImg.setScale(stageWidth/bd.width , stageHeight/bd.height)
+        this.bgImg.alpha = 0.5;
     }
 
     drawWheel(){
-        this.spSpin = this.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
-        let bds:Rectagle = this.spSpin.getBounds()
-        let width = bds.width
+        this.spinTable = new SpinTable(this.circleCenter, this.circleRadius, this.spSpinSpeed)
+        this.spinTable.addToContainer(this)
+        // this.spSpin = this.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
+        // this.spSpin.alpha = 0.5
 
-        this.spSpin.setScale(this.circleRadius / (width/2), this.circleRadius / (width/2) )
+        // let bds:Rectagle = this.spSpin.getBounds()
+        // let width = bds.width
 
-        this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);
+        // this.spSpin.setScale(this.circleRadius / (width/2), this.circleRadius / (width/2) )
+
+        // this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);
     }
 
     addText() {
-        this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+        // this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
 
     }
 }

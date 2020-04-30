@@ -1,5 +1,4 @@
 import { WebView } from 'react-native-webview';
-
 import React, { Component } from 'react';
 import {
   AppRegistry,
@@ -17,18 +16,14 @@ import { offsetXPreview, offsetYPreview, previewWidth, previewHeight } from '../
 import styles from '../Styles/Screens/CameraScreen';
 
 import { postToWebview } from '../util/util';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM } from '../constant';
 
 
 
+var webviewURL = 'http://10.12.113.139:5001/';
 // var webviewURL = 'http://192.168.8.242:5001/';
-var webviewURL = 'http://10.12.166.251:5001/';
-
-
-// blob 请求无法识别
-var webviewLocal = 'file:///android_asset/index.html'
-
-// 报错
-//var webviewSource = require("../../android/app/src/main/assets/index.html")
+// var webviewLocal = 'file:///android_asset/index.html' // blob 请求无法识别
+// var webviewSource = require("../../android/app/src/main/assets/index.html") // 报错
 
 
 export default class CameraScreen extends Component {
@@ -46,6 +41,8 @@ export default class CameraScreen extends Component {
     this.renderFace = this.renderFace.bind(this);
     this.renderAllContours = this.renderAllContours.bind(this);
     this.renderLandmarks = this.renderLandmarks.bind(this);
+    this.onWebviewLoadEnd = this.onWebviewLoadEnd.bind(this);
+
 
     this.lastTime = +new Date;
     setTimeout(() => {
@@ -91,45 +88,81 @@ export default class CameraScreen extends Component {
 
 
 
-  onMessage(event) {
+  onMessageFromWeb(event) {
     console.log('RCT  recevice event', event.nativeEvent.data);
   }
 
+  onWebviewLoadEnd(event) {
+    postToWebview({
+      previewPos: {
+        top: offsetYPreview,
+        left: offsetXPreview,
+        width: previewWidth,
+        height: previewHeight
+      },
+      messageType:MSG_TYPE_CAM,
+    })
+  }
 
 
   facesDetected(detectData) {
     this.setState({
-      faces: detectData.faces
+      faces: detectData.faces,
     })
   };
 
 
   renderFace(faceData) {
-    let { bounds, faceID, rollAngle, yawAngle } = faceData;
-    postToWebview(this.webref, faceData);
-    // return (
-    //   <View
-    //     key={faceID}
-    //     transform={[
-    //       { perspective: 600 },
-    //       { rotateZ: `${rollAngle.toFixed(0)}deg` },
-    //       { rotateY: `${yawAngle.toFixed(0)}deg` },
-    //     ]}
-    //     style={[
-    //       styles.face,
-    //       {
-    //         ...bounds.size,
-    //         left: bounds.origin.x,
-    //         top: bounds.origin.y,
-    //       },
-    //     ]}
-    //   >
-    //     <Text style={styles.faceText}>ID: {faceID}</Text>
-    //     <Text style={styles.faceText}>rollAngle: {rollAngle.toFixed(0)}</Text>
-    //     <Text style={styles.faceText}>yawAngle: {yawAngle.toFixed(0)}</Text>
-    //   </View>
-    // )
+    postToWebview(this.webref, {
+      faceData: this.addOffsetForFaceData(faceData),
+      messageType: MSG_TYPE_FACE,
+    });
   }
+
+
+ addOffsetForFaceData(target) {
+  const checkedType = (target) => {
+    return Object.prototype.toString.call(target).slice(8, -1)
+  }
+  //判断拷贝的数据类型
+  //初始化变量result 成为最终克隆的数据
+  let result
+  let targetType = checkedType(target)
+  if (targetType === 'Object') {
+    result = {}
+  } else if (targetType === 'Array') {
+    result = []
+  } else {
+    return target
+  }
+
+
+
+  //遍历目标数据  target is {...}
+  for (let [key, value] of Object.entries(target)) {
+    //获取遍历数据结构的每一项值。
+    // let value = target[key]
+    //判断目标结构里的每一值是否存在对象/数组
+    if (checkedType(value) === 'Object' ||
+      checkedType(value) === 'Array') { //对象/数组里嵌套了对象/数组
+      //继续遍历获取到value值
+      result[key] = this.addOffsetForFaceData(value)
+    } else { //获取到value值是基本的数据类型或者是函数。
+
+      if (key == "x") {
+        result[key] = offsetXPreview + (value)
+
+      } else if (key == "y") {
+        result[key] = offsetYPreview + (value)
+
+      } else {
+        result[key] = value;
+
+      }
+    }
+  }
+  return result
+}
 
   renderContourOfFace(faceData) {
 
@@ -274,11 +307,11 @@ export default class CameraScreen extends Component {
             // ref={this.webref}
             ref={(r) => (this.webref = r)}
             style={[styles.webview, { backgroundColor: this.state.webviewBG }]}
-
-            onMessage={this.onMessage}
+            onMessage={this.webviewLoadEnd}
             source={{
               uri: webviewURL,
             }}
+            onLoadEnd={this.webviewLoadEnd}
             originWhitelist={['*']}
           // source={{
           //   baseUrl: '',

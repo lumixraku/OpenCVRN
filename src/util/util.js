@@ -8,6 +8,8 @@ var stageHeight = Dimensions.get('window').height; //full height
 
 let lasttime = +new Date
 
+
+
 const	postToWebview = (webview, data) => {
 		if (!webview) {
 			return
@@ -25,8 +27,6 @@ const	postToWebview = (webview, data) => {
 		var dataStr = ""
 
 		console.log("face data::: ", data)
-
-
 		console.log("time", (+new Date) - lasttime)
 		lasttime = +new Date
 
