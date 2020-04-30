@@ -8,17 +8,20 @@ import PhaserText = Phaser.GameObjects.Text;
 
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
+// 在 RN 中得到的宽和高 是411 * 823
+// 在 webview 得到的宽高是 412 * 804  // 因为我的APP 并没有打开全屏
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW } from '@root/constants';
+
 
 import Mouth from '@game/mouth'
 import Food from '@game/food'
-import { FaceData } from '@root/faceData';
+import { FaceData, Bounds } from '@root/faceData';
 import SpinTable from './spinTable';
+import CamFaceCheck from './startCheck';
 
 
 
 export default class Demo extends Phaser.Scene {
-    // public spSpin: Sprite;
-    // public circle: Circle;
     // // 旋转圆心
     public spinTable: SpinTable
     public spSpinSpeed: number = 1;
@@ -31,12 +34,9 @@ export default class Demo extends Phaser.Scene {
     public foodList: Food[] = [...Array(this.tableCapacity)].map(_ => null);
 
     // mouth
-    // public mouthRect: Rectagle = new Rectagle(0, 0, 0, 0);
-    // public mouthContourPoints: Point[];
-    // public mouthContour: Graphics;
-    // private mouthColor: Graphics;
     public mouthObj: Mouth;
 
+    public camFaceCheck: CamFaceCheck;
 
     // background
     public bg: Graphics;
@@ -45,6 +45,11 @@ export default class Demo extends Phaser.Scene {
 
     //text
     // public mouthStateText: PhaserText;
+
+    private previewArea: Rectagle = new Rectagle(0, 0, 0, 0)
+
+
+    private testText: PhaserText
 
     constructor() {
         super('demo');
@@ -76,7 +81,9 @@ export default class Demo extends Phaser.Scene {
 
     create() {
         this.bg = this.add.graphics()
+
         this.drawBackground()
+        this.addFace()
         this.drawWheel()
 
         // Phaser会根据 add 的先后顺序决定层级.
@@ -120,7 +127,7 @@ export default class Demo extends Phaser.Scene {
 
     addCounter = 0
     addFoodIfNeed() {
-        for(let i =0; i < this.foodList.length; i++) {
+        for (let i = 0; i < this.foodList.length; i++) {
             // i = 0 angle 0
             // i = 1 angle 60
             // 盘子是空的, 且恰好转到合适的位置. 就添加食物
@@ -154,16 +161,16 @@ export default class Demo extends Phaser.Scene {
                 let mathAngle = rawAngle < 0 ? 360 + rawAngle : rawAngle
                 // 只在圆圈的 0° 这个位置(也就是坐标系 x )这个位置生成新的元素.
                 // 根据目前的采样率 得不到 mathAngle 为 1 的情况, 最接近1 是 1.79°
-                if ( Math.abs(mathAngle - i *  this.distanceAngle)  < 2) {
+                if (Math.abs(mathAngle - i * this.distanceAngle) < 2) {
                     let foodTextureKey = `food${i}`
                     let food = this.add.image(0, 0, foodTextureKey) as Food
 
                     food.name = `Food${i}`
-                    food.setScale(2,2)
+                    food.setScale(2, 2)
 
                     this.foodList[i] = food
 
-                    console.log("angle add", rawAngle, mathAngle, food.name)
+                    // console.log("angle add", rawAngle, mathAngle, food.name)
                     // this.foodList.push(food)
                 }
             }
@@ -195,85 +202,59 @@ export default class Demo extends Phaser.Scene {
 
     refreshMouth(upperTop: Point[], upperBottom: Point[], lowerTop: Point[], lowerBottom: Point[]) {
         this.mouthObj.setMouthContourPoints(upperTop, upperBottom, lowerTop, lowerBottom)
-        // if (!this.mouthContour) {
-        //     this.mouthContour = this.add.graphics()
-
-        // }
-
-
-
-        // this.mouthContourPoints = points
-        // let mouthPoints = points;
-
-        // let xVals = mouthPoints.map(p => {
-        //     return p.x
-        // })
-        // let yVals = mouthPoints.map(p => {
-        //     return p.y
-        // })
-
-        // let minX = Math.min(...xVals)
-        // let maxX = Math.max(...xVals)
-        // let minY = Math.min(...yVals)
-        // let maxY = Math.max(...yVals)
-
-        // this.mouthContour.clear()
-        // this.mouthContour.lineStyle(5, 0xFF00FF, 1.0);
-        // this.mouthContour.beginPath();
-
-        // let idx = 0
-        // for (let p of mouthPoints) {
-        //     if (idx == 0) {
-        //         this. mouthContour.moveTo(p.x, p.y);
-        //     }else {
-        //         this.mouthContour.lineTo(p.x, p.y);
-        //     }
-        //     idx++
-
-        // }
-        // this.mouthContour.closePath();
-        // this.mouthContour.strokePath();
-
-        // this.mouthRect.setPosition(minX, minY);
-        // this.mouthRect.setSize(maxX - minX, maxY - minY)
-        // if (!this.mouthColor) {
-        //     this.mouthColor = this.add.graphics({ fillStyle: { color: 0x0000ff } });
-        // }
-
-
-        // this.mouthColor.clear()
-        // this.mouthColor.fillStyle(0x0000ff)
-        // this.mouthColor.fillRectShape(this.mouth)
 
     }
 
     messageListener() {
         window.addEventListener("message", (event) => {
-            if (event.data.messageType == "face") {
-                let of: FaceData = event.data.faceData
-                console.log('faceData', of )
-                let mouthPoints = [...of.upperLipBottom, ...of.lowerLipTop]
-                let newPoints = this.offsetPoints(stageWidth, stageHeight, mouthPoints)
+            console.log("msg type", event.data.messageType)
+            switch (event.data.messageType) {
+                case MSG_TYPE_FACE:
+                    // 不论取景器是否有偏移  这里得到的坐标就是相对于 webview 左上角而言的
+                    // offset 的处理已经在 RN 的部分完成
+                    let of: FaceData = event.data.faceData
+                    this.refreshMouth(of.upperLipTop, of.upperLipBottom, of.lowerLipTop, of.lowerLipBottom)
+                    this.refreshFaceBounds(of.bounds)
 
-                this.refreshMouth(of.upperLipTop, of.upperLipBottom, of.lowerLipTop, of.lowerLipBottom)
-
+                    break;
+                case MSG_TYPE_CAM:
+                    setTimeout(() => {
+                        console.log("MSG_TYPE_CAM")
+                    }, 1000)
+                    let previewArea = event.data.previewArea
+                    this.previewArea = previewArea
+                    this.camFaceCheck.setCameraArea(previewArea)
+                default:
+                    break;
             }
 
-        }, false)
-    }
-    private previewWidth = 198
-    private previewHeight = 352
-    private previewOffsetX = 170
-    private previewOffsetY = 250
-    offsetPoints(webviewWidth: number,  webviewHeight, mouthPoints: Point[]) {
-        let scaleX = webviewWidth / this.previewWidth;
-        let scaleY = webviewHeight / this.previewHeight;
 
-        let newPoints = mouthPoints.map( p => {
-            return new Point(p.x + this.previewOffsetX, p.y + this.previewOffsetY )
-        })
-        return newPoints
+
+
+        }, false)
+
+        // 告知 RN webview 事件绑定上了
+        if (window["ReactNativeWebView"]) {
+            let msg = {
+                messageType: MSG_TYPE_WEBVIEW,
+                event: "bindMessage",
+                time: +new Date
+            }
+            window["ReactNativeWebView"].postMessage(JSON.stringify(msg));
+        }
     }
+
+
+    // 所有的 offset 都移动到了 RN 的部分处理
+    // offsetPoints(webviewWidth: number,  webviewHeight, mouthPoints: Point[]) {
+    //     let scaleX = webviewWidth / this.previewWidth;
+    //     let scaleY = webviewHeight / this.previewHeight;
+
+    //     let newPoints = mouthPoints.map( p => {
+    //         return new Point(p.x + this.previewOffsetX, p.y + this.previewOffsetY )
+    //     })
+    //     return newPoints
+    // }
 
 
 
@@ -282,6 +263,15 @@ export default class Demo extends Phaser.Scene {
         if (this.mouthObj.checkIfMouthClose()) {
             return
         }
+
+        if (this.previewArea.x == 0) {
+            console.warn("offsetXPreview is still zero")
+            return
+        }
+        let offsetXPreview: number = this.previewArea.x
+        let offsetYPreview: number = this.previewArea.y
+        let previewWidth: number = this.previewArea.width
+        let previewHeight: number = this.previewArea.height
 
 
         let destPos = this.mouthObj.getMouthCenter();
@@ -304,9 +294,9 @@ export default class Demo extends Phaser.Scene {
             // 重新修改判定条件
             // 当food 在摄像头范围内就可以吃
             if (
-                ( this.previewOffsetX < food.x &&  food. x < this.previewOffsetX +  this.previewWidth)
+                (offsetXPreview < food.x && food.x < offsetXPreview + previewWidth)
                 &&
-                (this.previewOffsetY < food.y && food.y < this.previewOffsetY + this.previewHeight)
+                (offsetYPreview < food.y && food.y < offsetYPreview + previewHeight)
                 &&
                 !food.eating
             ) {
@@ -337,13 +327,13 @@ export default class Demo extends Phaser.Scene {
         let faceCenter = new Point(300, 450)
         let faceRadius = 200
         this.bg.beginPath()
-        this.bg.moveTo(0,0)
+        this.bg.moveTo(0, 0)
         this.bg.lineTo(stageWidth, 0)
         this.bg.lineTo(stageWidth, faceCenter.y)
         this.bg.lineTo(faceCenter.x + faceRadius, faceCenter.y)
-        this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI , true);
+        this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI, true);
         this.bg.lineTo(0, faceCenter.y)
-        this.bg.lineTo(0,0)
+        this.bg.lineTo(0, 0)
         this.bg.fillStyle(0xffeeff)
         this.bg.fill()
 
@@ -358,35 +348,34 @@ export default class Demo extends Phaser.Scene {
         this.bg.fill()
     }
 
-    drawBackground(){
+    drawBackground() {
         this.bgImg = this.add.image(0, 0, 'bgImg')
         let bd: Rectagle = this.bgImg.getBounds()
 
-        this.bgImg.setPosition(0,0)
+        this.bgImg.setPosition(0, 0)
         // Phaser 中 Image 的默认 pivot 就是图片的中心点
 
-        this.bgImg.x = stageWidth/2
-        this.bgImg.y = stageHeight/2
-        this.bgImg.setScale(stageWidth/bd.width , stageHeight/bd.height)
+        this.bgImg.x = stageWidth / 2
+        this.bgImg.y = stageHeight / 2
+        this.bgImg.setScale(stageWidth / bd.width, stageHeight / bd.height)
         this.bgImg.alpha = 0.5;
     }
 
-    drawWheel(){
+    drawWheel() {
         this.spinTable = new SpinTable(this.circleCenter, this.circleRadius, this.spSpinSpeed)
         this.spinTable.addToContainer(this)
-        // this.spSpin = this.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
-        // this.spSpin.alpha = 0.5
+    }
 
-        // let bds:Rectagle = this.spSpin.getBounds()
-        // let width = bds.width
-
-        // this.spSpin.setScale(this.circleRadius / (width/2), this.circleRadius / (width/2) )
-
-        // this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);
+    addFace() {
+        this.camFaceCheck = new CamFaceCheck(this)
     }
 
     addText() {
         // this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+        this.testText = this.add.text(170, 170, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+    }
 
+    refreshFaceBounds(bounds: Bounds) {
+        this.camFaceCheck.checkFacePosition(bounds)
     }
 }

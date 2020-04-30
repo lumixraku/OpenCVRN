@@ -4,11 +4,16 @@ console.log(Phaser.AUTO)
 
 
 import GameScene from '@game/game'
-import changeMouth from 'test'
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW } from '@root/constants';
 
-console.log('.................')
+import { changeMouth, setPreview }from 'test'
+
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
+setTimeout( ()=> {
+
+    console.log('....stageWidth.', stageWidth, stageHeight)
+}, 1000)
 
 
 
@@ -29,4 +34,7 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 console.log("...............")
 const game = new Phaser.Game(config);
+
 changeMouth(game)
+setPreview()
+

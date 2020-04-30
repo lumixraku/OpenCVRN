@@ -16,7 +16,7 @@ import { offsetXPreview, offsetYPreview, previewWidth, previewHeight } from '../
 import styles from '../Styles/Screens/CameraScreen';
 
 import { postToWebview } from '../util/util';
-import { MSG_TYPE_FACE, MSG_TYPE_CAM } from '../constant';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW } from '../constant';
 
 
 
@@ -42,7 +42,7 @@ export default class CameraScreen extends Component {
     this.renderAllContours = this.renderAllContours.bind(this);
     this.renderLandmarks = this.renderLandmarks.bind(this);
     this.onWebviewLoadEnd = this.onWebviewLoadEnd.bind(this);
-
+    this.onMessageFromWeb = this.onMessageFromWeb.bind(this);
 
     this.lastTime = +new Date;
     setTimeout(() => {
@@ -90,17 +90,44 @@ export default class CameraScreen extends Component {
 
   onMessageFromWeb(event) {
     console.log('RCT  recevice event', event.nativeEvent.data);
+    // event 只能是 string
+    if (event.nativeEvent.data) {
+      let evtData =  JSON.parse(event.nativeEvent.data)
+      switch (evtData.messageType) {
+        case MSG_TYPE_WEBVIEW:
+          this.passPreviewPosToWebview()
+          break;
+
+        default:
+          break;
+      }
+
+    }
+
   }
 
+
+  // 即使webview内页面发生了刷新  该函数也会被调用
   onWebviewLoadEnd(event) {
-    postToWebview({
-      previewPos: {
-        top: offsetYPreview,
-        left: offsetXPreview,
+    console.log("on webview loaded", +new Date)
+    // 1588241946854 - 1588241947039 = -185 < 0
+    // RN 中loadEnd的时间要早于 webview 中页面绑定message 事件的时间
+
+
+    setTimeout( ()=> {
+      this.passPreviewPosToWebview()
+    }, 0)
+  }
+
+  passPreviewPosToWebview() {
+    postToWebview(this.webref, {
+      previewArea: {
+        y: offsetYPreview,
+        x: offsetXPreview,
         width: previewWidth,
         height: previewHeight
       },
-      messageType:MSG_TYPE_CAM,
+      messageType: MSG_TYPE_CAM,
     })
   }
 
@@ -173,7 +200,6 @@ export default class CameraScreen extends Component {
       for (let [idx, p] of points.entries()) {
         let left =  p.x
         let top =  p.y
-        console.log("left", left, top);
         elems.push(
           <View
             key={ `${faceData.faceID}${idx}`}
@@ -275,8 +301,6 @@ export default class CameraScreen extends Component {
 
     return (
       <View style={styles.container}>
-        <View style={styles.previewContainer}>
-        </View>
         <View style={styles.box1}></View>
         <RNCamera
           ref={(cam) => {
@@ -307,11 +331,11 @@ export default class CameraScreen extends Component {
             // ref={this.webref}
             ref={(r) => (this.webref = r)}
             style={[styles.webview, { backgroundColor: this.state.webviewBG }]}
-            onMessage={this.webviewLoadEnd}
+            onMessage={this.onMessageFromWeb}
             source={{
               uri: webviewURL,
             }}
-            onLoadEnd={this.webviewLoadEnd}
+            onLoadEnd={this.onWebviewLoadEnd}
             originWhitelist={['*']}
           // source={{
           //   baseUrl: '',

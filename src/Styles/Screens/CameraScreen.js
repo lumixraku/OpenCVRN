@@ -4,6 +4,8 @@ import {StyleSheet, Dimensions} from 'react-native';
 // RN 中的高宽就是在webview 中默认得到的高宽(在不处理 dpr 的情况下的值)
 var stageWidth = Dimensions.get('window').width; //full width
 var stageHeight = Dimensions.get('window').height; //full height
+console.log("LogDemo stage Size", stageWidth, stageHeight)
+
 var screenRatio =  stageHeight / stageWidth;
 
 // PS: 不能把屏幕比例直接套用在取景器大小上
@@ -18,7 +20,7 @@ var landmarkSize = 2;
 
 
 // camera preview offset
-var offsetXPreview = 170
+var offsetXPreview = 180
 var offsetYPreview = 250
 var previewWidth = 198
 var previewHeight = previewWidth * 16 / 9
@@ -98,13 +100,12 @@ export default StyleSheet.create({
     fontSize: 15,
     marginRight: 10,
   },
-  previewContainer: {
-  },
+
 
   box1: {
     position: 'absolute',
-    top: 240,
-    left: 250,
+    top: 170,
+    left: 170,
     width: 100,
     height: 100,
     backgroundColor: 'red'
