@@ -55,7 +55,7 @@
         function Mouth(scene) {
             this.mouthRect = new Rectagle(0, 0, 0, 0);
             this.mouthContour = scene.add.graphics();
-            this.mouthStateText = scene.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+            this.mouthStateText = scene.add.text(stageWidth - 100, -100, 'Hello World', { fontFamily: '"Roboto Condensed"' });
         }
         Mouth.prototype.setMouthContourPoints = function (upperTop, upperBottom, lowerTop, lowerBottom) {
             this.upperTopPoints = upperTop;
@@ -186,7 +186,7 @@
             this.scene = scene;
             this.faceRect = scene.add.graphics();
             this.previewRect = scene.add.graphics();
-            this.facePosText = scene.add.text(stageWidth$2 - 100, 50, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+            this.facePosText = scene.add.text(stageWidth$2 - 100, 250, 'Hello World', { fontFamily: '"Roboto Condensed"' });
         }
         CamFaceCheck.prototype.refreshFacePosition = function (faceBounds, facePoints) {
             this.faceBounds = faceBounds;
@@ -207,7 +207,7 @@
                 var minFaceY = faceBounds.origin.y;
                 var maxFaceY = faceBounds.origin.y + faceBounds.size.height;
                 this.drawFaceBounds(faceBounds);
-                this.drawPreviewBounds(this.camPreviewArea);
+                // this.drawPreviewBounds(this.camPreviewArea)
                 var minPreviewX = this.camPreviewArea.x;
                 var maxPreviewX = this.camPreviewArea.x + this.camPreviewArea.width;
                 var minPreviewY = this.camPreviewArea.y;
@@ -327,7 +327,7 @@
             var offset = new Point$2(faceCenterPos.x - centerX, faceCenterPos.y - centerY);
             this.camPreviewArea.x = originCamArea.x + offset.x;
             this.camPreviewArea.y = originCamArea.y + offset.y;
-            this.drawPreviewBounds(this.camPreviewArea);
+            // this.drawPreviewBounds(this.camPreviewArea)
         };
         return CamFaceCheck;
     }());
@@ -379,8 +379,7 @@
             _this.distanceAngle = 60; //食物和食物之间的间隔(角度)
             _this.tableCapacity = 360 / _this.distanceAngle; //根据间隔计算得到的桌面容量
             _this.foodList = __spreadArrays(Array(_this.tableCapacity)).map(function (_) { return null; });
-            //text
-            // public mouthStateText: PhaserText;
+            // preview 取景器
             _this.previewArea = new Rectagle$2(0, 0, 0, 0);
             _this.frameCounter = 0;
             _this.addCounter = 0;
@@ -574,13 +573,18 @@
                 // 当food 在摄像头范围内就可以吃
                 if ((offsetXPreview < food.x && food.x < offsetXPreview + previewWidth)
                     &&
-                        (offsetYPreview < food.y && food.y < offsetYPreview + previewHeight)
+                        (offsetYPreview < food.y && food.y < offsetYPreview + previewHeight * 1.2)
                     &&
                         !food.eating) {
                     // this.foodList.splice(i--, 1)
                     this.foodList[i] = null;
                     this.eatingAnimation(food, destPos);
+                    this.countEatScore();
                     break;
+                }
+                // 来到了取景器右边 // 表示miss
+                if (food.x > offsetXPreview + previewWidth && food.y < offsetYPreview + previewHeight * 1.2) {
+                    console.log('miss');
                 }
             }
         };
@@ -597,6 +601,21 @@
                     food.destroy();
                 }
             });
+        };
+        Demo.prototype.countEatScore = function () {
+            var _this = this;
+            if (!this.cook.isCooking()) {
+                this.showCaughtToast('You get caught!!!!', 1000, function () {
+                    // this.scoreText.text = +(this.scoreText.text) + 1 + ''
+                });
+            }
+            else {
+                this.showScoreToast('+1', 400, function () {
+                    _this.scoreText.text = +(_this.scoreText.text) + 1 + '';
+                });
+            }
+        };
+        Demo.prototype.missAnimation = function () {
         };
         Demo.prototype.drawHollowBackground = function () {
             var faceCenter = new Point$3(300, 450);
@@ -639,7 +658,11 @@
         };
         Demo.prototype.addText = function () {
             // this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
-            this.testText = this.add.text(170, 170, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+            // this.testText = this.add.text(170, 170, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+            this.scoreText = this.add.text(390, 50, '0', {
+                fontFamily: '"Roboto Condensed"',
+                color: 'red'
+            });
         };
         Demo.prototype.refreshFaceBounds = function (bounds, facePoints) {
             this.camFaceCheck.refreshFacePosition(bounds, facePoints);
@@ -652,8 +675,64 @@
         Demo.prototype.addCook = function () {
             this.cook = new Cook(this, 100, 400);
         };
+        Demo.prototype.showScoreToast = function (text, delay, cb) {
+            var _this = this;
+            var toastText = this.add.text(0, 0, '', { fontFamily: '"Roboto Condensed"' });
+            toastText.x = stageWidth$3 / 2;
+            toastText.y = stageWidth$3 / 2;
+            toastText.text = text;
+            toastText.setFontSize(32);
+            toastText.setColor('red');
+            var dest = {
+                x: 390, y: 50
+            };
+            setTimeout(function () {
+                _this.tweens.add({
+                    targets: toastText,
+                    x: dest.x,
+                    y: dest.y,
+                    scale: 0,
+                    duration: 1000,
+                    ease: 'Power3',
+                    onComplete: function () {
+                        cb();
+                        toastText.destroy();
+                    }
+                });
+            }, delay);
+        };
+        Demo.prototype.showCaughtToast = function (text, delay, cb) {
+            var _this = this;
+            if (this.hasCaughtToast)
+                return;
+            var toastText = this.add.text(0, 0, '', { fontFamily: '"Roboto Condensed"' });
+            this.hasCaughtToast = true;
+            toastText.x = stageWidth$3 / 2;
+            toastText.y = stageWidth$3 / 2;
+            toastText.text = text;
+            toastText.setFontSize(32);
+            toastText.setColor('red');
+            var dest = {
+                x: -200, y: stageWidth$3 / 2
+            };
+            setTimeout(function () {
+                _this.tweens.add({
+                    targets: toastText,
+                    x: dest.x,
+                    y: dest.y,
+                    duration: 400,
+                    ease: 'Power3',
+                    onComplete: function () {
+                        cb();
+                        toastText.destroy();
+                        _this.hasCaughtToast = false;
+                    }
+                });
+            }, delay);
+        };
         return Demo;
     }(Phaser.Scene));
+    //# sourceMappingURL=game.js.map
 
     var offsetXPreview = 170;
     var offsetYPreview = 250;
