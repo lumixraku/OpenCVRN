@@ -46,10 +46,16 @@ export default class Demo extends Phaser.Scene {
 
 
     //text
-    // public mouthStateText: PhaserText;
-
-    private previewArea: Rectagle = new Rectagle(0, 0, 0, 0)
+    public mouthStateText: PhaserText;
+    private toastText: PhaserText
+    private scoreText: PhaserText
     private testText: PhaserText
+    private hasCaughtToast: boolean
+    
+    // preview 取景器
+    private previewArea: Rectagle = new Rectagle(0, 0, 0, 0)
+
+
 
     constructor() {
         super('demo');
@@ -104,7 +110,6 @@ export default class Demo extends Phaser.Scene {
         this.movingFoodOnTable()
         this.checkIfCouldEat()
 
-
         this.frameCounter += 1
 
         if (this.frameCounter >= 60) {
@@ -124,7 +129,7 @@ export default class Demo extends Phaser.Scene {
                 this.cook.lookBack()
             }
             if (!isDogCooking) {
-                setTimeout(()=>{
+                setTimeout(()=> {
                     this.cook.cookAgain()
                 }, 1000)
             }
@@ -309,14 +314,23 @@ export default class Demo extends Phaser.Scene {
             if (
                 (offsetXPreview < food.x && food.x < offsetXPreview + previewWidth)
                 &&
-                (offsetYPreview < food.y && food.y < offsetYPreview + previewHeight)
+                (offsetYPreview < food.y && food.y < offsetYPreview + previewHeight * 1.2 )
                 &&
                 !food.eating
             ) {
                 // this.foodList.splice(i--, 1)
                 this.foodList[i] = null
                 this.eatingAnimation(food, destPos)
+                
+                this.countEatScore()
+
+
                 break
+            }
+
+            // 来到了取景器右边 // 表示miss
+            if (food.x > offsetXPreview + previewWidth && food.y < offsetYPreview + previewHeight * 1.2 ) {
+                console.log('miss')
             }
         }
     }
@@ -334,6 +348,24 @@ export default class Demo extends Phaser.Scene {
                 food.destroy()
             }
         })
+        
+    }
+
+    countEatScore() {
+        if (!this.cook.isCooking()) {
+            this.showCaughtToast('You get caught!!!!', 1000, () => {
+                // this.scoreText.text = +(this.scoreText.text) + 1 + ''
+            })
+        }else{            
+            this.showScoreToast('+1', 400,  () => {
+                this.scoreText.text = +(this.scoreText.text) + 1 + ''
+            })
+        }
+
+    }
+
+    missAnimation(){
+
     }
 
     drawHollowBackground() {
@@ -385,7 +417,14 @@ export default class Demo extends Phaser.Scene {
 
     addText() {
         // this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
-        this.testText = this.add.text(170, 170, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+        // this.testText = this.add.text(170, 170, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+        
+        this.scoreText = this.add.text(390, 50, '0', { 
+            fontFamily: '"Roboto Condensed"',
+            color: 'red'
+        })
+        
+
     }
 
     refreshFaceBounds(bounds: Bounds, facePoints: Point[]) {   
@@ -401,4 +440,64 @@ export default class Demo extends Phaser.Scene {
     addCook() {
         this.cook = new Cook(this, 100, 400)
     }
+
+    showScoreToast(text: string, delay:number, cb: Function) {
+        let toastText = this.add.text(0, 0, '', { fontFamily: '"Roboto Condensed"' })
+
+        toastText.x = stageWidth/2
+        toastText.y = stageWidth / 2
+        toastText.text = text
+        toastText.setFontSize(32)
+        toastText.setColor('red')
+
+        let dest = {
+            x: 390, y:50
+        }
+        setTimeout( ()=> {
+            this.tweens.add({
+                targets: toastText,
+                x: dest.x,
+                y: dest.y,
+                scale: 0,
+                duration: 1000,
+                ease: 'Power3',
+                onComplete: () => {
+                    cb()
+                    toastText.destroy()
+                }
+            })   
+        }, delay)
+    
+    }
+
+    showCaughtToast(text: string, delay: number, cb: Function) {
+        if (this.hasCaughtToast) return
+
+        let toastText = this.add.text(0, 0, '', { fontFamily: '"Roboto Condensed"' })
+        this.hasCaughtToast = true
+        toastText.x = stageWidth / 2
+        toastText.y = stageWidth / 2
+        toastText.text = text
+        toastText.setFontSize(32)
+        toastText.setColor('red')
+
+        let dest = {
+            x: -200, y: stageWidth / 2
+        }
+        setTimeout(() => {
+            this.tweens.add({
+                targets: toastText,
+                x: dest.x,
+                y: dest.y,
+                duration: 400,
+                ease: 'Power3',
+                onComplete: () => {
+                    cb()
+                    toastText.destroy()
+                    this.hasCaughtToast = false
+                }
+            })
+        }, delay)
+
+    }    
 }

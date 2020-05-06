@@ -44,7 +44,7 @@ export default class CamFaceCheck {
         this.scene = scene
         this.faceRect = scene.add.graphics()
         this.previewRect = scene.add.graphics()
-        this.facePosText = scene.add.text(stageWidth - 100, 50, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+        this.facePosText = scene.add.text(stageWidth - 100, 250, 'Hello World', { fontFamily: '"Roboto Condensed"' });
     }
 
     refreshFacePosition(faceBounds: Bounds, facePoints: Point[]) {
@@ -69,7 +69,7 @@ export default class CamFaceCheck {
             let maxFaceY = faceBounds.origin.y + faceBounds.size.height
 
             this.drawFaceBounds(faceBounds)
-            this.drawPreviewBounds(this.camPreviewArea)
+            // this.drawPreviewBounds(this.camPreviewArea)
             let minPreviewX = this.camPreviewArea.x
             let maxPreviewX = this.camPreviewArea.x + this.camPreviewArea.width
             let minPreviewY = this.camPreviewArea.y
@@ -216,7 +216,7 @@ export default class CamFaceCheck {
 
         this.camPreviewArea.x = originCamArea.x + offset.x
         this.camPreviewArea.y = originCamArea.y + offset.y
-        this.drawPreviewBounds(this.camPreviewArea)
+        // this.drawPreviewBounds(this.camPreviewArea)
 
     }
 }
