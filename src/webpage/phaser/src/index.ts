@@ -35,6 +35,8 @@ const config: Phaser.Types.Core.GameConfig = {
 console.log("...............")
 const game = new Phaser.Game(config);
 
-changeMouth(game)
-setPreview()
+setTimeout( ()=> {
+    changeMouth(game)
+    setPreview()
+})
 

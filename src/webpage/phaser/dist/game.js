@@ -178,19 +178,30 @@
     //# sourceMappingURL=spinTable.js.map
 
     var Point$2 = Phaser.Geom.Point;
+    var Vector2 = Phaser.Math.Vector2;
     var Rectagle$1 = Phaser.Geom.Rectangle;
     var stageWidth$2 = document.body.clientWidth;
     var stageHeight$2 = document.body.clientHeight;
     var CamFaceCheck = /** @class */ (function () {
         function CamFaceCheck(scene) {
-            this.camPreviewArea = new Rectagle$1(0, 0, 0, 0);
             this.scene = scene;
             this.faceRect = scene.add.graphics();
             this.previewRect = scene.add.graphics();
             this.facePosText = scene.add.text(stageWidth$2 - 100, 50, 'Hello World', { fontFamily: '"Roboto Condensed"' });
         }
+        CamFaceCheck.prototype.refreshFacePosition = function (faceBounds, facePoints) {
+            this.faceBounds = faceBounds;
+        };
         // check if face is in the center of preview
+        // private 
         CamFaceCheck.prototype.checkFacePosition = function (faceBounds) {
+            var rs = {
+                pass: false,
+                bounds: null
+            };
+            if (!this.camPreviewArea) {
+                return rs;
+            }
             if (faceBounds) {
                 var minFaceX = faceBounds.origin.x;
                 var maxFaceX = faceBounds.origin.x + faceBounds.size.width;
@@ -205,25 +216,33 @@
                 var paddingLeft = minFaceX - minPreviewX;
                 var paddingRight = maxPreviewX - maxFaceX;
                 // this.facePosText.text = `${paddingLeft.toFixed(2)} --- ${paddingRight.toFixed(2)}`
-                if (paddingLeft / paddingRight > 1.5) {
+                if (paddingLeft / paddingRight > 2) {
                     this.facePosText.text = 'to right slightly';
                 }
-                else if (paddingRight / paddingLeft > 1.5) {
-                    this.facePosText.text = 'to right slightly';
+                else if (paddingRight / paddingLeft > 2) {
+                    this.facePosText.text = 'to left slightly';
                 }
                 else {
                     this.facePosText.text = 'Hold your phone!';
+                    return {
+                        pass: true,
+                        bounds: faceBounds
+                    };
                 }
             }
+            return rs;
         };
-        CamFaceCheck.prototype.drawPreviewBounds = function (previewRect) {
+        CamFaceCheck.prototype.drawPreviewBounds = function (previewCamArea) {
+            if (!previewCamArea) {
+                return;
+            }
             this.previewRect.clear();
             this.previewRect.lineStyle(5, 0x00FFFF, 1.0);
             this.previewRect.beginPath();
-            var minPreviewX = previewRect.x;
-            var maxPreviewX = previewRect.x + previewRect.width;
-            var minPreviewY = previewRect.y;
-            var maxPreviewY = previewRect.y + previewRect.height;
+            var minPreviewX = previewCamArea.x;
+            var maxPreviewX = previewCamArea.x + previewCamArea.width;
+            var minPreviewY = previewCamArea.y;
+            var maxPreviewY = previewCamArea.y + previewCamArea.height;
             var points = [
                 new Point$2(minPreviewX, minPreviewY), new Point$2(maxPreviewX, minPreviewY),
                 new Point$2(maxPreviewX, maxPreviewY), new Point$2(minPreviewX, maxPreviewY)
@@ -270,10 +289,50 @@
         };
         CamFaceCheck.prototype.setCameraArea = function (camPreviewArea) {
             this.camPreviewArea = camPreviewArea;
+            if (!this.firstSetCamPreviewArea) {
+                this.firstSetCamPreviewArea = new Rectagle$1(0, 0, 0, 0);
+                this.firstSetCamPreviewArea.x = this.camPreviewArea.x;
+                this.firstSetCamPreviewArea.y = this.camPreviewArea.y;
+                this.firstSetCamPreviewArea.width = this.camPreviewArea.width;
+                this.firstSetCamPreviewArea.height = this.camPreviewArea.height;
+            }
+        };
+        CamFaceCheck.prototype.setTargetFaceBounds = function (facebds) {
+            if (this.targetFaceBounds == null) {
+                this.targetFaceBounds = facebds;
+                var centerX = facebds.origin.x + facebds.size.width;
+                var centerY = facebds.origin.y + facebds.size.height;
+                var distanceX = this.camPreviewArea.x - centerX;
+                var distanceY = this.camPreviewArea.y - centerY;
+                this.faceCenterPos = new Vector2(centerX, centerY);
+            }
+        };
+        CamFaceCheck.prototype.getTargetFaceBounds = function () {
+            return this.faceBounds;
+        };
+        CamFaceCheck.prototype.updatePreviewPosByTarget = function () {
+            var faceCenterPos = this.faceCenterPos;
+            var firstCamPreviewArea = this.firstSetCamPreviewArea;
+            if (!firstCamPreviewArea) {
+                return;
+            }
+            if (!faceCenterPos) {
+                return;
+            }
+            var originCamArea = this.firstSetCamPreviewArea;
+            var faceBounds = this.faceBounds;
+            var centerX = faceBounds.origin.x + faceBounds.size.width;
+            var centerY = faceBounds.origin.y + faceBounds.size.height;
+            var distanceX = this.camPreviewArea.x - centerX;
+            var distanceY = this.camPreviewArea.y - centerY;
+            var offset = new Point$2(faceCenterPos.x - centerX, faceCenterPos.y - centerY);
+            this.camPreviewArea.x = originCamArea.x + offset.x;
+            this.camPreviewArea.y = originCamArea.y + offset.y;
+            this.drawPreviewBounds(this.camPreviewArea);
         };
         return CamFaceCheck;
     }());
-    //# sourceMappingURL=startCheck.js.map
+    //# sourceMappingURL=facePosCheck.js.map
 
     var Point$3 = Phaser.Geom.Point;
     var Rectagle$2 = Phaser.Geom.Rectangle;
@@ -307,14 +366,15 @@
             this.load.image('food3', 'assets/chicken-leg.png');
             this.load.image('food4', 'assets/french-fries.png');
             this.load.image('food5', 'assets/donut.png');
-            this.load.image('dogFront', 'assets/front.png');
-            this.load.image('dogBack', 'assets/back.png');
+            this.load.image('dog', 'assets/front.png');
+            this.load.image('dogback', 'assets/back.png');
             this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
             this.load.glsl('stars', 'assets/starfields.glsl.js');
         };
         Demo.prototype.create = function () {
             this.bg = this.add.graphics();
             this.drawBackground();
+            this.addCook();
             this.addFace();
             this.drawWheel();
             // Phaser会根据 add 的先后顺序决定层级.
@@ -335,6 +395,12 @@
             }
         };
         Demo.prototype.update60Frame = function () {
+            var shouldLookBack = Math.random();
+            if (this.cook) {
+                if (shouldLookBack < 0.5) {
+                    this.cook.lookBack();
+                }
+            }
         };
         Demo.prototype.rotateTable = function () {
             // 右手顺时针
@@ -407,14 +473,13 @@
         Demo.prototype.messageListener = function () {
             var _this = this;
             window.addEventListener("message", function (event) {
-                console.log("msg type", event.data.messageType);
                 switch (event.data.messageType) {
                     case MSG_TYPE_FACE:
                         // 不论取景器是否有偏移  这里得到的坐标就是相对于 webview 左上角而言的
                         // offset 的处理已经在 RN 的部分完成
                         var of = event.data.faceData;
                         _this.refreshMouth(of.upperLipTop, of.upperLipBottom, of.lowerLipTop, of.lowerLipBottom);
-                        _this.refreshFaceBounds(of.bounds);
+                        _this.refreshFaceBounds(of.bounds, of.face);
                         break;
                     case MSG_TYPE_CAM:
                         setTimeout(function () {
@@ -538,17 +603,28 @@
             // this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
             this.testText = this.add.text(170, 170, 'Hello World', { fontFamily: '"Roboto Condensed"' });
         };
-        Demo.prototype.refreshFaceBounds = function (bounds) {
-            this.camFaceCheck.checkFacePosition(bounds);
+        Demo.prototype.refreshFaceBounds = function (bounds, facePoints) {
+            this.camFaceCheck.refreshFacePosition(bounds, facePoints);
+            this.camFaceCheck.updatePreviewPosByTarget();
+            var rs = this.camFaceCheck.checkFacePosition(bounds);
+            if (rs.pass) {
+                this.camFaceCheck.setTargetFaceBounds(bounds);
+            }
+        };
+        Demo.prototype.addCook = function () {
+            this.cook = this.add.image(100, 400, 'dog');
+            // this.cook.setTexture('dogback')
         };
         return Demo;
     }(Phaser.Scene));
-    //# sourceMappingURL=game.js.map
 
     var offsetXPreview = 170;
     var offsetYPreview = 250;
     var previewWidth = 198;
     var previewHeight = previewWidth * 16 / 9;
+    // 给坐标加上取景器的偏移信息
+    // 原本的坐标信息是人脸相对取景器的位置
+    // 现在坐标信息变为相对整个画布的位置
     function addOffsetForFaceData(target) {
         var checkedType = function (target) {
             return Object.prototype.toString.call(target).slice(8, -1);
@@ -604,19 +680,73 @@
                         height: previewHeight
                     },
                 }, "*");
-            }, 1000);
+            }, 100);
         }, false);
     }
     // 测试嘴巴位置
     function changeMouth(game) {
         //contours sample data
         window.addEventListener("load", function () {
-            var movingDown = function (points) {
-                for (var _i = 0, points_1 = points; _i < points_1.length; _i++) {
-                    var p = points_1[_i];
-                    p.y = p.y += 0.5;
+            var offsetSpeed = 3;
+            var movingFaceBounds = function (bounds, dir) {
+                var offset = 0;
+                // dir 0下 1左 2上 3右
+                if (dir == 0 || dir == 2) {
+                    offset = dir == 2 ? -offsetSpeed : offsetSpeed;
+                    bounds.origin.y = bounds.origin.y + offset;
+                }
+                else {
+                    offset = dir == 1 ? -offsetSpeed : offsetSpeed;
+                    bounds.origin.x = bounds.origin.x + offset;
                 }
             };
+            var movingYPoints = function (points, dir) {
+                // dir 0下 1左 2上 3右
+                var offset = 0;
+                if (dir == 2) {
+                    offset = -offsetSpeed;
+                }
+                else {
+                    offset = offsetSpeed;
+                }
+                for (var _i = 0, points_1 = points; _i < points_1.length; _i++) {
+                    var p = points_1[_i];
+                    p.y = p.y + offset;
+                }
+            };
+            var movingXPoints = function (points, dir) {
+                var offset = 0;
+                if (dir == 1) {
+                    offset = -offsetSpeed;
+                }
+                else {
+                    offset = offsetSpeed;
+                }
+                for (var _i = 0, points_2 = points; _i < points_2.length; _i++) {
+                    var p = points_2[_i];
+                    p.x = p.x + offset;
+                }
+            };
+            var moveFace = function (oneFace, dir) {
+                // dir 0下 1左 2上 3右
+                if (dir == 0 || dir == 2) {
+                    movingYPoints(oneFace.lowerLipBottom, dir);
+                    movingYPoints(oneFace.lowerLipTop, dir);
+                    movingYPoints(oneFace.upperLipBottom, dir);
+                    movingYPoints(oneFace.upperLipTop, dir);
+                    movingFaceBounds(oneFace.bounds, dir);
+                }
+                else {
+                    movingXPoints(oneFace.lowerLipBottom, dir);
+                    movingXPoints(oneFace.lowerLipTop, dir);
+                    movingXPoints(oneFace.upperLipBottom, dir);
+                    movingXPoints(oneFace.upperLipTop, dir);
+                    movingFaceBounds(oneFace.bounds, dir);
+                }
+            };
+            // 这个数据是和取景器大小有关的数据 
+            // 当 RN 的部分设置了取景器大小的时候, 返回的脸的位置也根据 RN 这里的实际尺寸有所压缩
+            // 但是和取景器的位移无关  毕竟安卓端也不知道取景器的相对位置
             fetch('/assets/sampleContours.json').then(function (resp) {
                 return resp.json();
             }).then(function (data) {
@@ -624,11 +754,14 @@
                 // 在PC上调试
                 if (window.navigator.userAgent.indexOf("ONEPLUS") == -1) {
                     var oneFace_1 = data[0];
+                    var i_1 = 0;
+                    var changeDir_1 = 0; // 0下 1上 2左 3右
                     setInterval(function () {
-                        movingDown(oneFace_1.lowerLipBottom);
-                        movingDown(oneFace_1.lowerLipTop);
-                        movingDown(oneFace_1.upperLipBottom);
-                        movingDown(oneFace_1.upperLipTop);
+                        if (i_1++ == 2) {
+                            i_1 = 0;
+                            changeDir_1 = (++changeDir_1) % 4;
+                        }
+                        moveFace(oneFace_1, changeDir_1);
                         var afterOffsetForFaceData = addOffsetForFaceData(oneFace_1);
                         window.postMessage({
                             messageType: 'face',
@@ -666,9 +799,10 @@
     };
     console.log("...............");
     var game = new Phaser.Game(config);
-    changeMouth();
-    setPreview();
-    //# sourceMappingURL=index.js.map
+    setTimeout(function () {
+        changeMouth();
+        setPreview();
+    });
 
 }(VConsole));
 //# sourceMappingURL=game.js.map
