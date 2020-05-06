@@ -69,8 +69,8 @@ export default class Demo extends Phaser.Scene {
         this.load.image('food4', 'assets/french-fries.png');
         this.load.image('food5', 'assets/donut.png');
 
-        this.load.image('dog', 'assets/front.png');
-        this.load.image('dogback', 'assets/back.png');
+        this.load.image('doglook', 'assets/front.png');
+        this.load.image('dogcook', 'assets/back.png');
 
 
         this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
@@ -118,8 +118,15 @@ export default class Demo extends Phaser.Scene {
         let shouldLookBack =  Math.random()
 
         if (this.cook) {
-            if (shouldLookBack < 0.5) {
+            let isDogCooking = this.cook.isCooking()
+
+            if ( isDogCooking && shouldLookBack < 0.3) {
                 this.cook.lookBack()
+            }
+            if (!isDogCooking) {
+                setTimeout(()=>{
+                    this.cook.cookAgain()
+                }, 1000)
             }
         }
         
@@ -392,7 +399,6 @@ export default class Demo extends Phaser.Scene {
     }
 
     addCook() {
-        this.cook = <Cook>this.add.image(100, 400, 'dog')
-        // this.cook.setTexture('dogback')
+        this.cook = new Cook(this, 100, 400)
     }
 }

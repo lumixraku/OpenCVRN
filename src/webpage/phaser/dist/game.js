@@ -1,9 +1,7 @@
-(function (VConsole) {
+(function () {
     'use strict';
 
     var global = window;
-
-    VConsole = VConsole && VConsole.hasOwnProperty('default') ? VConsole['default'] : VConsole;
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -45,6 +43,7 @@
     var MSG_TYPE_FACE = 'face';
     var MSG_TYPE_CAM = 'cam';
     var MSG_TYPE_WEBVIEW = 'webview';
+    var DOGCOOK = 'dogcook';
     //# sourceMappingURL=constants.js.map
 
     var Point = Phaser.Geom.Point;
@@ -334,6 +333,38 @@
     }());
     //# sourceMappingURL=facePosCheck.js.map
 
+    var Image = Phaser.GameObjects.Image;
+    var Cook = /** @class */ (function (_super) {
+        __extends(Cook, _super);
+        function Cook(scene, x, y) {
+            var _this = this;
+            var textureName = DOGCOOK;
+            _this = _super.call(this, scene, x, y, textureName, 0) || this;
+            // scene.add.image(this)
+            // let img = new Image(scene,x,y,texture);
+            scene.children.add(_this);
+            return _this;
+        }
+        Cook.prototype.setOriginToTopLeft = function () {
+            this.setOrigin(0, 0);
+        };
+        Cook.prototype.lookBack = function () {
+            this.setTexture('doglook', 0);
+            this.checking = true;
+            this.cooking = false;
+        };
+        Cook.prototype.cookAgain = function () {
+            this.setTexture('dogcook', 0);
+            this.checking = false;
+            this.cooking = true;
+        };
+        Cook.prototype.isCooking = function () {
+            return this.cooking;
+        };
+        return Cook;
+    }(Image));
+    //# sourceMappingURL=cook.js.map
+
     var Point$3 = Phaser.Geom.Point;
     var Rectagle$2 = Phaser.Geom.Rectangle;
     var stageWidth$3 = document.body.clientWidth;
@@ -366,8 +397,8 @@
             this.load.image('food3', 'assets/chicken-leg.png');
             this.load.image('food4', 'assets/french-fries.png');
             this.load.image('food5', 'assets/donut.png');
-            this.load.image('dog', 'assets/front.png');
-            this.load.image('dogback', 'assets/back.png');
+            this.load.image('doglook', 'assets/front.png');
+            this.load.image('dogcook', 'assets/back.png');
             this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
             this.load.glsl('stars', 'assets/starfields.glsl.js');
         };
@@ -395,10 +426,17 @@
             }
         };
         Demo.prototype.update60Frame = function () {
+            var _this = this;
             var shouldLookBack = Math.random();
             if (this.cook) {
-                if (shouldLookBack < 0.5) {
+                var isDogCooking = this.cook.isCooking();
+                if (isDogCooking && shouldLookBack < 0.3) {
                     this.cook.lookBack();
+                }
+                if (!isDogCooking) {
+                    setTimeout(function () {
+                        _this.cook.cookAgain();
+                    }, 1000);
                 }
             }
         };
@@ -612,8 +650,7 @@
             }
         };
         Demo.prototype.addCook = function () {
-            this.cook = this.add.image(100, 400, 'dog');
-            // this.cook.setTexture('dogback')
+            this.cook = new Cook(this, 100, 400);
         };
         return Demo;
     }(Phaser.Scene));
@@ -750,7 +787,6 @@
             fetch('/assets/sampleContours.json').then(function (resp) {
                 return resp.json();
             }).then(function (data) {
-                new VConsole();
                 // 在PC上调试
                 if (window.navigator.userAgent.indexOf("ONEPLUS") == -1) {
                     var oneFace_1 = data[0];
@@ -804,5 +840,5 @@
         setPreview();
     });
 
-}(VConsole));
+}());
 //# sourceMappingURL=game.js.map
