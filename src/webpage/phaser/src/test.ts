@@ -4,7 +4,7 @@ import Circle = Phaser.Geom.Circle;
 import Point = Phaser.Geom.Point;
 import Rectagle = Phaser.Geom.Rectangle;
 import VConsole from "vconsole";
-import { FaceData } from "./faceData";
+import { FaceData, Bounds } from "./faceData";
 import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW } from '@root/constants';
 
 // 使用 namespace 定义的类型可以直接用
@@ -20,7 +20,9 @@ var previewHeight = previewWidth * 16 / 9
 
 export { changeMouth, setPreview }
 
-
+// 给坐标加上取景器的偏移信息
+// 原本的坐标信息是人脸相对取景器的位置
+// 现在坐标信息变为相对整个画布的位置
 function addOffsetForFaceData(target) {
   const checkedType = (target) => {
     return Object.prototype.toString.call(target).slice(8, -1)
@@ -63,11 +65,10 @@ function addOffsetForFaceData(target) {
 }
 // set preview area
 
- function setPreview() {
+function setPreview() {
 
-   window.addEventListener("load", () => {
-    setTimeout( ()=> {
-
+  window.addEventListener("load", () => {
+    setTimeout(() => {
       window.postMessage({
         messageType: MSG_TYPE_CAM,
         previewArea: {
@@ -77,27 +78,84 @@ function addOffsetForFaceData(target) {
           height: previewHeight
         },
       }, "*")
-    }, 1000)
-      
-    }, false)
+    }, 100)
+
+  }, false)
 
 
- }
+}
 
 
 // 测试嘴巴位置
- function changeMouth(game: Phaser.Game) {
+function changeMouth(game: Phaser.Game) {
 
   //contours sample data
   window.addEventListener("load", () => {
+    let offsetSpeed = 3
 
-    let movingDown = (points: Point[]) => {
+
+    let movingFaceBounds = (bounds: Bounds, dir: number) => {
+      let offset = 0
+      // dir 0下 1左 2上 3右
+
+      if (dir == 0 || dir == 2) {
+        offset = dir == 2 ? -offsetSpeed : offsetSpeed
+        bounds.origin.y = bounds.origin.y + offset
+      } else {
+        offset = dir == 1 ? -offsetSpeed : offsetSpeed
+        bounds.origin.x = bounds.origin.x + offset
+      }
+    }
+    let movingYPoints = (points: Point[], dir) => {
+      // dir 0下 1左 2上 3右
+
+      let offset = 0
+      if (dir == 2) {
+        offset = -offsetSpeed
+      } else {
+        offset = offsetSpeed
+      }
+
       for (let p of points) {
-        p.y = p.y += 0.5
+        p.y = p.y + offset
+      }
+    }
+
+    let movingXPoints = (points: Point[], dir) => {
+      let offset = 0
+      if (dir == 1) {
+        offset = -offsetSpeed
+      } else {
+        offset = offsetSpeed
+      }
+
+
+      for (let p of points) {
+        p.x = p.x + offset
+      }
+    }
+
+    let moveFace = (oneFace: FaceData, dir: number) => {
+      // dir 0下 1左 2上 3右
+      if (dir == 0 || dir == 2) {
+        movingYPoints(oneFace.lowerLipBottom, dir)
+        movingYPoints(oneFace.lowerLipTop, dir)
+        movingYPoints(oneFace.upperLipBottom, dir)
+        movingYPoints(oneFace.upperLipTop, dir)
+        movingFaceBounds(oneFace.bounds, dir)
+      } else {
+        movingXPoints(oneFace.lowerLipBottom, dir)
+        movingXPoints(oneFace.lowerLipTop, dir)
+        movingXPoints(oneFace.upperLipBottom, dir)
+        movingXPoints(oneFace.upperLipTop, dir)
+        movingFaceBounds(oneFace.bounds, dir)
       }
     }
 
 
+    // 这个数据是和取景器大小有关的数据 
+    // 当 RN 的部分设置了取景器大小的时候, 返回的脸的位置也根据 RN 这里的实际尺寸有所压缩
+    // 但是和取景器的位移无关  毕竟安卓端也不知道取景器的相对位置
     fetch('/assets/sampleContours.json').then(resp => {
       return resp.json()
     }).then(data => {
@@ -108,13 +166,15 @@ function addOffsetForFaceData(target) {
       if (window.navigator.userAgent.indexOf("ONEPLUS") == -1) {
         let oneFace: FaceData = data[0]
         let i = 0
+
+        let changeDir = 0  // 0下 1上 2左 3右
         setInterval(() => {
-          movingDown(oneFace.lowerLipBottom)
-          movingDown(oneFace.lowerLipTop)
-          movingDown(oneFace.upperLipBottom)
-          movingDown(oneFace.upperLipTop)
+          if (i++ == 2) {
+            i = 0
+            changeDir = (++changeDir) % 4
+          }
 
-
+          moveFace(oneFace, changeDir)
           let afterOffsetForFaceData = addOffsetForFaceData(oneFace)
 
           window.postMessage({

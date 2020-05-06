@@ -17,9 +17,8 @@ import Mouth from '@game/mouth'
 import Food from '@game/food'
 import { FaceData, Bounds } from '@root/faceData';
 import SpinTable from './spinTable';
-import CamFaceCheck from './startCheck';
-
-
+import CamFaceCheck, { FaceInCircle } from './facePosCheck';
+import Cook from './cook';
 
 export default class Demo extends Phaser.Scene {
     // // 旋转圆心
@@ -42,13 +41,14 @@ export default class Demo extends Phaser.Scene {
     public bg: Graphics;
     public bgImg: PhaserImage;
 
+    // cook
+    public cook: Cook;
+
 
     //text
     // public mouthStateText: PhaserText;
 
     private previewArea: Rectagle = new Rectagle(0, 0, 0, 0)
-
-
     private testText: PhaserText
 
     constructor() {
@@ -69,13 +69,12 @@ export default class Demo extends Phaser.Scene {
         this.load.image('food4', 'assets/french-fries.png');
         this.load.image('food5', 'assets/donut.png');
 
-        this.load.image('dogFront', 'assets/front.png');
-        this.load.image('dogBack', 'assets/back.png');
+        this.load.image('dog', 'assets/front.png');
+        this.load.image('dogback', 'assets/back.png');
 
 
         this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
         this.load.glsl('stars', 'assets/starfields.glsl.js');
-
 
     }
 
@@ -83,6 +82,7 @@ export default class Demo extends Phaser.Scene {
         this.bg = this.add.graphics()
 
         this.drawBackground()
+        this.addCook()
         this.addFace()
         this.drawWheel()
 
@@ -115,7 +115,14 @@ export default class Demo extends Phaser.Scene {
     }
 
     update60Frame() {
+        let shouldLookBack =  Math.random()
 
+        if (this.cook) {
+            if (shouldLookBack < 0.5) {
+                this.cook.lookBack()
+            }
+        }
+        
     }
 
     rotateTable() {
@@ -207,14 +214,13 @@ export default class Demo extends Phaser.Scene {
 
     messageListener() {
         window.addEventListener("message", (event) => {
-            console.log("msg type", event.data.messageType)
             switch (event.data.messageType) {
                 case MSG_TYPE_FACE:
                     // 不论取景器是否有偏移  这里得到的坐标就是相对于 webview 左上角而言的
                     // offset 的处理已经在 RN 的部分完成
                     let of: FaceData = event.data.faceData
                     this.refreshMouth(of.upperLipTop, of.upperLipBottom, of.lowerLipTop, of.lowerLipBottom)
-                    this.refreshFaceBounds(of.bounds)
+                    this.refreshFaceBounds(of.bounds, of.face)
 
                     break;
                 case MSG_TYPE_CAM:
@@ -375,7 +381,18 @@ export default class Demo extends Phaser.Scene {
         this.testText = this.add.text(170, 170, 'Hello World', { fontFamily: '"Roboto Condensed"' });
     }
 
-    refreshFaceBounds(bounds: Bounds) {
-        this.camFaceCheck.checkFacePosition(bounds)
+    refreshFaceBounds(bounds: Bounds, facePoints: Point[]) {   
+        this.camFaceCheck.refreshFacePosition(bounds, facePoints)  
+        this.camFaceCheck.updatePreviewPosByTarget()
+
+        let rs: FaceInCircle = this.camFaceCheck.checkFacePosition(bounds)
+        if (rs.pass) {
+            this.camFaceCheck.setTargetFaceBounds(bounds)
+        }
+    }
+
+    addCook() {
+        this.cook = <Cook>this.add.image(100, 400, 'dog')
+        // this.cook.setTexture('dogback')
     }
 }

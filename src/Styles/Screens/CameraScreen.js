@@ -134,6 +134,7 @@ export default StyleSheet.create({
   webViewContainer: {
     width: stageWidth,
     height: absViewHeight,
+    // backgroundColor: 'red',
     backgroundColor: "rgba(255, 255, 0, 0.1)",
     position: 'absolute',
     top: 0,
