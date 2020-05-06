@@ -4,13 +4,18 @@ import Sprite = Phaser.GameObjects.Sprite;
 import Circle = Phaser.Geom.Circle;
 import Point = Phaser.Geom.Point;
 
+import { DOGLOOK, DOGCOOK } from '@root/constants'
 
-export default class Cook extends Image {
+export default class Cook extends Image  {
     checking: boolean  //回头观察
-
-    
-    constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame?: string | integer) {
-        super(scene, x, y, texture, frame)
+    cooking: boolean
+    image: Image
+    constructor(scene: Phaser.Scene, x: number, y: number, ) {
+        let textureName = DOGCOOK
+        super(scene, x, y, textureName, 0)
+        // scene.add.image(this)
+        // let img = new Image(scene,x,y,texture);
+        scene.children.add(this);
     }   
 
     setOriginToTopLeft(){
@@ -20,16 +25,18 @@ export default class Cook extends Image {
     
 
     lookBack() {
-        this.setTexture('dogback', 0)
+        this.setTexture('doglook', 0)
         this.checking = true
+        this.cooking = false
     }
 
     cookAgain() {
-        this.setTexture('dog', 0)
+        this.setTexture('dogcook', 0)
         this.checking = false
+        this.cooking = true
     }
     
-    isCookChecking(): boolean {
-        return this.checking
+    isCooking(): boolean {
+        return this.cooking
     }
 }

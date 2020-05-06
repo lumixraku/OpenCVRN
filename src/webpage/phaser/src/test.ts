@@ -159,7 +159,9 @@ function changeMouth(game: Phaser.Game) {
     fetch('/assets/sampleContours.json').then(resp => {
       return resp.json()
     }).then(data => {
-      new VConsole();
+
+
+
 
 
       // 在PC上调试
