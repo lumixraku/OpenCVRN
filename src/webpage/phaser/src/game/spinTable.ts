@@ -7,8 +7,11 @@ import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
 import { Scene } from "phaser";
 
+
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
+import { isPC } from '@root/test'
+
 
 const angle2Rad = (angle: number) => {
     return (Math.PI / 180) * angle
@@ -35,7 +38,10 @@ export default class SpinTable {
 
     addToContainer(scene: Scene){
         this.spSpin = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
-        this.spSpin.alpha = 0.5
+        if (isPC) {
+            this.spSpin.alpha = 0.5
+
+        }
 
         let bds: Rectagle = this.spSpin.getBounds()
         let width = bds.width
