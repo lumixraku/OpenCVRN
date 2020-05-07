@@ -18,7 +18,9 @@ var offsetYPreview = 250
 var previewWidth = 198
 var previewHeight = previewWidth * 16 / 9
 
-export { changeMouth, setPreview }
+var isPC = window.navigator.userAgent.indexOf("PCMozilla") != -1
+
+export { changeMouth, setPreview, isPC }
 
 // 给坐标加上取景器的偏移信息
 // 原本的坐标信息是人脸相对取景器的位置
@@ -165,7 +167,7 @@ function changeMouth(game: Phaser.Game) {
 
 
       // 在PC上调试
-      if (window.navigator.userAgent.indexOf("ONEPLUS") == -1) {
+      if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
         let oneFace: FaceData = data[0]
         let i = 0
 

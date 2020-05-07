@@ -51,13 +51,14 @@ android {
 
 ```
 
-this command would generate aab
+The command below would generate aab
 ```
 ./gradlew bundleRelease
 ```
 
-This command would generate an apkfile, `app-release.apk`
 
+
+This command would generate an apkfile, `app-release.apk`
 ```
 npx react-native run-android --variant=release
 

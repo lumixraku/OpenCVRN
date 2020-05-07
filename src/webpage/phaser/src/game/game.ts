@@ -11,6 +11,7 @@ const stageHeight = document.body.clientHeight;
 // 在 RN 中得到的宽和高 是411 * 823
 // 在 webview 得到的宽高是 412 * 804  // 因为我的APP 并没有打开全屏
 import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW } from '@root/constants';
+import { isPC } from '@root/test'
 
 
 import Mouth from '@game/mouth'
@@ -403,7 +404,10 @@ export default class Demo extends Phaser.Scene {
         this.bgImg.x = stageWidth / 2
         this.bgImg.y = stageHeight / 2
         this.bgImg.setScale(stageWidth / bd.width, stageHeight / bd.height)
-        this.bgImg.alpha = 0.5;
+        if (isPC) {
+            this.bgImg.alpha = 0.5; 
+        }
+
     }
 
     drawWheel() {
