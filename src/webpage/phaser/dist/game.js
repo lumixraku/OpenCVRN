@@ -41,167 +41,11 @@
     }
 
     var MSG_TYPE_FACE = 'face';
-    var MSG_TYPE_CAM = 'cam';
-    var MSG_TYPE_WEBVIEW = 'webview';
+    var MSG_TYPE_CAM = 'cam'; // RN  告知 WEB 取景器的位置
+    var MSG_TYPE_WEBVIEW_READY = 'webview_ready'; // WEB 告知 RN OnMessage 事件已经准备好 RN可以post 消息了
+    var MSG_TYPE_FACE_TARGET_POS = 'face_target'; // WEB 告知 RN 人脸应该固定的位置
     var DOGCOOK = 'dogcook';
     //# sourceMappingURL=constants.js.map
-
-    var offsetXPreview = 170;
-    var offsetYPreview = 250;
-    var previewWidth = 198;
-    var previewHeight = previewWidth * 16 / 9;
-    var isPC = window.navigator.userAgent.indexOf("PCMozilla") != -1;
-    // 给坐标加上取景器的偏移信息
-    // 原本的坐标信息是人脸相对取景器的位置
-    // 现在坐标信息变为相对整个画布的位置
-    function addOffsetForFaceData(target) {
-        var checkedType = function (target) {
-            return Object.prototype.toString.call(target).slice(8, -1);
-        };
-        //判断拷贝的数据类型
-        //初始化变量result 成为最终克隆的数据
-        var result;
-        var targetType = checkedType(target);
-        if (targetType === 'Object') {
-            result = {};
-        }
-        else if (targetType === 'Array') {
-            result = [];
-        }
-        else {
-            return target;
-        }
-        //遍历目标数据
-        for (var _i = 0, _a = Object.entries(target); _i < _a.length; _i++) {
-            var _b = _a[_i], key = _b[0], value = _b[1];
-            //获取遍历数据结构的每一项值。
-            // let value = target[key]
-            //判断目标结构里的每一值是否存在对象/数组
-            if (checkedType(value) === 'Object' ||
-                checkedType(value) === 'Array') { //对象/数组里嵌套了对象/数组
-                //继续遍历获取到value值
-                result[key] = addOffsetForFaceData(value);
-            }
-            else { //获取到value值是基本的数据类型或者是函数。
-                if (key == "x") {
-                    result[key] = offsetXPreview + value;
-                }
-                else if (key == "y") {
-                    result[key] = offsetYPreview + value;
-                }
-                else {
-                    result[key] = value;
-                }
-            }
-        }
-        return result;
-    }
-    // set preview area
-    function setPreview() {
-        window.addEventListener("load", function () {
-            setTimeout(function () {
-                window.postMessage({
-                    messageType: MSG_TYPE_CAM,
-                    previewArea: {
-                        y: offsetYPreview,
-                        x: offsetXPreview,
-                        width: previewWidth,
-                        height: previewHeight
-                    },
-                }, "*");
-            }, 100);
-        }, false);
-    }
-    // 测试嘴巴位置
-    function changeMouth(game) {
-        //contours sample data
-        window.addEventListener("load", function () {
-            var offsetSpeed = 3;
-            var movingFaceBounds = function (bounds, dir) {
-                var offset = 0;
-                // dir 0下 1左 2上 3右
-                if (dir == 0 || dir == 2) {
-                    offset = dir == 2 ? -offsetSpeed : offsetSpeed;
-                    bounds.origin.y = bounds.origin.y + offset;
-                }
-                else {
-                    offset = dir == 1 ? -offsetSpeed : offsetSpeed;
-                    bounds.origin.x = bounds.origin.x + offset;
-                }
-            };
-            var movingYPoints = function (points, dir) {
-                // dir 0下 1左 2上 3右
-                var offset = 0;
-                if (dir == 2) {
-                    offset = -offsetSpeed;
-                }
-                else {
-                    offset = offsetSpeed;
-                }
-                for (var _i = 0, points_1 = points; _i < points_1.length; _i++) {
-                    var p = points_1[_i];
-                    p.y = p.y + offset;
-                }
-            };
-            var movingXPoints = function (points, dir) {
-                var offset = 0;
-                if (dir == 1) {
-                    offset = -offsetSpeed;
-                }
-                else {
-                    offset = offsetSpeed;
-                }
-                for (var _i = 0, points_2 = points; _i < points_2.length; _i++) {
-                    var p = points_2[_i];
-                    p.x = p.x + offset;
-                }
-            };
-            var moveFace = function (oneFace, dir) {
-                // dir 0下 1左 2上 3右
-                if (dir == 0 || dir == 2) {
-                    movingYPoints(oneFace.lowerLipBottom, dir);
-                    movingYPoints(oneFace.lowerLipTop, dir);
-                    movingYPoints(oneFace.upperLipBottom, dir);
-                    movingYPoints(oneFace.upperLipTop, dir);
-                    movingFaceBounds(oneFace.bounds, dir);
-                }
-                else {
-                    movingXPoints(oneFace.lowerLipBottom, dir);
-                    movingXPoints(oneFace.lowerLipTop, dir);
-                    movingXPoints(oneFace.upperLipBottom, dir);
-                    movingXPoints(oneFace.upperLipTop, dir);
-                    movingFaceBounds(oneFace.bounds, dir);
-                }
-            };
-            // 这个数据是和取景器大小有关的数据 
-            // 当 RN 的部分设置了取景器大小的时候, 返回的脸的位置也根据 RN 这里的实际尺寸有所压缩
-            // 但是和取景器的位移无关  毕竟安卓端也不知道取景器的相对位置
-            fetch('/assets/sampleContours.json').then(function (resp) {
-                return resp.json();
-            }).then(function (data) {
-                // 在PC上调试
-                if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
-                    var oneFace_1 = data[0];
-                    var i_1 = 0;
-                    var changeDir_1 = 0; // 0下 1上 2左 3右
-                    setInterval(function () {
-                        if (i_1++ == 2) {
-                            i_1 = 0;
-                            changeDir_1 = (++changeDir_1) % 4;
-                        }
-                        moveFace(oneFace_1, changeDir_1);
-                        var afterOffsetForFaceData = addOffsetForFaceData(oneFace_1);
-                        window.postMessage({
-                            messageType: 'face',
-                            faceData: afterOffsetForFaceData
-                        }, "*");
-                    }, 100);
-                }
-            });
-        }, false);
-        // let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
-    }
-    //# sourceMappingURL=test.js.map
 
     var Point = Phaser.Geom.Point;
     var Rectagle = Phaser.Geom.Rectangle;
@@ -295,9 +139,9 @@
         }
         SpinTable.prototype.addToContainer = function (scene) {
             this.spSpin = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
-            if (isPC) {
-                this.spSpin.alpha = 0.5;
-            }
+            // if (isPC) {
+            this.spSpin.alpha = 0.5;
+            // }
             var bds = this.spSpin.getBounds();
             var width = bds.width;
             this.spSpin.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2));
@@ -463,6 +307,17 @@
                 var distanceX = this.camPreviewArea.x - centerX;
                 var distanceY = this.camPreviewArea.y - centerY;
                 this.faceCenterPos = new Vector2(centerX, centerY);
+                // 同时告知 RN?  //脸的位置确定了
+                if (window["ReactNativeWebView"]) {
+                    var msg = {
+                        messageType: MSG_TYPE_FACE_TARGET_POS,
+                        actualData: {
+                            bounds: facebds,
+                        },
+                        time: +new Date
+                    };
+                    window["ReactNativeWebView"].postMessage(JSON.stringify(msg));
+                }
             }
         };
         CamFaceCheck.prototype.getTargetFaceBounds = function () {
@@ -486,7 +341,7 @@
             var offset = new Point$2(faceCenterPos.x - centerX, faceCenterPos.y - centerY);
             this.camPreviewArea.x = originCamArea.x + offset.x;
             this.camPreviewArea.y = originCamArea.y + offset.y;
-            // this.drawPreviewBounds(this.camPreviewArea)
+            this.drawPreviewBounds(this.camPreviewArea);
         };
         return CamFaceCheck;
     }());
@@ -499,9 +354,10 @@
             var _this = this;
             var textureName = DOGCOOK;
             _this = _super.call(this, scene, x, y, textureName, 0) || this;
-            // scene.add.image(this)
+            // scene.add.image(0, 0, 'dog', 0)
             // let img = new Image(scene,x,y,texture);
-            scene.children.add(_this);
+            // scene.children.add(this);
+            scene.add.existing(_this);
             return _this;
         }
         Cook.prototype.setOriginToTopLeft = function () {
@@ -689,7 +545,7 @@
             // 告知 RN webview 事件绑定上了
             if (window["ReactNativeWebView"]) {
                 var msg = {
-                    messageType: MSG_TYPE_WEBVIEW,
+                    messageType: MSG_TYPE_WEBVIEW_READY,
                     event: "bindMessage",
                     time: +new Date
                 };
@@ -806,9 +662,9 @@
             this.bgImg.x = stageWidth$3 / 2;
             this.bgImg.y = stageHeight$3 / 2;
             this.bgImg.setScale(stageWidth$3 / bd.width, stageHeight$3 / bd.height);
-            if (isPC) {
-                this.bgImg.alpha = 0.5;
-            }
+            // if (isPC) {
+            this.bgImg.alpha = 0.5;
+            // }
         };
         Demo.prototype.drawWheel = function () {
             this.spinTable = new SpinTable(this.circleCenter, this.circleRadius, this.spSpinSpeed);
@@ -895,6 +751,163 @@
     }(Phaser.Scene));
     //# sourceMappingURL=game.js.map
 
+    var offsetXPreview = 170;
+    var offsetYPreview = 250;
+    var previewWidth = 198;
+    var previewHeight = previewWidth * 16 / 9;
+    var isPC = window.navigator.userAgent.indexOf("PCMozilla") != -1;
+    // 给坐标加上取景器的偏移信息
+    // 原本的坐标信息是人脸相对取景器的位置
+    // 现在坐标信息变为相对整个画布的位置
+    function addOffsetForFaceData(target) {
+        var checkedType = function (target) {
+            return Object.prototype.toString.call(target).slice(8, -1);
+        };
+        //判断拷贝的数据类型
+        //初始化变量result 成为最终克隆的数据
+        var result;
+        var targetType = checkedType(target);
+        if (targetType === 'Object') {
+            result = {};
+        }
+        else if (targetType === 'Array') {
+            result = [];
+        }
+        else {
+            return target;
+        }
+        //遍历目标数据
+        for (var _i = 0, _a = Object.entries(target); _i < _a.length; _i++) {
+            var _b = _a[_i], key = _b[0], value = _b[1];
+            //获取遍历数据结构的每一项值。
+            // let value = target[key]
+            //判断目标结构里的每一值是否存在对象/数组
+            if (checkedType(value) === 'Object' ||
+                checkedType(value) === 'Array') { //对象/数组里嵌套了对象/数组
+                //继续遍历获取到value值
+                result[key] = addOffsetForFaceData(value);
+            }
+            else { //获取到value值是基本的数据类型或者是函数。
+                if (key == "x") {
+                    result[key] = offsetXPreview + value;
+                }
+                else if (key == "y") {
+                    result[key] = offsetYPreview + value;
+                }
+                else {
+                    result[key] = value;
+                }
+            }
+        }
+        return result;
+    }
+    // set preview area
+    function setPreview() {
+        window.addEventListener("load", function () {
+            setTimeout(function () {
+                window.postMessage({
+                    messageType: MSG_TYPE_CAM,
+                    previewArea: {
+                        y: offsetYPreview,
+                        x: offsetXPreview,
+                        width: previewWidth,
+                        height: previewHeight
+                    },
+                }, "*");
+            }, 100);
+        }, false);
+    }
+    // 测试嘴巴位置
+    function changeMouth(game) {
+        //contours sample data
+        window.addEventListener("load", function () {
+            var offsetSpeed = 3;
+            var movingFaceBounds = function (bounds, dir) {
+                var offset = 0;
+                // dir 0下 1左 2上 3右
+                if (dir == 0 || dir == 2) {
+                    offset = dir == 2 ? -offsetSpeed : offsetSpeed;
+                    bounds.origin.y = bounds.origin.y + offset;
+                }
+                else {
+                    offset = dir == 1 ? -offsetSpeed : offsetSpeed;
+                    bounds.origin.x = bounds.origin.x + offset;
+                }
+            };
+            var movingYPoints = function (points, dir) {
+                // dir 0下 1左 2上 3右
+                var offset = 0;
+                if (dir == 2) {
+                    offset = -offsetSpeed;
+                }
+                else {
+                    offset = offsetSpeed;
+                }
+                for (var _i = 0, points_1 = points; _i < points_1.length; _i++) {
+                    var p = points_1[_i];
+                    p.y = p.y + offset;
+                }
+            };
+            var movingXPoints = function (points, dir) {
+                var offset = 0;
+                if (dir == 1) {
+                    offset = -offsetSpeed;
+                }
+                else {
+                    offset = offsetSpeed;
+                }
+                for (var _i = 0, points_2 = points; _i < points_2.length; _i++) {
+                    var p = points_2[_i];
+                    p.x = p.x + offset;
+                }
+            };
+            var moveFace = function (oneFace, dir) {
+                // dir 0下 1左 2上 3右
+                if (dir == 0 || dir == 2) {
+                    movingYPoints(oneFace.lowerLipBottom, dir);
+                    movingYPoints(oneFace.lowerLipTop, dir);
+                    movingYPoints(oneFace.upperLipBottom, dir);
+                    movingYPoints(oneFace.upperLipTop, dir);
+                    movingFaceBounds(oneFace.bounds, dir);
+                }
+                else {
+                    movingXPoints(oneFace.lowerLipBottom, dir);
+                    movingXPoints(oneFace.lowerLipTop, dir);
+                    movingXPoints(oneFace.upperLipBottom, dir);
+                    movingXPoints(oneFace.upperLipTop, dir);
+                    movingFaceBounds(oneFace.bounds, dir);
+                }
+            };
+            // 这个数据是和取景器大小有关的数据 
+            // 当 RN 的部分设置了取景器大小的时候, 返回的脸的位置也根据 RN 这里的实际尺寸有所压缩
+            // 但是和取景器的位移无关  毕竟安卓端也不知道取景器的相对位置
+            fetch('/assets/sampleContours.json').then(function (resp) {
+                return resp.json();
+            }).then(function (data) {
+                // 在PC上调试
+                if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
+                    var oneFace_1 = data[0];
+                    var i_1 = 0;
+                    var changeDir_1 = 0; // 0下 1上 2左 3右
+                    setInterval(function () {
+                        if (i_1++ == 2) {
+                            i_1 = 0;
+                            changeDir_1 = (++changeDir_1) % 4;
+                        }
+                        moveFace(oneFace_1, changeDir_1);
+                        var afterOffsetForFaceData = addOffsetForFaceData(oneFace_1);
+                        window.postMessage({
+                            messageType: 'face',
+                            faceData: afterOffsetForFaceData
+                        }, "*");
+                    }, 100);
+                }
+            });
+        }, false);
+        // let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
+    }
+    //# sourceMappingURL=test.js.map
+
     console.log(Phaser.AUTO);
     console.log(Phaser.AUTO);
     var stageWidth$4 = document.body.clientWidth;
@@ -919,6 +932,7 @@
     };
     console.log("...............");
     var game = new Phaser.Game(config);
+    // game.scene.getScene()  game.scene 是 SceneManager  getScene()才是 Phaser.Scene
     setTimeout(function () {
         changeMouth();
         setPreview();

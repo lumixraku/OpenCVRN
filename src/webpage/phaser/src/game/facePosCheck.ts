@@ -10,6 +10,7 @@ import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
 import { Bounds } from "@root/faceData";
 import { Scene, Tilemaps } from "phaser";
+import { MSG_TYPE_FACE_TARGET_POS } from "@root/constants";
 
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
@@ -84,7 +85,7 @@ export default class CamFaceCheck {
 
             if (paddingLeft / paddingRight > 2) {
                 this.facePosText.text = 'to right slightly'
-            } else if (paddingRight / paddingLeft > 2) {
+            } else if (paddingRight / paddingLeft > 2) {  
                 this.facePosText.text = 'to left slightly'
             } else {
                 this.facePosText.text = 'Hold your phone!'
@@ -183,6 +184,18 @@ export default class CamFaceCheck {
             let distanceY = this.camPreviewArea.y - centerY      
             this.faceCenterPos = new Vector2(centerX, centerY)
             
+            // 同时告知 RN?  //脸的位置确定了
+            if (window["ReactNativeWebView"]) {
+                let msg = {
+                    messageType: MSG_TYPE_FACE_TARGET_POS,                    
+                    actualData: {
+                        bounds: facebds,
+                    },
+                    time: +new Date
+                }
+                window["ReactNativeWebView"].postMessage(JSON.stringify(msg));
+            }            
+
         }
     }
 
@@ -216,7 +229,10 @@ export default class CamFaceCheck {
 
         this.camPreviewArea.x = originCamArea.x + offset.x
         this.camPreviewArea.y = originCamArea.y + offset.y
-        // this.drawPreviewBounds(this.camPreviewArea)
+        this.drawPreviewBounds(this.camPreviewArea)
+        
+        
+
 
     }
 }

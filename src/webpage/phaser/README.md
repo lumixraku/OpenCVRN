@@ -31,6 +31,11 @@ https://phaser.io/tutorials/getting-started-phaser3/part5
 
 http://labs.phaser.io/   对应的repo  git@github.com:photonstorm/phaser3-examples.git
 
+
+### About extends sprite in Phaser3
+https://phasergames.com/extend-a-sprite-in-phaser-3/?mc_cid=3f4ee26e5d&mc_eid=a4d9ee0291
+
+
 ## Trouble Shooting
 
 

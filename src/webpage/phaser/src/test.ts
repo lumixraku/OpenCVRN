@@ -5,7 +5,7 @@ import Point = Phaser.Geom.Point;
 import Rectagle = Phaser.Geom.Rectangle;
 import VConsole from "vconsole";
 import { FaceData, Bounds } from "./faceData";
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW } from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY } from '@root/constants';
 
 // 使用 namespace 定义的类型可以直接用
 import Coco = MyName.Coco
@@ -161,11 +161,6 @@ function changeMouth(game: Phaser.Game) {
     fetch('/assets/sampleContours.json').then(resp => {
       return resp.json()
     }).then(data => {
-
-
-
-
-
       // 在PC上调试
       if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
         let oneFace: FaceData = data[0]

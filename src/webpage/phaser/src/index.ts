@@ -4,7 +4,7 @@ console.log(Phaser.AUTO)
 
 
 import GameScene from '@game/game'
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW } from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY} from '@root/constants';
 
 import { changeMouth, setPreview }from 'test'
 
@@ -34,6 +34,9 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 console.log("...............")
 const game = new Phaser.Game(config);
+// game.scene.getScene()  game.scene 是 SceneManager  getScene()才是 Phaser.Scene
+
+
 
 setTimeout( ()=> {
     changeMouth(game)

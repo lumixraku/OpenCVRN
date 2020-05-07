@@ -13,11 +13,13 @@ export default class Cook extends Image  {
     constructor(scene: Phaser.Scene, x: number, y: number, ) {
         let textureName = DOGCOOK
         super(scene, x, y, textureName, 0)
-        // scene.add.image(this)
+        // scene.add.image(0, 0, 'dog', 0)
         // let img = new Image(scene,x,y,texture);
-        scene.children.add(this);
+        // scene.children.add(this);
+        scene.add.existing(this)
+        
     }   
-
+    
     setOriginToTopLeft(){
         this.setOrigin(0,0)
     }
