@@ -10,7 +10,7 @@ const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
 // 在 RN 中得到的宽和高 是411 * 823
 // 在 webview 得到的宽高是 412 * 804  // 因为我的APP 并没有打开全屏
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW } from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY } from '@root/constants';
 import { isPC } from '@root/test'
 
 
@@ -20,6 +20,7 @@ import { FaceData, Bounds } from '@root/faceData';
 import SpinTable from './spinTable';
 import CamFaceCheck, { FaceInCircle } from './facePosCheck';
 import Cook from './cook';
+
 
 export default class Demo extends Phaser.Scene {
     // // 旋转圆心
@@ -142,7 +143,7 @@ export default class Demo extends Phaser.Scene {
         // 右手顺时针
         // this.spSpin.angle += this.spSpinSpeed;
         this.spinTable.rotateTableSlightly()
-
+        
     }
 
     addCounter = 0
@@ -255,7 +256,7 @@ export default class Demo extends Phaser.Scene {
         // 告知 RN webview 事件绑定上了
         if (window["ReactNativeWebView"]) {
             let msg = {
-                messageType: MSG_TYPE_WEBVIEW,
+                messageType: MSG_TYPE_WEBVIEW_READY,
                 event: "bindMessage",
                 time: +new Date
             }
@@ -404,9 +405,9 @@ export default class Demo extends Phaser.Scene {
         this.bgImg.x = stageWidth / 2
         this.bgImg.y = stageHeight / 2
         this.bgImg.setScale(stageWidth / bd.width, stageHeight / bd.height)
-        if (isPC) {
+        // if (isPC) {
             this.bgImg.alpha = 0.5; 
-        }
+        // }
 
     }
 

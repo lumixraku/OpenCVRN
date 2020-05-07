@@ -59,6 +59,7 @@ The command below would generate aab
 
 
 This command would generate an apkfile, `app-release.apk`
+jump back to root path of your project.
 ```
 npx react-native run-android --variant=release
 

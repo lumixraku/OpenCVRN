@@ -20,17 +20,17 @@ var landmarkSize = 2;
 
 
 // camera preview offset
-var offsetXPreview = 180
-var offsetYPreview = 250
-var previewWidth = 198
-var previewHeight = previewWidth * 16 / 9
+var offsetXPreviewDefault = 180
+var offsetYPreviewDefault = 250
+var previewWidthDefault = 198
+var previewHeightDefault = previewWidthDefault * 16 / 9
 
 // var offsetXPreview = 0
 // var offsetYPreview = 0
 // var previewWidth = stageWidth
 // var previewHeight = stageWidth /9 * 16
 
-export { offsetXPreview, offsetYPreview, previewWidth, previewHeight}
+export { offsetXPreviewDefault , offsetYPreviewDefault , previewWidthDefault, previewHeightDefault }
 
 export default StyleSheet.create({
   imagePreview: {
@@ -112,10 +112,10 @@ export default StyleSheet.create({
   },
   preview: {
     position: 'absolute',
-    top: offsetYPreview,
-    left: offsetXPreview,
-    width: previewWidth,
-    height: previewHeight,
+    top: offsetYPreviewDefault,
+    left: offsetXPreviewDefault,
+    width: previewWidthDefault,
+    height: previewHeightDefault,
     // flex: 1,
     // justifyContent: 'flex-end',
     // alignItems: 'center',
