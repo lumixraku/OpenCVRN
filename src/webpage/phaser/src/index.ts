@@ -15,8 +15,6 @@ setTimeout( ()=> {
     console.log('....stageWidth.', stageWidth, stageHeight)
 }, 1000)
 
-
-
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     parent: 'phaser-example',
@@ -41,5 +39,5 @@ const game = new Phaser.Game(config);
 setTimeout( ()=> {
     changeMouth(game)
     setPreview()
-})
+}, 0)
 
