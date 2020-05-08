@@ -126,11 +126,9 @@ export default class Demo extends Phaser.Scene {
 
         if (this.cook) {
             let isDogCooking = this.cook.isCooking()
-
-            if ( isDogCooking && shouldLookBack < 0.3) {
+            let isJustChecked = this.cook.ifJustChecked()
+            if (!isJustChecked && isDogCooking && shouldLookBack < 0.9) {
                 this.cook.lookBack()
-            }
-            if (!isDogCooking) {
                 setTimeout(()=> {
                     this.cook.cookAgain()
                 }, 1000)

@@ -45,6 +45,7 @@
     var MSG_TYPE_WEBVIEW_READY = 'webview_ready'; // WEB 告知 RN OnMessage 事件已经准备好 RN可以post 消息了
     var MSG_TYPE_FACE_TARGET_POS = 'face_target'; // WEB 告知 RN 人脸应该固定的位置
     var DOGCOOK = 'dogcook';
+    var CHECKING_INTERVAL = 2000; // 回头检测的最短间隔
     //# sourceMappingURL=constants.js.map
 
     var Point = Phaser.Geom.Point;
@@ -351,9 +352,8 @@
     var Cook = /** @class */ (function (_super) {
         __extends(Cook, _super);
         function Cook(scene, x, y) {
-            var _this = this;
-            var textureName = DOGCOOK;
-            _this = _super.call(this, scene, x, y, textureName, 0) || this;
+            var _this = _super.call(this, scene, x, y, DOGCOOK, 0) || this;
+            _this.cooking = true;
             // scene.add.image(0, 0, 'dog', 0)
             // let img = new Image(scene,x,y,texture);
             // scene.children.add(this);
@@ -367,18 +367,25 @@
             this.setTexture('doglook', 0);
             this.checking = true;
             this.cooking = false;
+            this.startCheckingTime = +new Date;
         };
         Cook.prototype.cookAgain = function () {
             this.setTexture('dogcook', 0);
             this.checking = false;
             this.cooking = true;
+            this.endCheckingTime = +new Date;
+            console.log("looking back", this.endCheckingTime - this.startCheckingTime);
         };
         Cook.prototype.isCooking = function () {
             return this.cooking;
         };
+        //是否刚刚回头过
+        Cook.prototype.ifJustChecked = function () {
+            var timeGap = +new Date - this.endCheckingTime;
+            return (timeGap < CHECKING_INTERVAL);
+        };
         return Cook;
     }(Image));
-    //# sourceMappingURL=cook.js.map
 
     var Point$3 = Phaser.Geom.Point;
     var Rectagle$2 = Phaser.Geom.Rectangle;
@@ -444,10 +451,9 @@
             var shouldLookBack = Math.random();
             if (this.cook) {
                 var isDogCooking = this.cook.isCooking();
-                if (isDogCooking && shouldLookBack < 0.3) {
+                var isJustChecked = this.cook.ifJustChecked();
+                if (!isJustChecked && isDogCooking && shouldLookBack < 0.9) {
                     this.cook.lookBack();
-                }
-                if (!isDogCooking) {
                     setTimeout(function () {
                         _this.cook.cookAgain();
                     }, 1000);
@@ -749,7 +755,6 @@
         };
         return Demo;
     }(Phaser.Scene));
-    //# sourceMappingURL=game.js.map
 
     var offsetXPreview = 170;
     var offsetYPreview = 250;
@@ -936,7 +941,7 @@
     setTimeout(function () {
         changeMouth();
         setPreview();
-    });
+    }, 0);
     //# sourceMappingURL=index.js.map
 
 }());

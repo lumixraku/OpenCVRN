@@ -21,7 +21,7 @@ import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, MSG_TYPE_FACE_TARG
 
 import _ from 'underscore'
 
-var webviewURL = 'http://10.12.167.7:5001/';
+var webviewURL = 'http://10.12.167.197:5001/';
 // var webviewURL = 'http://47.92.222.162:3001/
 // var webviewLocal = 'file:///android_asset/index.html' // blob 请求无法识别
 // var webviewSource = require("../../android/app/src/main/assets/index.html") // 报错
