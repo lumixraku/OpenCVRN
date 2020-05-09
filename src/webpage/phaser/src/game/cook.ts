@@ -50,9 +50,6 @@ export default class Cook extends Image  {
 
     //是否刚刚回头过
     ifJustChecked(): boolean {
-
-
-
         
         let timeGap = +new Date - this.endCheckingTime
         return (timeGap < CHECKING_INTERVAL) 
