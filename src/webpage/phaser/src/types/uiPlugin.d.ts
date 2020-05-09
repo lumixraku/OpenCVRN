@@ -240,6 +240,8 @@ declare namespace UI {
         layout():this;
         pushIntoBounds():this;
         popUp(v: any):this;
+        on(evt: string, callback: Function, caller? :any)
+        scaleDownDestroy(time: number)
     }
 
 

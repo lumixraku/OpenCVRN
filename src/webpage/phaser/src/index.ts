@@ -3,7 +3,7 @@ console.log(Phaser.AUTO)
 console.log(Phaser.AUTO)
 
 
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY} from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, UI_SCENE} from '@root/constants';
 // import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
 
@@ -14,9 +14,8 @@ const stageHeight = document.body.clientHeight;
 import GameScene from '@game/game'
 import UIManagerScene from '@root/UI/DialogManager'
 
-setTimeout( ()=> {
-    console.log('....stageWidth.', stageWidth, stageHeight)
-}, 1000)
+
+
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -43,8 +42,9 @@ const config: Phaser.Types.Core.GameConfig = {
     //     ]
     // }    
 };
-console.log("...............")
 const game = new Phaser.Game(config);
+console.log(game.scene.isSleeping(UI_SCENE)) 
+// game.scene.add(UI_SCENE, UIManagerScene)
 // game.scene.getScene()  game.scene 是 SceneManager  getScene()才是 Phaser.Scene
 
 

@@ -5,7 +5,7 @@ import Point = Phaser.Geom.Point;
 import Rectagle = Phaser.Geom.Rectangle;
 import VConsole from "vconsole";
 import { FaceData, Bounds } from "./faceData";
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY } from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE } from '@root/constants';
 
 // 使用 namespace 定义的类型可以直接用
 import Coco = MyName.Coco
@@ -195,7 +195,7 @@ function changeMouth(game: Phaser.Game) {
 
 // 获取鼠标点击位置
 function testClickEvent(game:Phaser.Game) {
-  game.scene.getScene('demo').input.on('pointerup', function(pointer){
+  game.scene.getScene(GAME_SCENE).input.on('pointerup', function(pointer){
     var touchX = pointer.x;
     var touchY = pointer.y;
     // let x = game.input.mousePointer.x;

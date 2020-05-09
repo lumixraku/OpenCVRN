@@ -11,7 +11,7 @@ const CHECKING_INTERVAL = 2000 // 回头检测的最短间隔
 const CHECK_PROB = 0.9 //回头检测的概率
 
 
-const GAME_SCENE = 'demo'
+const GAME_SCENE = 'game'
 const UI_SCENE = 'uiScene'
 
 export {
