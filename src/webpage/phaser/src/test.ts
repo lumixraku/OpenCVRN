@@ -20,7 +20,7 @@ var previewHeight = previewWidth * 16 / 9
 
 var isPC = window.navigator.userAgent.indexOf("PCMozilla") != -1
 
-export { changeMouth, setPreview, isPC }
+export { changeMouth, setPreview, isPC, testClickEvent }
 
 // 给坐标加上取景器的偏移信息
 // 原本的坐标信息是人脸相对取景器的位置
@@ -80,11 +80,9 @@ function setPreview() {
           height: previewHeight
         },
       }, "*")
-    }, 100)
+    }, 300)
 
   }, false)
-
-
 }
 
 
@@ -193,3 +191,17 @@ function changeMouth(game: Phaser.Game) {
 
 
 }
+
+
+// 获取鼠标点击位置
+function testClickEvent(game:Phaser.Game) {
+  game.scene.getScene('demo').input.on('pointerup', function(pointer){
+    var touchX = pointer.x;
+    var touchY = pointer.y;
+    // let x = game.input.mousePointer.x;
+    // let y = game.input.mousePointer.y;
+    console.log('clickXY', touchX, touchY)
+    // ...
+ });
+}
+

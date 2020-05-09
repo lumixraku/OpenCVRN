@@ -36,6 +36,13 @@ http://labs.phaser.io/   对应的repo  git@github.com:photonstorm/phaser3-examp
 https://phasergames.com/extend-a-sprite-in-phaser-3/?mc_cid=3f4ee26e5d&mc_eid=a4d9ee0291
 
 
+### About RexUI
+https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ui-overview/
+https://codepen.io/rexrainbow/pen/MPZWZG
+https://github.com/rexrainbow/phaser3-rex-notes
+
+
+
 ## Trouble Shooting
 
 
@@ -60,3 +67,16 @@ set `"noEmitHelpers": false,`
 ### Physics.add Error
 
 https://github.com/photonstorm/phaser/issues/3754
+
+
+### About d.ts for ES6
+
+https://github.com/microsoft/dts-gen/issues/42
+Doesn't seem to be working on ES6 modules at all
+
+https://github.com/Microsoft/dts-gen/issues/86
+Even peer dependencies installed still not work.
+
+
+https://stackoverflow.com/questions/46636318/dts-gen-fails-to-find-globally-installed-modules/46640889#46640889
+The post suggests not installing global but local instead.

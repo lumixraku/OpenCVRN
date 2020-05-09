@@ -6,6 +6,8 @@ import Rectagle = Phaser.Geom.Rectangle;
 import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
 
+
+
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
 // 在 RN 中得到的宽和高 是411 * 823
@@ -20,6 +22,9 @@ import { FaceData, Bounds } from '@root/faceData';
 import SpinTable from './spinTable';
 import CamFaceCheck, { FaceInCircle } from './facePosCheck';
 import Cook from './cook';
+import { Scene } from 'phaser';
+import { createDemoDialog } from '@root/UI/Dialogs';
+import UIManager from '@root/UI/DialogManager';
 
 
 export default class Demo extends Phaser.Scene {
@@ -54,10 +59,14 @@ export default class Demo extends Phaser.Scene {
     private testText: PhaserText
     private hasCaughtToast: boolean
     
+    
+
     // preview 取景器
     private previewArea: Rectagle = new Rectagle(0, 0, 0, 0)
 
 
+    // UI  Manager
+    private uiManager: UIManager 
 
     constructor() {
         super('demo');
@@ -101,6 +110,8 @@ export default class Demo extends Phaser.Scene {
 
         this.messageListener()
         this.addText();
+
+        // this.uiManager = new UIManager()
     }
 
 
@@ -503,4 +514,19 @@ export default class Demo extends Phaser.Scene {
         }, delay)
 
     }    
+
+    createDialog(x: number, y: number) {
+
+        // 放最后 不然存在遮挡
+        // this.createDialog(20, 20);
+
+        // let scene = this
+
+        // layout 似乎是计算位置和大小
+        // scene.uiManager.holdsOn.visible = false
+        // setTimeout(()=> {
+        //     scene.uiManager.holdsOn.visible = true
+        // }, 1000  )
+        
+    }
 }

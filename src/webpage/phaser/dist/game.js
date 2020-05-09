@@ -46,6 +46,7 @@
     var MSG_TYPE_FACE_TARGET_POS = 'face_target'; // WEB 告知 RN 人脸应该固定的位置
     var DOGCOOK = 'dogcook';
     var CHECKING_INTERVAL = 2000; // 回头检测的最短间隔
+    var UI_SCENE = 'uiScene';
     //# sourceMappingURL=constants.js.map
 
     var Point = Phaser.Geom.Point;
@@ -386,6 +387,7 @@
         };
         return Cook;
     }(Image));
+    //# sourceMappingURL=cook.js.map
 
     var Point$3 = Phaser.Geom.Point;
     var Rectagle$2 = Phaser.Geom.Rectangle;
@@ -434,6 +436,7 @@
             this.refreshMouth([], [], [], []);
             this.messageListener();
             this.addText();
+            // this.uiManager = new UIManager()
         };
         Demo.prototype.update = function (time, delta) {
             this.rotateTable();
@@ -753,7 +756,146 @@
                 });
             }, delay);
         };
+        Demo.prototype.createDialog = function (x, y) {
+            // 放最后 不然存在遮挡
+            // this.createDialog(20, 20);
+            // let scene = this
+            // layout 似乎是计算位置和大小
+            // scene.uiManager.holdsOn.visible = false
+            // setTimeout(()=> {
+            //     scene.uiManager.holdsOn.visible = true
+            // }, 1000  )
+        };
         return Demo;
+    }(Phaser.Scene));
+
+    var stageWidth$4 = document.body.clientWidth;
+    var stageHeight$4 = document.body.clientHeight;
+    function createHoldsDialog(scene, width, height) {
+        var x = stageWidth$4 / 2;
+        var y = stageHeight$4 / 2;
+        var content = "\nThe Fox went out on a chilly night\n\n    The Fox went out on a chilly night\n\nThe Fox went out on a chilly night\n";
+        // 默认x y 是 Dialog 中心位置   也就是说 Pivot 默认是 center 
+        var dialog = scene.rexUI.add.dialog({
+            x: x,
+            y: y,
+            width: width,
+            height: height,
+            // background 并不在意大小的
+            background: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xf57f17),
+            title: scene.rexUI.add.label({
+                background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0xbc5100),
+                text: scene.add.text(0, 0, 'Notice', {
+                    fontSize: '20px'
+                }),
+                space: {
+                    left: 10,
+                    right: 10,
+                    top: 10,
+                    bottom: 10
+                }
+            }),
+            actions: [
+                scene.rexUI.add.label({
+                    width: 40,
+                    height: 240,
+                    background: scene.rexUI.add.roundRectangle(0, 0, 100, 240, 20, 0xffffff),
+                    text: scene.add.text(0, 0, content, {
+                        fontSize: '12px',
+                        color: 0x888888
+                    }),
+                    space: {
+                        left: 10,
+                        right: 10,
+                        top: 10,
+                        bottom: 10
+                    }
+                })
+                // scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63),
+                // scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x673ab7),
+                // scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x2196f3),
+                // scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x00bcd4),
+                // scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x4caf50),
+                // scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xcddc39),
+            ],
+            actionsAlign: 'left',
+            space: {
+                title: 10,
+                action: 5,
+                left: 10,
+                right: 10,
+                top: 10,
+                bottom: 10,
+            }
+        });
+        dialog.layout(); //.pushIntoBounds()
+        return dialog;
+    }
+    //# sourceMappingURL=Dialogs.js.map
+
+    var stageWidth$5 = document.body.clientWidth;
+    var stageHeight$5 = document.body.clientHeight;
+    var UIManagerScene = /** @class */ (function (_super) {
+        __extends(UIManagerScene, _super);
+        function UIManagerScene() {
+            var _this = this;
+            debugger;
+            _this = _super.call(this, UI_SCENE) || this;
+            return _this;
+        }
+        UIManagerScene.prototype.preload = function () {
+            this.load.scenePlugin({
+                key: 'rexuiplugin',
+                url: '/rexuiplugin.min.js',
+                sceneKey: 'rexUI'
+            });
+        };
+        UIManagerScene.prototype.create = function () {
+            this.holdsOn = createHoldsDialog(this, 300, 500);
+            this.testView = this.createDemoDialog(this, 0, 0);
+        };
+        UIManagerScene.prototype.createDemoDialog = function (scene, x, y) {
+            scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63);
+            return scene.rexUI.add.dialog({
+                x: x,
+                y: y,
+                background: scene.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0xf57f17),
+                title: scene.rexUI.add.label({
+                    background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0xbc5100),
+                    text: scene.add.text(0, 0, 'Pick a color', {
+                        fontSize: '20px'
+                    }),
+                    space: {
+                        left: 15,
+                        right: 15,
+                        top: 10,
+                        bottom: 10
+                    }
+                }),
+                actions: [
+                    scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63),
+                    scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x673ab7),
+                    scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x2196f3),
+                    scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x00bcd4),
+                    scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x4caf50),
+                    scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xcddc39),
+                ],
+                actionsAlign: 'left',
+                space: {
+                    title: 10,
+                    action: 5,
+                    left: 10,
+                    right: 10,
+                    top: 10,
+                    bottom: 10,
+                }
+            })
+                .layout()
+                .pushIntoBounds()
+                //.drawBounds(this.add.graphics(), 0xff0000)
+                .popUp(500);
+        };
+        return UIManagerScene;
     }(Phaser.Scene));
 
     var offsetXPreview = 170;
@@ -819,7 +961,7 @@
                         height: previewHeight
                     },
                 }, "*");
-            }, 100);
+            }, 300);
         }, false);
     }
     // 测试嘴巴位置
@@ -911,21 +1053,33 @@
         }, false);
         // let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
     }
+    // 获取鼠标点击位置
+    function testClickEvent(game) {
+        game.scene.getScene('demo').input.on('pointerup', function (pointer) {
+            var touchX = pointer.x;
+            var touchY = pointer.y;
+            // let x = game.input.mousePointer.x;
+            // let y = game.input.mousePointer.y;
+            console.log('clickXY', touchX, touchY);
+            // ...
+        });
+    }
     //# sourceMappingURL=test.js.map
 
     console.log(Phaser.AUTO);
     console.log(Phaser.AUTO);
-    var stageWidth$4 = document.body.clientWidth;
-    var stageHeight$4 = document.body.clientHeight;
+    // import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
+    var stageWidth$6 = document.body.clientWidth;
+    var stageHeight$6 = document.body.clientHeight;
     setTimeout(function () {
-        console.log('....stageWidth.', stageWidth$4, stageHeight$4);
+        console.log('....stageWidth.', stageWidth$6, stageHeight$6);
     }, 1000);
     var config = {
         type: Phaser.AUTO,
         parent: 'phaser-example',
-        width: stageWidth$4,
-        height: stageHeight$4,
-        scene: Demo,
+        width: stageWidth$6,
+        height: stageHeight$6,
+        scene: [Demo, UIManagerScene],
         transparent: true,
         physics: {
             "default": 'arcade',
@@ -937,12 +1091,11 @@
     };
     console.log("...............");
     var game = new Phaser.Game(config);
-    // game.scene.getScene()  game.scene 是 SceneManager  getScene()才是 Phaser.Scene
     setTimeout(function () {
         changeMouth();
         setPreview();
+        testClickEvent(game);
     }, 0);
-    //# sourceMappingURL=index.js.map
 
 }());
 //# sourceMappingURL=game.js.map
