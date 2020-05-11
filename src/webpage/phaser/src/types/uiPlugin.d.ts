@@ -14,6 +14,8 @@ declare namespace UI {
         roundRectangle(x: any, y: any, width: any, height: any, radiusConfig: any, fillColor: any, fillAlpha?: any): RoundRectangle;
         label(config: any): Label;
         circle(x: any, y: any, radius: any, color: any)
+        scrollablePanel(config: any): ScrollablePanel
+        fixWidthSizer(config: any): FixWidthSizer
     }
 
     class Label extends Sizer {
@@ -40,6 +42,9 @@ declare namespace UI {
         add(gameObjects: any): Label;
         remove(gameObjects: any, destroyChild: any): Label;
         clear(destroyChild: any): Label;
+
+
+        layout()
     }
 
 
@@ -217,7 +222,77 @@ declare namespace UI {
         };
         destroy(): void;
     }
-    
+    class ScrollablePanel extends Scrollable {
+        constructor(scene: any, config: any);
+    }    
+
+    class FixWidthSizer extends BaseSizer {
+        constructor(scene: any, x: any, y: any, minWidth: any, minHeight: any, config: any);
+        sizerChildren: any[];
+        setOrientation(orientation: any): FixWidthSizer;
+        orientation: any;
+        setItemSpacing(space: any): FixWidthSizer;
+        setLineSpacing(space: any): FixWidthSizer;
+        setAlign(align: any): FixWidthSizer;
+        align: any;
+        setRTL(enabled: any): FixWidthSizer;
+        rtl: any;
+        get maxChildWidth(): any;
+        _maxChildWidth: any;
+        get maxChildHeight(): any;
+        _maxChildHeight: any;
+        setMinSize(minWidth: any, minHeight: any): FixWidthSizer;
+        setMinWidth(minWidth: any): FixWidthSizer;
+        setMinHeight(minHeight: any): FixWidthSizer;
+        alignLeft(value: any): FixWidthSizer;
+        alignRight(value: any): FixWidthSizer;
+        alignCenterX(value: any): FixWidthSizer;
+        alignTop(value: any): FixWidthSizer;
+        alignBottom(value: any): FixWidthSizer;
+        alignCenterY(value: any): FixWidthSizer;
+        resize(width: any, height: any): FixWidthSizer;
+        add(gameObjects: any): FixWidthSizer;
+        remove(gameObjects: any, destroyChild: any): FixWidthSizer;
+        clear(destroyChild: any): FixWidthSizer;
+    }    
+
+    class Scrollable extends Sizer {
+        constructor(scene: any, config: any);
+        type: any;
+        layout(parent: any, newWidth: any, newHeight: any): Scrollable;
+        set t(arg: any);
+        get t(): any;
+        set childOY(arg: any);
+        get childOY(): any;
+        get topChildOY(): any;
+        get bottomChildOY(): number;
+        setChildOY(value: any): Scrollable;
+        setT(value: any): Scrollable;
+        scrollToTop(): Scrollable;
+        scrollToBottom(): Scrollable;
+        set sliderEnable(arg: any);
+        get sliderEnable(): any;
+        setSliderEnable(enabled: any): Scrollable;
+        set scrollerEnable(arg: any);
+        get scrollerEnable(): any;
+        setScrollerEnable(enabled: any): Scrollable;
+        setOrientation(orientation: any): Scrollable;
+        setMinSize(minWidth: any, minHeight: any): Scrollable;
+        setMinWidth(minWidth: any): Scrollable;
+        setMinHeight(minHeight: any): Scrollable;
+        alignLeft(value: any): Scrollable;
+        alignRight(value: any): Scrollable;
+        alignCenterX(value: any): Scrollable;
+        alignTop(value: any): Scrollable;
+        alignBottom(value: any): Scrollable;
+        alignCenterY(value: any): Scrollable;
+        resize(width: any, height: any): Scrollable;
+        add(gameObjects: any): Scrollable;
+        remove(gameObjects: any, destroyChild: any): Scrollable;
+        clear(destroyChild: any): Scrollable;
+
+        layout():any
+    }    
 
     class Dialog extends Sizer {
         constructor(scene: any, config: any);
@@ -266,6 +341,9 @@ declare namespace UI {
         add(gameObjects: any): Sizer;
         remove(gameObjects: any, destroyChild: any): Sizer;
         clear(destroyChild: any): Sizer;
+
+        scene: any;
+        getElement(mapNameList: any): any;
 
     }
 

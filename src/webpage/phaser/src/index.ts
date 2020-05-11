@@ -34,7 +34,7 @@ const config: Phaser.Types.Core.GameConfig = {
     // 这个 npm 包存在问题
     // plugins: {
     //     scene: [
-    //     {
+    //     {´´´´´´´´´´´
     //         key: 'rexUI',
     //         plugin: UIPlugin,
     //         mapping: 'rexUI'
