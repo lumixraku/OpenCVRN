@@ -3,7 +3,7 @@ console.log(Phaser.AUTO)
 console.log(Phaser.AUTO)
 
 
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, UI_SCENE} from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, UI_SCENE, BASE_SCENE} from '@root/constants';
 // import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
 
@@ -12,8 +12,9 @@ const stageHeight = document.body.clientHeight;
 
 
 import GameScene from '@game/game'
-import UIManagerScene from '@root/UI/DialogManager'
-
+import DialogScene from '@root/UI/DialogManager'
+import EFScene from '@root/UI/EffectManager'
+import BaseScene from './BaseScene';
 
 
 
@@ -22,7 +23,7 @@ const config: Phaser.Types.Core.GameConfig = {
     parent: 'phaser-example',
     width: stageWidth,
     height: stageHeight,
-    scene: [GameScene, UIManagerScene],
+    scene: [ BaseScene, GameScene,EFScene, DialogScene],
     transparent: true,
     physics: {
         default: 'arcade',
@@ -43,15 +44,14 @@ const config: Phaser.Types.Core.GameConfig = {
     // }    
 };
 const game = new Phaser.Game(config);
-console.log(game.scene.isSleeping(UI_SCENE)) 
+console.log(game.scene.isSleeping(BASE_SCENE)) 
 // game.scene.add(UI_SCENE, UIManagerScene)
 // game.scene.getScene()  game.scene 是 SceneManager  getScene()才是 Phaser.Scene
 
 
 import { changeMouth, setPreview, testClickEvent } from 'test'
-setTimeout( ()=> {
-    changeMouth(game)
-    setPreview()
-    testClickEvent(game)
-}, 0)
+
+changeMouth(game)
+setPreview()
+testClickEvent(game)
 

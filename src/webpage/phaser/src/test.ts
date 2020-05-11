@@ -80,7 +80,7 @@ function setPreview() {
           height: previewHeight
         },
       }, "*")
-    }, 300)
+    }, 1000)
 
   }, false)
 }
@@ -195,13 +195,18 @@ function changeMouth(game: Phaser.Game) {
 
 // 获取鼠标点击位置
 function testClickEvent(game:Phaser.Game) {
-  game.scene.getScene(GAME_SCENE).input.on('pointerup', function(pointer){
-    var touchX = pointer.x;
-    var touchY = pointer.y;
-    // let x = game.input.mousePointer.x;
-    // let y = game.input.mousePointer.y;
-    console.log('clickXY', touchX, touchY)
-    // ...
- });
+  window.addEventListener('load', ()=> {
+    setTimeout( ()=> {
+      game.scene.getScene(GAME_SCENE).input.on('pointerup', function(pointer){
+        var touchX = pointer.x;
+        var touchY = pointer.y;
+        // let x = game.input.mousePointer.x;
+        // let y = game.input.mousePointer.y;
+        console.log('clickXY', touchX, touchY)
+        // ...
+     });
+
+    })
+  }, false)
 }
 

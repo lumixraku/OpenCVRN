@@ -12,7 +12,7 @@ const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
 // 在 RN 中得到的宽和高 是411 * 823
 // 在 webview 得到的宽高是 412 * 804  // 因为我的APP 并没有打开全屏
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE } from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION } from '@root/constants';
 import { isPC } from '@root/test'
 
 
@@ -23,14 +23,17 @@ import SpinTable from './spinTable';
 import CamFaceCheck, { FaceInCircle } from './facePosCheck';
 import Cook from './cook';
 import { UIPlugin } from 'UI';
+import { Scene } from 'phaser';
+import DialogScene from '@root/UI/DialogManager';
+import EffectScene from '@root/UI/EffectManager';
 
 
 export default class Demo extends Phaser.Scene {
     // // 旋转圆心
     public spinTable: SpinTable
     public spSpinSpeed: number = 1;
-    public circleRadius: number = stageWidth
-    public circleCenter: Point = new Point(stageWidth / 2, stageHeight + this.circleRadius / 2.3);
+    public circleRadius: number = stageWidth * 1.5
+    public tablePos: Point = new Point(stageWidth / 2 + this.circleRadius/2.2, stageHeight + this.circleRadius / 2);
 
     public distanceAngle: number = 60  //食物和食物之间的间隔(角度)
     public tableCapacity: number = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
@@ -62,7 +65,9 @@ export default class Demo extends Phaser.Scene {
     // preview 取景器
     private previewArea: Rectagle = new Rectagle(0, 0, 0, 0)
 
-
+    // scene
+    private dialogScene: DialogScene;
+    private effScene: EffectScene;
 
     constructor() {
         super(GAME_SCENE);
@@ -86,8 +91,8 @@ export default class Demo extends Phaser.Scene {
         this.load.image('dogcook', 'assets/back.png');
 
 
-        this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
-        this.load.glsl('stars', 'assets/starfields.glsl.js');
+        // this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
+        // this.load.glsl('stars', 'assets/starfields.glsl.js');
 
     }
 
@@ -106,9 +111,10 @@ export default class Demo extends Phaser.Scene {
 
         this.messageListener()
         this.addText();
+        
+        this.dialogScene =  this.scene.get(UI_SCENE) as DialogScene
+        this.effScene = this.scene.get(EF_SCENE) as EffectScene
 
-        this.scene.launch(UI_SCENE);
-        // this.uiManager = new UIManager()
     }
 
 
@@ -139,10 +145,9 @@ export default class Demo extends Phaser.Scene {
                 this.cook.lookBack()
                 setTimeout(()=> {
                     this.cook.cookAgain()
-                }, 1000)
+                }, CHECKING_DURATION)
             }
-        }
-        
+        }        
     }
 
     rotateTable() {
@@ -330,7 +335,6 @@ export default class Demo extends Phaser.Scene {
                 this.foodList[i] = null
                 this.eatingAnimation(food, destPos)
                 
-                this.countEatScore()
 
 
                 break
@@ -354,22 +358,25 @@ export default class Demo extends Phaser.Scene {
             ease: 'Power3',
             onComplete: () => {
                 food.destroy()
+
+                // if not get caught
+                if (!this.cook.isCooking()) {
+                    this.caughtAnimation()
+                }else{
+                    this.effScene.addCoin()
+
+                }
+                this.scoreText.text = +(this.scoreText.text) + 1 + ''
             }
         })
         
     }
 
-    countEatScore() {
-        if (!this.cook.isCooking()) {
-            this.showCaughtToast('You get caught!!!!', 1000, () => {
-                // this.scoreText.text = +(this.scoreText.text) + 1 + ''
-            })
-        }else{            
-            this.showScoreToast('+1', 400,  () => {
-                this.scoreText.text = +(this.scoreText.text) + 1 + ''
-            })
-        }
-
+    caughtAnimation() {
+        this.effScene.addHammer()
+        // this.showCaughtToast('You get caught!!!!', 1000, () => {
+        //     // this.scoreText.text = +(this.scoreText.text) + 1 + ''
+        // })
     }
 
     missAnimation(){
@@ -418,7 +425,7 @@ export default class Demo extends Phaser.Scene {
     }
 
     drawWheel() {
-        this.spinTable = new SpinTable(this.circleCenter, this.circleRadius, this.spSpinSpeed)
+        this.spinTable = new SpinTable(this.tablePos, this.circleRadius, this.spSpinSpeed)
         this.spinTable.addToContainer(this)
     }
 
@@ -481,35 +488,10 @@ export default class Demo extends Phaser.Scene {
     
     }
 
-    showCaughtToast(text: string, delay: number, cb: Function) {
+    showCaughtToast(text: string, last: number, cb: Function) {
         if (this.hasCaughtToast) return
 
-        let toastText = this.add.text(0, 0, '', { fontFamily: '"Roboto Condensed"' })
-        this.hasCaughtToast = true
-        toastText.x = stageWidth / 2
-        toastText.y = stageWidth / 2
-        toastText.text = text
-        toastText.setFontSize(32)
-        toastText.setColor('red')
-
-        let dest = {
-            x: -200, y: stageWidth / 2
-        }
-        setTimeout(() => {
-            this.tweens.add({
-                targets: toastText,
-                x: dest.x,
-                y: dest.y,
-                duration: 400,
-                ease: 'Power3',
-                onComplete: () => {
-                    cb()
-                    toastText.destroy()
-                    this.hasCaughtToast = false
-                }
-            })
-        }, delay)
-
+        
     }    
 
 }

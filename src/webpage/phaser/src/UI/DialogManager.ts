@@ -5,14 +5,19 @@ const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
 
 
-export default class UIManagerScene extends Phaser.Scene {
+export default class DialogScene extends Phaser.Scene {
 
 
     public testView: UI.Dialog
-    public holdsOn: UI.Dialog
+    public welcome: UI.Dialog
+    public getCaught: UI.Dialog
+    public getCaughtText: PhaserText
+
     constructor() {
         super(UI_SCENE);
     }
+
+    
 
     preload() {
         this.load.scenePlugin({
@@ -20,12 +25,18 @@ export default class UIManagerScene extends Phaser.Scene {
             url: '/rexuiplugin.min.js',
             sceneKey: 'rexUI'
         });
+
     }
 
     create() {
-        this.holdsOn = this.createHoldsDialog(this, 300, 500)
-        this.testView = this.createDemoDialog(this, 0, 0)
 
+        this.welcome = this.createWelcomeDialog(this, 300, 500)
+        this.testView = this.createDemoDialog(this, 0, 0)
+        // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
+        
+        this.createCaughtText(stageWidth/2, stageHeight/2, ()=> {})
+
+        this.welcome.visible = false
         this.testView.visible = false
 
     }
@@ -33,7 +44,15 @@ export default class UIManagerScene extends Phaser.Scene {
     update(time, delta) {
     }
 
-    createHoldsDialog(scene: Scene, width: number, height: number): UI.Dialog {
+    showWelcome() {
+        this.welcome.visible = true
+    }
+
+
+
+
+    createWelcomeDialog(scene: Scene, width: number, height: number): UI.Dialog {
+
         let makeContentLabel = (content: string) => {
 
             let x = width/2
@@ -42,7 +61,7 @@ export default class UIManagerScene extends Phaser.Scene {
                 x:0,
                 y:0,
                 width: 40, // Minimum width of round-rectangle
-                height: 240, // Minimum height of round-rectangle            
+                height: 340, // Minimum height of round-rectangle            
                 background: scene.rexUI.add.roundRectangle(40, 40, 100, 240, 0, 0x00ccbb),
                 text: scene.add.text(0, 0, content, {
                     fontSize: '12px',
@@ -56,12 +75,14 @@ export default class UIManagerScene extends Phaser.Scene {
                     bottom: 10
                 }
             }).layout()
+            
+
             return contentLabel
         }
 
         let makeFixWidthPanel = (maxwidth: number, content: string) => {
             let sizer = this.rexUI.add.fixWidthSizer({
-                child: makeContentLabel(content),
+                // child: makeContentLabel(content),
                 space: {
                     left: 3,
                     right: 3,
@@ -83,7 +104,7 @@ export default class UIManagerScene extends Phaser.Scene {
                 x: width/2,
                 y: height/2,
                 width: 240, // Minimum width of round-rectangle ???
-                height: 240, // Minimum height of round-rectangle ???      
+                height: 340, // Minimum height of round-rectangle ???      
     
                 scrollMode: 0,
                 background: this.rexUI.add.roundRectangle(0, 0, 2, 2, 10, 0xcccccc),    
@@ -181,11 +202,11 @@ export default class UIManagerScene extends Phaser.Scene {
                 this.createButton(this, 'OK', 0xf57f17),
             ],
 
-            actionsAlign: 'center',
+            actionsAlign: '  center  ',
             space: {
                 title: 10,
                 action: 45, // ?? 没有效果 
-                content: 115, //指 content 下方的空白区域高度
+                content: 25, //指 content 下方的空白区域高度
 
                 left: 10,
                 right: 10,
@@ -208,6 +229,7 @@ export default class UIManagerScene extends Phaser.Scene {
             });
 
         dialog.layout()//.pushIntoBounds()
+        dialog.visible = false
         return dialog
     }
 
@@ -261,6 +283,131 @@ export default class UIManagerScene extends Phaser.Scene {
 
 
 
+    }
+
+    createCaughtText(x:number, y:number, cb: Function ): PhaserText {
+        let parent = this.add.container(0, 0)
+
+
+        let toastText = this.add.text(0, 0, 'You get Caught', { fontFamily: '"Arial"' })
+        // this.hasCaughtToast = true
+        // toastText.x = stageWidth / 2
+        // toastText.y = stageHeight / 2
+        toastText.setFontSize(42)
+        toastText.setColor('red')
+        toastText.setScale(0)
+        toastText.setOrigin(0.5)
+        toastText.setShadowBlur(0.5)
+
+        // let bg = this.rexUI.add.roundRectangle(0, 0, 100, 240, 0, 0x00ccbb)
+        let bg = this.add.graphics()
+        this.faceRect.lineStyle(5, 0xFF00FF, 1.0);
+        
+        
+        parent.add([toastText])
+
+        this.tweens.add({
+            targets: toastText,
+            scale: 1,
+            duration: 232,
+            x: stageWidth / 2,
+            y: stageHeight / 2,            
+            ease: 'Power3',
+            onComplete: () => {
+                setTimeout(()=> {
+                    this.tweens.add({
+                        targets: toastText,
+                        scale: 0,
+                        duration: 232,
+                        ease: 'Power3',                    
+                        onComplete: () => {
+                            toastText.destroy
+                        }
+                    })
+
+                }, 432)
+            }
+        })
+
+        return toastText
+    }
+
+    createGetCaughtDialog(x: number, y: number): UI.Dialog {
+        let scene = this
+        scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63)
+
+        // 你被抓住了 计划从左往右显示
+        // 然后发现做不到  Dialog 一定会在屏幕区域内显示
+        let popup = scene.rexUI.add.dialog({
+            x: 0, // 所以一开始在左边放起来
+            y: 0,
+
+            background: scene.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0xf57f17),
+            content: scene.rexUI.add.label({
+                    background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0xbc5100),
+                    text: scene.add.text(0, 0, '\nYou get Caught!!\n', {
+                        fontSize: '30px'
+                    }),
+                    space: {
+                        left: 15,
+                        right: 15,
+                        top: 10,
+                        bottom: 10
+                    }
+                }),
+            // title: scene.rexUI.add.label({
+            //     background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0xbc5100),
+            //     text: scene.add.text(0, 0, 'Pick a color', {
+            //         fontSize: '20px'
+            //     }),
+            //     space: {
+            //         left: 15,
+            //         right: 15,
+            //         top: 10,
+            //         bottom: 10
+            //     }
+            // }),
+
+            // actions: [
+            //     scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63),
+            //     scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x673ab7),
+            //     scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x2196f3),
+            //     scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x00bcd4),
+            //     scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x4caf50),
+            //     scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xcddc39),
+            // ],
+
+            actionsAlign: 'left',
+
+            space: {
+                title: 10,
+                action: 5,
+
+                left: 10,
+                right: 10,
+                top: 10,
+                bottom: 10,
+            }
+        })
+            .layout()
+            .pushIntoBounds()
+            //.drawBounds(this.add.graphics(), 0xff0000)
+            // .popUp(500);
+
+        // this.tweens.add({
+        //     targets: popup,
+        //     x: stageWidth/2,
+        //     y: stageHeight/2,
+        //     duration: 400,
+        //     ease: 'Power3',
+        //     yoyo: true,
+        //     onComplete: () => {
+
+        //     }
+        // })
+
+        return popup
+        
     }
 
     createButton(scene: Scene, text:string, color: any, space?: any) {
