@@ -3,14 +3,19 @@
 
   var global = window;
 
+  // Message 类型
   var MSG_TYPE_FACE = 'face';
   var MSG_TYPE_CAM = 'cam'; // RN  告知 WEB 取景器的位置
   var MSG_TYPE_WEBVIEW_READY = 'webview_ready'; // WEB 告知 RN OnMessage 事件已经准备好 RN可以post 消息了
   var MSG_TYPE_FACE_TARGET_POS = 'face_target'; // WEB 告知 RN 人脸应该固定的位置
-  var DOGCOOK = 'dogcook';
-  var CHECKING_INTERVAL = 2000; // 回头检测的最短间隔
+  // scene
+  var BASE_SCENE = 'base';
   var GAME_SCENE = 'game';
   var UI_SCENE = 'uiScene';
+  var EF_SCENE = 'effectScene';
+  var DOGCOOK = 'dogcook';
+  var CHECKING_INTERVAL = 2000; // 回头检测的最短间隔
+  var CHECKING_DURATION = 3000;
   //# sourceMappingURL=constants.js.map
 
   /*! *****************************************************************************
@@ -399,8 +404,8 @@
       function Demo() {
           var _this = _super.call(this, GAME_SCENE) || this;
           _this.spSpinSpeed = 1;
-          _this.circleRadius = stageWidth$3;
-          _this.circleCenter = new Point$3(stageWidth$3 / 2, stageHeight$3 + _this.circleRadius / 2.3);
+          _this.circleRadius = stageWidth$3 * 1.5;
+          _this.tablePos = new Point$3(stageWidth$3 / 2 + _this.circleRadius / 2.2, stageHeight$3 + _this.circleRadius / 2);
           _this.distanceAngle = 60; //食物和食物之间的间隔(角度)
           _this.tableCapacity = 360 / _this.distanceAngle; //根据间隔计算得到的桌面容量
           _this.foodList = __spreadArrays(Array(_this.tableCapacity)).map(function (_) { return null; });
@@ -423,8 +428,8 @@
           this.load.image('food5', 'assets/donut.png');
           this.load.image('doglook', 'assets/front.png');
           this.load.image('dogcook', 'assets/back.png');
-          this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
-          this.load.glsl('stars', 'assets/starfields.glsl.js');
+          // this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
+          // this.load.glsl('stars', 'assets/starfields.glsl.js');
       };
       Demo.prototype.create = function () {
           this.bg = this.add.graphics();
@@ -437,8 +442,8 @@
           this.refreshMouth([], [], [], []);
           this.messageListener();
           this.addText();
-          this.scene.launch(UI_SCENE);
-          // this.uiManager = new UIManager()
+          this.dialogScene = this.scene.get(UI_SCENE);
+          this.effScene = this.scene.get(EF_SCENE);
       };
       Demo.prototype.update = function (time, delta) {
           this.rotateTable();
@@ -461,7 +466,7 @@
                   this.cook.lookBack();
                   setTimeout(function () {
                       _this.cook.cookAgain();
-                  }, 1000);
+                  }, CHECKING_DURATION);
               }
           }
       };
@@ -605,7 +610,6 @@
                   // this.foodList.splice(i--, 1)
                   this.foodList[i] = null;
                   this.eatingAnimation(food, destPos);
-                  this.countEatScore();
                   break;
               }
               // 来到了取景器右边 // 表示miss
@@ -615,6 +619,7 @@
           }
       };
       Demo.prototype.eatingAnimation = function (food, dest) {
+          var _this = this;
           food.eating = true;
           var tween = this.tweens.add({
               targets: food,
@@ -625,21 +630,22 @@
               ease: 'Power3',
               onComplete: function () {
                   food.destroy();
+                  // if not get caught
+                  if (!_this.cook.isCooking()) {
+                      _this.caughtAnimation();
+                  }
+                  else {
+                      _this.effScene.addCoin();
+                  }
+                  _this.scoreText.text = +(_this.scoreText.text) + 1 + '';
               }
           });
       };
-      Demo.prototype.countEatScore = function () {
-          var _this = this;
-          if (!this.cook.isCooking()) {
-              this.showCaughtToast('You get caught!!!!', 1000, function () {
-                  // this.scoreText.text = +(this.scoreText.text) + 1 + ''
-              });
-          }
-          else {
-              this.showScoreToast('+1', 400, function () {
-                  _this.scoreText.text = +(_this.scoreText.text) + 1 + '';
-              });
-          }
+      Demo.prototype.caughtAnimation = function () {
+          this.effScene.addHammer();
+          // this.showCaughtToast('You get caught!!!!', 1000, () => {
+          //     // this.scoreText.text = +(this.scoreText.text) + 1 + ''
+          // })
       };
       Demo.prototype.missAnimation = function () {
       };
@@ -678,7 +684,7 @@
           // }
       };
       Demo.prototype.drawWheel = function () {
-          this.spinTable = new SpinTable(this.circleCenter, this.circleRadius, this.spSpinSpeed);
+          this.spinTable = new SpinTable(this.tablePos, this.circleRadius, this.spSpinSpeed);
           this.spinTable.addToContainer(this);
       };
       Demo.prototype.addFace = function () {
@@ -729,85 +735,45 @@
               });
           }, delay);
       };
-      Demo.prototype.showCaughtToast = function (text, delay, cb) {
-          var _this = this;
+      Demo.prototype.showCaughtToast = function (text, last, cb) {
           if (this.hasCaughtToast)
               return;
-          var toastText = this.add.text(0, 0, '', { fontFamily: '"Roboto Condensed"' });
-          this.hasCaughtToast = true;
-          toastText.x = stageWidth$3 / 2;
-          toastText.y = stageWidth$3 / 2;
-          toastText.text = text;
-          toastText.setFontSize(32);
-          toastText.setColor('red');
-          var dest = {
-              x: -200, y: stageWidth$3 / 2
-          };
-          setTimeout(function () {
-              _this.tweens.add({
-                  targets: toastText,
-                  x: dest.x,
-                  y: dest.y,
-                  duration: 400,
-                  ease: 'Power3',
-                  onComplete: function () {
-                      cb();
-                      toastText.destroy();
-                      _this.hasCaughtToast = false;
-                  }
-              });
-          }, delay);
       };
       return Demo;
   }(Phaser.Scene));
-  //# sourceMappingURL=game.js.map
 
   var stageWidth$4 = document.body.clientWidth;
   var stageHeight$4 = document.body.clientHeight;
-  var UIManagerScene = /** @class */ (function (_super) {
-      __extends(UIManagerScene, _super);
-      function UIManagerScene() {
+  var DialogScene = /** @class */ (function (_super) {
+      __extends(DialogScene, _super);
+      function DialogScene() {
           return _super.call(this, UI_SCENE) || this;
       }
-      UIManagerScene.prototype.preload = function () {
+      DialogScene.prototype.preload = function () {
           this.load.scenePlugin({
               key: 'rexuiplugin',
               url: '/rexuiplugin.min.js',
               sceneKey: 'rexUI'
           });
       };
-      UIManagerScene.prototype.create = function () {
-          this.holdsOn = this.createHoldsDialog(this, 300, 500);
+      DialogScene.prototype.create = function () {
+          this.welcome = this.createWelcomeDialog(this, 300, 500);
           this.testView = this.createDemoDialog(this, 0, 0);
+          // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
+          this.createCaughtText(stageWidth$4 / 2, stageHeight$4 / 2, function () { });
+          this.welcome.visible = false;
           this.testView.visible = false;
       };
-      UIManagerScene.prototype.update = function (time, delta) {
+      DialogScene.prototype.update = function (time, delta) {
       };
-      UIManagerScene.prototype.createHoldsDialog = function (scene, width, height) {
+      DialogScene.prototype.showWelcome = function () {
+          this.welcome.visible = true;
+      };
+      DialogScene.prototype.createWelcomeDialog = function (scene, width, height) {
           var _this = this;
-          var makeContentLabel = function (content) {
-              var contentLabel = scene.rexUI.add.label({
-                  x: 0,
-                  y: 0,
-                  width: 40,
-                  height: 240,
-                  background: scene.rexUI.add.roundRectangle(40, 40, 100, 240, 0, 0x00ccbb),
-                  text: scene.add.text(0, 0, content, {
-                      fontSize: '12px',
-                      color: 0x888888
-                  }),
-                  space: {
-                      left: 10,
-                      right: 10,
-                      top: 10,
-                      bottom: 10
-                  }
-              }).layout();
-              return contentLabel;
-          };
           var makeFixWidthPanel = function (maxwidth, content) {
               var sizer = _this.rexUI.add.fixWidthSizer({
-                  child: makeContentLabel(content),
+                  // child: makeContentLabel(content),
                   space: {
                       left: 3,
                       right: 3,
@@ -824,12 +790,12 @@
                   x: width / 2,
                   y: height / 2,
                   width: 240,
-                  height: 240,
+                  height: 340,
                   scrollMode: 0,
                   background: _this.rexUI.add.roundRectangle(0, 0, 2, 2, 10, 0xcccccc),
                   panel: {
                       // child: makeContentLabel(content),
-                      child: makeFixWidthPanel(240, content),
+                      child: makeFixWidthPanel(),
                       mask: {
                           padding: 1
                       },
@@ -903,11 +869,11 @@
               actions: [
                   this.createButton(this, 'OK', 0xf57f17),
               ],
-              actionsAlign: 'center',
+              actionsAlign: '  center  ',
               space: {
                   title: 10,
                   action: 45,
-                  content: 115,
+                  content: 25,
                   left: 10,
                   right: 10,
                   top: 10,
@@ -926,9 +892,10 @@
               button.getElement('background').setStrokeStyle();
           });
           dialog.layout(); //.pushIntoBounds()
+          dialog.visible = false;
           return dialog;
       };
-      UIManagerScene.prototype.createDemoDialog = function (scene, x, y) {
+      DialogScene.prototype.createDemoDialog = function (scene, x, y) {
           scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63);
           return scene.rexUI.add.dialog({
               x: x,
@@ -969,7 +936,112 @@
               //.drawBounds(this.add.graphics(), 0xff0000)
               .popUp(500);
       };
-      UIManagerScene.prototype.createButton = function (scene, text, color, space) {
+      DialogScene.prototype.createCaughtText = function (x, y, cb) {
+          var _this = this;
+          var parent = this.add.container(0, 0);
+          var toastText = this.add.text(0, 0, 'You get Caught', { fontFamily: '"Arial"' });
+          // this.hasCaughtToast = true
+          // toastText.x = stageWidth / 2
+          // toastText.y = stageHeight / 2
+          toastText.setFontSize(42);
+          toastText.setColor('red');
+          toastText.setScale(0);
+          toastText.setOrigin(0.5);
+          toastText.setShadowBlur(0.5);
+          // let bg = this.rexUI.add.roundRectangle(0, 0, 100, 240, 0, 0x00ccbb)
+          var bg = this.add.graphics();
+          parent.add([toastText]);
+          this.tweens.add({
+              targets: toastText,
+              scale: 1,
+              duration: 232,
+              x: stageWidth$4 / 2,
+              y: stageHeight$4 / 2,
+              ease: 'Power3',
+              onComplete: function () {
+                  setTimeout(function () {
+                      _this.tweens.add({
+                          targets: toastText,
+                          scale: 0,
+                          duration: 232,
+                          ease: 'Power3',
+                          onComplete: function () {
+                              toastText.destroy;
+                          }
+                      });
+                  }, 432);
+              }
+          });
+          return toastText;
+      };
+      DialogScene.prototype.createGetCaughtDialog = function (x, y) {
+          var scene = this;
+          scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63);
+          // 你被抓住了 计划从左往右显示
+          // 然后发现做不到  Dialog 一定会在屏幕区域内显示
+          var popup = scene.rexUI.add.dialog({
+              x: 0,
+              y: 0,
+              background: scene.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0xf57f17),
+              content: scene.rexUI.add.label({
+                  background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0xbc5100),
+                  text: scene.add.text(0, 0, '\nYou get Caught!!\n', {
+                      fontSize: '30px'
+                  }),
+                  space: {
+                      left: 15,
+                      right: 15,
+                      top: 10,
+                      bottom: 10
+                  }
+              }),
+              // title: scene.rexUI.add.label({
+              //     background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0xbc5100),
+              //     text: scene.add.text(0, 0, 'Pick a color', {
+              //         fontSize: '20px'
+              //     }),
+              //     space: {
+              //         left: 15,
+              //         right: 15,
+              //         top: 10,
+              //         bottom: 10
+              //     }
+              // }),
+              // actions: [
+              //     scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63),
+              //     scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x673ab7),
+              //     scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x2196f3),
+              //     scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x00bcd4),
+              //     scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x4caf50),
+              //     scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xcddc39),
+              // ],
+              actionsAlign: 'left',
+              space: {
+                  title: 10,
+                  action: 5,
+                  left: 10,
+                  right: 10,
+                  top: 10,
+                  bottom: 10,
+              }
+          })
+              .layout()
+              .pushIntoBounds();
+          //.drawBounds(this.add.graphics(), 0xff0000)
+          // .popUp(500);
+          // this.tweens.add({
+          //     targets: popup,
+          //     x: stageWidth/2,
+          //     y: stageHeight/2,
+          //     duration: 400,
+          //     ease: 'Power3',
+          //     yoyo: true,
+          //     onComplete: () => {
+          //     }
+          // })
+          return popup;
+      };
+      DialogScene.prototype.createButton = function (scene, text, color, space) {
           return scene.rexUI.add.label({
               x: 0,
               y: 100,
@@ -987,7 +1059,113 @@
               }
           });
       };
-      return UIManagerScene;
+      return DialogScene;
+  }(Phaser.Scene));
+
+  var stageWidth$5 = document.body.clientWidth;
+  var stageHeight$5 = document.body.clientHeight;
+  var EffectScene = /** @class */ (function (_super) {
+      __extends(EffectScene, _super);
+      function EffectScene() {
+          return _super.call(this, EF_SCENE) || this;
+      }
+      EffectScene.prototype.preload = function () {
+          // this.load.scenePlugin({
+          //     key: 'rexuiplugin',
+          //     url: '/rexuiplugin.min.js',
+          //     sceneKey: 'rexUI'
+          // });
+          this.load.image('coin', 'assets/coin.png');
+          this.load.image('hammer', 'assets/hammer.png');
+      };
+      EffectScene.prototype.create = function () {
+      };
+      EffectScene.prototype.addCoin = function () {
+          var _this = this;
+          this.coin = this.add.image(stageWidth$5 / 2, stageHeight$5 / 2, 'coin');
+          // this.coin.displayWidth = 64
+          // this.coin.displayHeight = 64
+          // scale 是根据原图的大小而言的。
+          this.coin.setScale(0.1);
+          var dest = {
+              x: 390, y: 50
+          };
+          this.tweens.add({
+              targets: this.coin,
+              scale: 0.5,
+              duration: 132,
+              ease: 'Power4',
+              onComplete: function () {
+                  // cb()
+                  _this.tweens.add({
+                      targets: _this.coin,
+                      x: dest.x,
+                      y: dest.y,
+                      scale: 0,
+                      duration: 432,
+                      ease: 'Circ',
+                      onComplete: function () {
+                          // cb()
+                          _this.coin.destroy();
+                      }
+                  });
+              }
+          });
+      };
+      EffectScene.prototype.addHammer = function () {
+          var _this = this;
+          this.hammer = this.add.image(258, 327, 'hammer');
+          this.hammer.setScale(0.3);
+          this.hammer.rotation = 1;
+          this.tweens.add({
+              targets: this.hammer,
+              rotation: 1.5,
+              duration: 232,
+              yoyo: true,
+              ease: 'Power3',
+              onComplete: function () {
+                  // cb()
+                  _this.hammer.destroy();
+              }
+          });
+      };
+      return EffectScene;
+  }(Phaser.Scene));
+  //# sourceMappingURL=EffectManager.js.map
+
+  var stageWidth$6 = document.body.clientWidth;
+  var stageHeight$6 = document.body.clientHeight;
+  var BaseScene = /** @class */ (function (_super) {
+      __extends(BaseScene, _super);
+      function BaseScene() {
+          return _super.call(this, BASE_SCENE) || this;
+      }
+      BaseScene.prototype.init = function () {
+      };
+      BaseScene.prototype.preload = function () {
+          this.load.scenePlugin({
+              key: 'rexuiplugin',
+              url: '/rexuiplugin.min.js',
+              sceneKey: 'rexUI'
+          });
+      };
+      BaseScene.prototype.create = function () {
+          this.scene.launch(GAME_SCENE);
+          this.scene.launch(EF_SCENE);
+          this.scene.launch(UI_SCENE);
+          // this.scene.launch(UI_SCENE).start();
+          // this.scene.launch(EF_SCENE);        
+          // this.scene.launch(UI_SCENE)
+          // this.scene.launch(UI_SCENE).start();
+          // this.scene.launch(EF_SCENE);
+          // this.dialogScene.showWelcome()
+          // this.effScene.addHammer()
+          this.dialogScene = this.scene.get(UI_SCENE);
+          // this.effScene = this.scene.get(EF_SCENE) as EffectScene
+          // 此刻调用提示 rexUI undefined
+          // this.dialogScene.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
+      };
+      return BaseScene;
   }(Phaser.Scene));
 
   var offsetXPreview = 170;
@@ -1053,7 +1231,7 @@
                       height: previewHeight
                   },
               }, "*");
-          }, 300);
+          }, 1000);
       }, false);
   }
   // 测试嘴巴位置
@@ -1147,28 +1325,32 @@
   }
   // 获取鼠标点击位置
   function testClickEvent(game) {
-      game.scene.getScene(GAME_SCENE).input.on('pointerup', function (pointer) {
-          var touchX = pointer.x;
-          var touchY = pointer.y;
-          // let x = game.input.mousePointer.x;
-          // let y = game.input.mousePointer.y;
-          console.log('clickXY', touchX, touchY);
-          // ...
-      });
+      window.addEventListener('load', function () {
+          setTimeout(function () {
+              game.scene.getScene(GAME_SCENE).input.on('pointerup', function (pointer) {
+                  var touchX = pointer.x;
+                  var touchY = pointer.y;
+                  // let x = game.input.mousePointer.x;
+                  // let y = game.input.mousePointer.y;
+                  console.log('clickXY', touchX, touchY);
+                  // ...
+              });
+          });
+      }, false);
   }
   //# sourceMappingURL=test.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
   // import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
-  var stageWidth$5 = document.body.clientWidth;
-  var stageHeight$5 = document.body.clientHeight;
+  var stageWidth$7 = document.body.clientWidth;
+  var stageHeight$7 = document.body.clientHeight;
   var config = {
       type: Phaser.AUTO,
       parent: 'phaser-example',
-      width: stageWidth$5,
-      height: stageHeight$5,
-      scene: [Demo, UIManagerScene],
+      width: stageWidth$7,
+      height: stageHeight$7,
+      scene: [BaseScene, Demo, EffectScene, DialogScene],
       transparent: true,
       physics: {
           "default": 'arcade',
@@ -1179,12 +1361,10 @@
       },
   };
   var game = new Phaser.Game(config);
-  console.log(game.scene.isSleeping(UI_SCENE));
-  setTimeout(function () {
-      changeMouth();
-      setPreview();
-      testClickEvent(game);
-  }, 0);
+  console.log(game.scene.isSleeping(BASE_SCENE));
+  changeMouth();
+  setPreview();
+  testClickEvent(game);
 
 }());
 //# sourceMappingURL=game.js.map

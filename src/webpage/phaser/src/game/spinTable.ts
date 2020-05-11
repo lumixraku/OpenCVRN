@@ -42,6 +42,7 @@ export default class SpinTable {
             this.spSpin.alpha = 0.5
 
         // }
+        
 
         let bds: Rectagle = this.spSpin.getBounds()
         let width = bds.width
