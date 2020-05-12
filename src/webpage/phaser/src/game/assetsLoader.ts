@@ -1,4 +1,5 @@
 import { Scene } from "phaser";
+import { DOGCOOK } from "@root/constants";
 
 
 
@@ -24,7 +25,10 @@ export default class AssetsLoader {
         scene.load.image('food5', 'assets/donut.png');
 
         scene.load.image('doglook', 'assets/front.png');
-        scene.load.image('dogcook', 'assets/back.png');
+
+        // 应当使用 gif 中的某一帧
+        // scene.load.image('dogcook', 'assets/back.png');
+        scene.load.image(DOGCOOK, `assets/dogeFrame/frame_00_delay-0.04s.gif`)
 
         this.loadDogeAnimation()
     }

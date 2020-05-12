@@ -187,7 +187,6 @@
       };
       return SpinTable;
   }());
-  //# sourceMappingURL=spinTable.js.map
 
   var Point$2 = Phaser.Geom.Point;
   var Vector2 = Phaser.Math.Vector2;
@@ -417,7 +416,9 @@
           scene.load.image('food4', 'assets/french-fries.png');
           scene.load.image('food5', 'assets/donut.png');
           scene.load.image('doglook', 'assets/front.png');
-          scene.load.image('dogcook', 'assets/back.png');
+          // 应当使用 gif 中的某一帧
+          // scene.load.image('dogcook', 'assets/back.png');
+          scene.load.image(DOGCOOK, "assets/dogeFrame/frame_00_delay-0.04s.gif");
           this.loadDogeAnimation();
       };
       AssetsLoader.prototype.loadDogeAnimation = function () {
@@ -456,7 +457,6 @@
               key: DOG_LOOKBACK_ANIMI,
               frames: makeFrames(),
               frameRate: 1 / 0.04,
-              repeat: -1
           });
       };
       return AnimateManager;
@@ -482,11 +482,13 @@
           _this.frameCounter = 0;
           _this.addCounter = 0;
           _this.assetsLoader = new AssetsLoader(_this);
+          _this.messageListener();
           return _this;
       }
       Demo.prototype.preload = function () {
           this.assetsLoader.loadPics();
       };
+      // preload 中的资源都加载完毕之后 才会调用 create
       Demo.prototype.create = function () {
           this.bg = this.add.graphics();
           this.drawBackground();
@@ -496,7 +498,6 @@
           // Phaser会根据 add 的先后顺序决定层级.
           this.mouthObj = new Mouth(this);
           this.refreshMouth([], [], [], []);
-          this.messageListener();
           this.addText();
           this.dialogScene = this.scene.get(UI_SCENE);
           this.effScene = this.scene.get(EF_SCENE);
@@ -594,7 +595,12 @@
           }
       };
       Demo.prototype.refreshMouth = function (upperTop, upperBottom, lowerTop, lowerBottom) {
-          this.mouthObj.setMouthContourPoints(upperTop, upperBottom, lowerTop, lowerBottom);
+          if (this.refreshMouth) {
+              this.mouthObj.setMouthContourPoints(upperTop, upperBottom, lowerTop, lowerBottom);
+          }
+          else {
+              console.warn('mouth obj has not ready');
+          }
       };
       Demo.prototype.messageListener = function () {
           var _this = this;
@@ -608,12 +614,8 @@
                       _this.refreshFaceBounds(of.bounds, of.face);
                       break;
                   case MSG_TYPE_CAM:
-                      setTimeout(function () {
-                          console.log("MSG_TYPE_CAM");
-                      }, 1000);
-                      var previewArea = event.data.previewArea;
-                      _this.previewArea = previewArea;
-                      _this.camFaceCheck.setCameraArea(previewArea);
+                      console.log("MSG_TYPE_CAM");
+                      _this.setCameraArea(event);
               }
           }, false);
           // 告知 RN webview 事件绑定上了
@@ -624,6 +626,20 @@
                   time: +new Date
               };
               window["ReactNativeWebView"].postMessage(JSON.stringify(msg));
+          }
+      };
+      Demo.prototype.setCameraArea = function (event) {
+          var _this = this;
+          if (this.camFaceCheck) {
+              var previewArea = event.data.previewArea;
+              this.previewArea = previewArea;
+              this.camFaceCheck.setCameraArea(previewArea);
+          }
+          else {
+              console.log("camFaceCheck not defined!!!");
+              setTimeout(function () {
+                  _this.setCameraArea(event);
+              }, 100);
           }
       };
       // 所有的 offset 都移动到了 RN 的部分处理
@@ -1450,7 +1466,6 @@
   changeMouth();
   setPreview();
   testClickEvent(game);
-  //# sourceMappingURL=index.js.map
 
 }());
 //# sourceMappingURL=game.js.map

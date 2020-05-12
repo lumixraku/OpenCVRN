@@ -78,6 +78,7 @@ export default class Demo extends Phaser.Scene {
     constructor() {
         super(GAME_SCENE);
         this.assetsLoader = new AssetsLoader(this)
+        this.messageListener()
 
 
     }
@@ -86,6 +87,8 @@ export default class Demo extends Phaser.Scene {
         this.assetsLoader.loadPics()
     }
 
+
+    // preload 中的资源都加载完毕之后 才会调用 create
     create() {
         this.bg = this.add.graphics()
 
@@ -99,7 +102,6 @@ export default class Demo extends Phaser.Scene {
         this.refreshMouth([], [], [], [])
 
 
-        this.messageListener()
         this.addText();
         
         this.dialogScene =  this.scene.get(UI_SCENE) as DialogScene
@@ -227,7 +229,12 @@ export default class Demo extends Phaser.Scene {
 
 
     refreshMouth(upperTop: Point[], upperBottom: Point[], lowerTop: Point[], lowerBottom: Point[]) {
-        this.mouthObj.setMouthContourPoints(upperTop, upperBottom, lowerTop, lowerBottom)
+        if (this.refreshMouth) {
+            this.mouthObj.setMouthContourPoints(upperTop, upperBottom, lowerTop, lowerBottom)
+
+        } else {
+            console.warn('mouth obj has not ready')
+        }
 
     }
 
@@ -243,19 +250,12 @@ export default class Demo extends Phaser.Scene {
 
                     break;
                 case MSG_TYPE_CAM:
-                    setTimeout(() => {
-                        console.log("MSG_TYPE_CAM")
-                    }, 1000)
-                    let previewArea = event.data.previewArea
-                    this.previewArea = previewArea
-                    this.camFaceCheck.setCameraArea(previewArea)
+                    console.log("MSG_TYPE_CAM")
+                    this.setCameraArea(event)
+
                 default:
                     break;
             }
-
-
-
-
         }, false)
 
         // 告知 RN webview 事件绑定上了
@@ -266,6 +266,20 @@ export default class Demo extends Phaser.Scene {
                 time: +new Date
             }
             window["ReactNativeWebView"].postMessage(JSON.stringify(msg));
+        }
+    }
+
+    setCameraArea(event) {
+        if (this.camFaceCheck) {
+
+            let previewArea = event.data.previewArea
+            this.previewArea = previewArea
+            this.camFaceCheck.setCameraArea(previewArea)
+        }else {
+            console.log("camFaceCheck not defined!!!")
+            setTimeout( ()=> {
+                this.setCameraArea(event)
+            }, 100)
         }
     }
 
