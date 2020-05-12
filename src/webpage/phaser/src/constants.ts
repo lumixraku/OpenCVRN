@@ -19,6 +19,10 @@ const CHECK_PROB = 0.9 //回头检测的概率
 const CHECKING_DURATION = 3000
 
 
+// animation
+const DOG_LOOKBACK_ANIMI = 'lookback'
+const DOG_TOCOOK_ANIMI = 'cookAgain'
+
 export {
   MSG_TYPE_FACE,
   MSG_TYPE_CAM,
@@ -29,6 +33,10 @@ export {
   CHECKING_INTERVAL,
   CHECK_PROB,
   CHECKING_DURATION,
+
+  DOG_LOOKBACK_ANIMI,
+  DOG_TOCOOK_ANIMI,
+
 
   BASE_SCENE,
   GAME_SCENE,

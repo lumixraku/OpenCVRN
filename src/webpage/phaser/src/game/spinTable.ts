@@ -37,7 +37,7 @@ export default class SpinTable {
     }
 
     addToContainer(scene: Scene){
-        this.spSpin = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
+        this.spSpin = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'table');
         // if (isPC) {
             this.spSpin.alpha = 0.5
 

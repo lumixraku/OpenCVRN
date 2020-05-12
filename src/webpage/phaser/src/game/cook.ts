@@ -4,9 +4,12 @@ import Sprite = Phaser.GameObjects.Sprite;
 import Circle = Phaser.Geom.Circle;
 import Point = Phaser.Geom.Point;
 
-import { DOGLOOK, DOGCOOK, CHECKING_INTERVAL } from '@root/constants'
+import { DOGLOOK, DOGCOOK, CHECKING_INTERVAL, DOG_LOOKBACK_ANIMI } from '@root/constants'
 
-export default class Cook extends Image  {
+
+// Phaser.Sprite 中可以 play 动画
+// 但是 Phaser.Image 不行
+export default class Cook extends Sprite  {
     checking: boolean;  //回头观察
     private cooking: boolean = true;
     image: Image;
@@ -31,6 +34,7 @@ export default class Cook extends Image  {
         this.checking = true
         this.cooking = false
         this.startCheckingTime = +new Date
+        this.play(DOG_LOOKBACK_ANIMI)
     }
 
 
@@ -54,4 +58,20 @@ export default class Cook extends Image  {
         let timeGap = +new Date - this.endCheckingTime
         return (timeGap < CHECKING_INTERVAL) 
     }
+
+    // createAnimate() {
+    //     this.anims.create({
+    //         key: 'snooze',
+    //         frames: [
+    //             { key: 'cat1' },
+    //             { key: 'cat2' },
+    //             { key: 'cat3' },
+    //             { key: 'cat4', duration: 50 }
+    //         ],
+    //         frameRate: 8,
+    //         repeat: -1
+    //     });
+
+
+    // }
 }

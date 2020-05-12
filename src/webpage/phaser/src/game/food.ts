@@ -12,7 +12,4 @@ export default class Food extends Image {
     this.width = 64
     this.height = 64
   }
-
-
-
 }
