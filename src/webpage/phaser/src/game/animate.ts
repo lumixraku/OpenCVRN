@@ -17,11 +17,8 @@ export default class AnimateManager {
     testDog: Sprite
 
     constructor(scene: Scene) {
-
         // 此刻 scene 还没有准备好
         this.scene = scene
-
-        
     }
 
     createDoge() {
@@ -45,7 +42,7 @@ export default class AnimateManager {
             key: DOG_LOOKBACK_ANIMI,
             frames: makeFrames(),
             frameRate: 1/0.04, // 原始 gif 每一帧仅占用 0.04s
-            repeat: -1
+            // repeat: -1
         })
     }
 
