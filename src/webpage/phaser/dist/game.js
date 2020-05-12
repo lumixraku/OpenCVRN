@@ -16,6 +16,8 @@
   var DOGCOOK = 'dogcook';
   var CHECKING_INTERVAL = 2000; // 回头检测的最短间隔
   var CHECKING_DURATION = 3000;
+  // animation
+  var DOG_LOOKBACK_ANIMI = 'lookback';
   //# sourceMappingURL=constants.js.map
 
   /*! *****************************************************************************
@@ -146,7 +148,7 @@
           this.spSpinSpeed = spinSpeed;
       }
       SpinTable.prototype.addToContainer = function (scene) {
-          this.spSpin = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'pinWheel');
+          this.spSpin = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'table');
           // if (isPC) {
           this.spSpin.alpha = 0.5;
           // }
@@ -355,7 +357,9 @@
   }());
   //# sourceMappingURL=facePosCheck.js.map
 
-  var Image = Phaser.GameObjects.Image;
+  var Sprite = Phaser.GameObjects.Sprite;
+  // Phaser.Sprite 中可以 play 动画
+  // 但是 Phaser.Image 不行
   var Cook = /** @class */ (function (_super) {
       __extends(Cook, _super);
       function Cook(scene, x, y) {
@@ -375,6 +379,7 @@
           this.checking = true;
           this.cooking = false;
           this.startCheckingTime = +new Date;
+          this.play(DOG_LOOKBACK_ANIMI);
       };
       Cook.prototype.cookAgain = function () {
           this.setTexture('dogcook', 0);
@@ -392,8 +397,71 @@
           return (timeGap < CHECKING_INTERVAL);
       };
       return Cook;
-  }(Image));
+  }(Sprite));
   //# sourceMappingURL=cook.js.map
+
+  var AssetsLoader = /** @class */ (function () {
+      function AssetsLoader(scene) {
+          this.scene = scene;
+      }
+      AssetsLoader.prototype.loadPics = function () {
+          var scene = this.scene;
+          // yarn run dev 的时候 这个资源也还是从 dist 中读取的
+          scene.load.image('bgImg', 'assets/kitchen.png');
+          scene.load.image('table', 'assets/table.png');
+          scene.load.image('light', 'assets/light.png');
+          scene.load.image('food0', 'assets/burger.png');
+          scene.load.image('food1', 'assets/burrito.png');
+          scene.load.image('food2', 'assets/cheese-burger.png');
+          scene.load.image('food3', 'assets/chicken-leg.png');
+          scene.load.image('food4', 'assets/french-fries.png');
+          scene.load.image('food5', 'assets/donut.png');
+          scene.load.image('doglook', 'assets/front.png');
+          scene.load.image('dogcook', 'assets/back.png');
+          this.loadDogeAnimation();
+      };
+      AssetsLoader.prototype.loadDogeAnimation = function () {
+          var scene = this.scene;
+          var endIndex = 47;
+          for (var idx = 0; idx <= endIndex; idx++) {
+              var idxStr = (idx < 10) ? '0' + idx : '' + idx;
+              var fname = "assets/dogeFrame/frame_" + idxStr + "_delay-0.04s.gif";
+              var keyname = "dogeFrame" + idx;
+              scene.load.image(keyname, fname);
+          }
+      };
+      return AssetsLoader;
+  }());
+  //# sourceMappingURL=assetsLoader.js.map
+
+  var AnimateManager = /** @class */ (function () {
+      function AnimateManager(scene) {
+          // 此刻 scene 还没有准备好
+          this.scene = scene;
+      }
+      AnimateManager.prototype.createDoge = function () {
+          var scene = this.scene;
+          var makeFrames = function () {
+              var arr = [];
+              var endIndex = 47;
+              for (var idx = 0; idx <= endIndex; idx++) {
+                  var keyname = "dogeFrame" + idx;
+                  arr.push({
+                      key: keyname,
+                  });
+              }
+              return arr;
+          };
+          this.doge = scene.anims.create({
+              key: DOG_LOOKBACK_ANIMI,
+              frames: makeFrames(),
+              frameRate: 1 / 0.04,
+              repeat: -1
+          });
+      };
+      return AnimateManager;
+  }());
+  //# sourceMappingURL=animate.js.map
 
   var Point$3 = Phaser.Geom.Point;
   var Rectagle$2 = Phaser.Geom.Rectangle;
@@ -413,23 +481,11 @@
           _this.previewArea = new Rectagle$2(0, 0, 0, 0);
           _this.frameCounter = 0;
           _this.addCounter = 0;
+          _this.assetsLoader = new AssetsLoader(_this);
           return _this;
       }
       Demo.prototype.preload = function () {
-          // yarn run dev 的时候 这个资源也还是从 dist 中读取的
-          this.load.image('bgImg', 'assets/kitchen.png');
-          this.load.image('pinWheel', 'assets/pinWheel.png');
-          this.load.image('light', 'assets/light.png');
-          this.load.image('food0', 'assets/burger.png');
-          this.load.image('food1', 'assets/burrito.png');
-          this.load.image('food2', 'assets/cheese-burger.png');
-          this.load.image('food3', 'assets/chicken-leg.png');
-          this.load.image('food4', 'assets/french-fries.png');
-          this.load.image('food5', 'assets/donut.png');
-          this.load.image('doglook', 'assets/front.png');
-          this.load.image('dogcook', 'assets/back.png');
-          // this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
-          // this.load.glsl('stars', 'assets/starfields.glsl.js');
+          this.assetsLoader.loadPics();
       };
       Demo.prototype.create = function () {
           this.bg = this.add.graphics();
@@ -444,6 +500,8 @@
           this.addText();
           this.dialogScene = this.scene.get(UI_SCENE);
           this.effScene = this.scene.get(EF_SCENE);
+          this.animateManager = new AnimateManager(this);
+          this.animateManager.createDoge();
       };
       Demo.prototype.update = function (time, delta) {
           this.rotateTable();
@@ -643,9 +701,7 @@
       };
       Demo.prototype.caughtAnimation = function () {
           this.effScene.addHammer();
-          // this.showCaughtToast('You get caught!!!!', 1000, () => {
-          //     // this.scoreText.text = +(this.scoreText.text) + 1 + ''
-          // })
+          this.dialogScene.createCaughtText(stageWidth$3 / 2, stageHeight$3 / 2, function () { });
       };
       Demo.prototype.missAnimation = function () {
       };
@@ -742,6 +798,8 @@
       return Demo;
   }(Phaser.Scene));
 
+  var Point$4 = Phaser.Geom.Point;
+  var Rectagle$3 = Phaser.Geom.Rectangle;
   var stageWidth$4 = document.body.clientWidth;
   var stageHeight$4 = document.body.clientHeight;
   var DialogScene = /** @class */ (function (_super) {
@@ -760,7 +818,6 @@
           this.welcome = this.createWelcomeDialog(this, 300, 500);
           this.testView = this.createDemoDialog(this, 0, 0);
           // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
-          this.createCaughtText(stageWidth$4 / 2, stageHeight$4 / 2, function () { });
           this.welcome.visible = false;
           this.testView.visible = false;
       };
@@ -938,41 +995,48 @@
       };
       DialogScene.prototype.createCaughtText = function (x, y, cb) {
           var _this = this;
-          var parent = this.add.container(0, 0);
-          var toastText = this.add.text(0, 0, 'You get Caught', { fontFamily: '"Arial"' });
+          var containerWidth = 400;
+          var containerHeight = 100;
+          var containerPos = new Point$4(stageWidth$4 / 2, stageHeight$4 / 2 * 1.6);
+          var container = this.add.container(containerPos.x, stageHeight$4);
+          var toastText = this.add.text(0, 0, 'You get Caught!!', { fontFamily: '"Arial"' });
           // this.hasCaughtToast = true
           // toastText.x = stageWidth / 2
           // toastText.y = stageHeight / 2
           toastText.setFontSize(42);
           toastText.setColor('red');
-          toastText.setScale(0);
+          // toastText.setScale(0)
           toastText.setOrigin(0.5);
-          toastText.setShadowBlur(0.5);
           // let bg = this.rexUI.add.roundRectangle(0, 0, 100, 240, 0, 0x00ccbb)
-          var bg = this.add.graphics();
-          parent.add([toastText]);
+          // 使用graphics的时候都是从左上角开始画  
+          // 而 container 的默认origin 是中心位置， （且无法更改？？）
+          // 添加元素的时候也是将子元素的origin 和 父容器的origin 对齐
+          // graphic 的 origin 是左上角
+          var bg = this.drawRoundRect(new Rectagle$3(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, 0x99aaee, 5, 0xaabbff);
+          container.add([bg, toastText]);
           this.tweens.add({
-              targets: toastText,
+              targets: container,
               scale: 1,
               duration: 232,
-              x: stageWidth$4 / 2,
-              y: stageHeight$4 / 2,
+              x: containerPos.x,
+              y: containerPos.y,
               ease: 'Power3',
               onComplete: function () {
                   setTimeout(function () {
                       _this.tweens.add({
-                          targets: toastText,
-                          scale: 0,
+                          targets: container,
+                          y: stageHeight$4 * 1.2,
+                          alpha: 0,
                           duration: 232,
                           ease: 'Power3',
                           onComplete: function () {
-                              toastText.destroy;
+                              container.destroy();
                           }
                       });
                   }, 432);
               }
           });
-          return toastText;
+          return container;
       };
       DialogScene.prototype.createGetCaughtDialog = function (x, y) {
           var scene = this;
@@ -1059,8 +1123,28 @@
               }
           });
       };
+      DialogScene.prototype.drawRoundRect = function (size, radius, color, borderWidth, borderColor) {
+          var bg = this.add.graphics();
+          bg.clear();
+          bg.beginPath();
+          var x = size.x;
+          var y = size.y;
+          var width = size.width;
+          var height = size.height;
+          bg.fillStyle(color);
+          // 没有 setOrigin 函数   graphics 的 origin 就是左上角
+          bg.fillRoundedRect(x, y, width, height, radius);
+          if (borderWidth) {
+              var x2 = x + borderWidth;
+              var y2 = y + borderWidth;
+              bg.fillStyle(borderColor);
+              bg.fillRoundedRect(x2, y2, width - 2 * borderWidth, height - 2 * borderWidth, radius - borderWidth);
+          }
+          return bg;
+      };
       return DialogScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=DialogManager.js.map
 
   var stageWidth$5 = document.body.clientWidth;
   var stageHeight$5 = document.body.clientHeight;
@@ -1167,6 +1251,7 @@
       };
       return BaseScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=BaseScene.js.map
 
   var offsetXPreview = 170;
   var offsetYPreview = 250;
@@ -1365,6 +1450,7 @@
   changeMouth();
   setPreview();
   testClickEvent(game);
+  //# sourceMappingURL=index.js.map
 
 }());
 //# sourceMappingURL=game.js.map

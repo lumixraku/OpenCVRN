@@ -1,6 +1,15 @@
 import { Scene } from "phaser";
-import { UI_SCENE } from "@root/constants";
+import PhaserImage = Phaser.GameObjects.Image;
+import Sprite = Phaser.GameObjects.Sprite;
+import Circle = Phaser.Geom.Circle;
+import Point = Phaser.Geom.Point;
+import Rectagle = Phaser.Geom.Rectangle;
+import Graphics = Phaser.GameObjects.Graphics;
+import PhaserText = Phaser.GameObjects.Text;
 
+ 
+import { UI_SCENE } from "@root/constants";
+import { World } from "matter";
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
 
@@ -26,6 +35,7 @@ export default class DialogScene extends Phaser.Scene {
             sceneKey: 'rexUI'
         });
 
+
     }
 
     create() {
@@ -34,7 +44,6 @@ export default class DialogScene extends Phaser.Scene {
         this.testView = this.createDemoDialog(this, 0, 0)
         // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
         
-        this.createCaughtText(stageWidth/2, stageHeight/2, ()=> {})
 
         this.welcome.visible = false
         this.testView.visible = false
@@ -285,51 +294,60 @@ export default class DialogScene extends Phaser.Scene {
 
     }
 
-    createCaughtText(x:number, y:number, cb: Function ): PhaserText {
-        let parent = this.add.container(0, 0)
-
-
-        let toastText = this.add.text(0, 0, 'You get Caught', { fontFamily: '"Arial"' })
+    createCaughtText(x:number, y:number, cb: Function ):Phaser.GameObjects.Container  {
+        let containerWidth = 400
+        let containerHeight = 100
+        let containerPos = new Point(stageWidth/2,  stageHeight/2 * 1.6)
+        let container = this.add.container(containerPos.x, stageHeight)
+                
+        let toastText = this.add.text(0, 0, 'You get Caught!!', { fontFamily: '"Arial"' })
         // this.hasCaughtToast = true
         // toastText.x = stageWidth / 2
         // toastText.y = stageHeight / 2
         toastText.setFontSize(42)
         toastText.setColor('red')
-        toastText.setScale(0)
+        // toastText.setScale(0)
         toastText.setOrigin(0.5)
-        toastText.setShadowBlur(0.5)
 
         // let bg = this.rexUI.add.roundRectangle(0, 0, 100, 240, 0, 0x00ccbb)
-        let bg = this.add.graphics()
-        this.faceRect.lineStyle(5, 0xFF00FF, 1.0);
+        // 使用graphics的时候都是从左上角开始画  
+        // 而 container 的默认origin 是中心位置， （且无法更改？？）
+        // 添加元素的时候也是将子元素的origin 和 父容器的origin 对齐
+        // graphic 的 origin 是左上角
+        let bg = this.drawRoundRect(
+            new Rectagle(-containerWidth/2, -containerHeight/2, containerWidth, containerHeight), 
+            20, 
+            0x99aaee,
+            5,
+            0xaabbff,            
+        )
         
         
-        parent.add([toastText])
+        container.add([bg, toastText])
 
         this.tweens.add({
-            targets: toastText,
+            targets: container,
             scale: 1,
             duration: 232,
-            x: stageWidth / 2,
-            y: stageHeight / 2,            
+            x: containerPos.x,
+            y: containerPos.y,            
             ease: 'Power3',
             onComplete: () => {
                 setTimeout(()=> {
                     this.tweens.add({
-                        targets: toastText,
-                        scale: 0,
+                        targets: container,
+                        y: stageHeight * 1.2,
+                        alpha:0,
                         duration: 232,
                         ease: 'Power3',                    
                         onComplete: () => {
-                            toastText.destroy
+                            container.destroy()
                         }
                     })
-
                 }, 432)
             }
         })
-
-        return toastText
+        return container        
     }
 
     createGetCaughtDialog(x: number, y: number): UI.Dialog {
@@ -432,6 +450,32 @@ export default class DialogScene extends Phaser.Scene {
         });
     }
 
+    drawRoundRect(size: Rectagle, radius:number,  color: any, borderWidth?:number, borderColor?: any) {
+
+        
+        let bg = this.add.graphics()
+        bg.clear()
+        bg.beginPath()
+
+        let x = size.x
+        let y = size.y
+        let width = size.width
+        let height = size.height
+        bg.fillStyle(color)
+        // 没有 setOrigin 函数   graphics 的 origin 就是左上角
+        bg.fillRoundedRect(x, y, width, height, radius)
+
+        if (borderWidth) {
+            let x2 = x + borderWidth
+            let y2 = y + borderWidth
+            bg.fillStyle( borderColor )
+            bg.fillRoundedRect(x2, y2, width- 2* borderWidth, height - 2 * borderWidth, radius - borderWidth)
+        }        
+        
+
+        return bg
+
+    }
 
 }
 

@@ -26,9 +26,14 @@ import { UIPlugin } from 'UI';
 import { Scene } from 'phaser';
 import DialogScene from '@root/UI/DialogManager';
 import EffectScene from '@root/UI/EffectManager';
+import AssetsLoader from './assetsLoader';
+import AnimateManager from './animate';
 
 
 export default class Demo extends Phaser.Scene {
+    public assetsLoader: AssetsLoader
+    public animateManager: AnimateManager
+
     // // 旋转圆心
     public spinTable: SpinTable
     public spSpinSpeed: number = 1;
@@ -69,31 +74,16 @@ export default class Demo extends Phaser.Scene {
     private dialogScene: DialogScene;
     private effScene: EffectScene;
 
+
     constructor() {
         super(GAME_SCENE);
+        this.assetsLoader = new AssetsLoader(this)
+
+
     }
 
     preload() {
-
-        // yarn run dev 的时候 这个资源也还是从 dist 中读取的
-        this.load.image('bgImg', 'assets/kitchen.png');
-        this.load.image('pinWheel', 'assets/pinWheel.png');
-        this.load.image('light', 'assets/light.png');
-
-        this.load.image('food0', 'assets/burger.png');
-        this.load.image('food1', 'assets/burrito.png');
-        this.load.image('food2', 'assets/cheese-burger.png');
-        this.load.image('food3', 'assets/chicken-leg.png');
-        this.load.image('food4', 'assets/french-fries.png');
-        this.load.image('food5', 'assets/donut.png');
-
-        this.load.image('doglook', 'assets/front.png');
-        this.load.image('dogcook', 'assets/back.png');
-
-
-        // this.load.glsl('bundle', 'assets/plasma-bundle.glsl.js');
-        // this.load.glsl('stars', 'assets/starfields.glsl.js');
-
+        this.assetsLoader.loadPics()
     }
 
     create() {
@@ -114,7 +104,11 @@ export default class Demo extends Phaser.Scene {
         
         this.dialogScene =  this.scene.get(UI_SCENE) as DialogScene
         this.effScene = this.scene.get(EF_SCENE) as EffectScene
+        
 
+        this.animateManager = new AnimateManager(this)        
+        this.animateManager.createDoge()
+        
     }
 
 
@@ -374,9 +368,8 @@ export default class Demo extends Phaser.Scene {
 
     caughtAnimation() {
         this.effScene.addHammer()
-        // this.showCaughtToast('You get caught!!!!', 1000, () => {
-        //     // this.scoreText.text = +(this.scoreText.text) + 1 + ''
-        // })
+        this.dialogScene.createCaughtText(stageWidth/2, stageHeight/2, ()=> {})
+
     }
 
     missAnimation(){
