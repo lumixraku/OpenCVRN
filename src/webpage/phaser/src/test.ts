@@ -172,7 +172,7 @@ function changeMouth(game: Phaser.Game) {
               changeDir = (++changeDir) % 4
             }
 
-            moveFace(oneFace, changeDir)
+            // moveFace(oneFace, changeDir)
             let afterOffsetForFaceData = addOffsetForFaceData(oneFace)
 
             window.postMessage({

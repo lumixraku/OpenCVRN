@@ -33,17 +33,11 @@ var previewHeightDefault = previewWidthDefault * 16 / 9
 export { offsetXPreviewDefault , offsetYPreviewDefault , previewWidthDefault, previewHeightDefault }
 
 export default StyleSheet.create({
-  imagePreview: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    left: 0,
-    bottom: 60,
-  },
   container: {
     flex: 1,
     // flexDirection: 'row',
     position:'relative',
+    zIndex:0
   },
   repeatPhotoContainer: {
     position: 'absolute',
@@ -100,15 +94,14 @@ export default StyleSheet.create({
     fontSize: 15,
     marginRight: 10,
   },
-
-
   box1: {
     position: 'absolute',
     top: 170,
     left: 170,
     width: 100,
     height: 100,
-    backgroundColor: 'red'
+    backgroundColor: 'red',
+    zIndex:120
   },
   preview: {
     position: 'absolute',
@@ -116,6 +109,7 @@ export default StyleSheet.create({
     left: offsetXPreviewDefault,
     width: previewWidthDefault,
     height: previewHeightDefault,
+    zIndex:1
     // flex: 1,
     // justifyContent: 'flex-end',
     // alignItems: 'center',
@@ -139,6 +133,7 @@ export default StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
+    zIndex:500
   },
   webview: {
     flex:1,

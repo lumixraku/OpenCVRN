@@ -21,7 +21,7 @@ import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, MSG_TYPE_FACE_TARG
 
 import _ from 'underscore'
 
-var webviewURL = 'http://10.12.113.125:5001/';
+var webviewURL = 'http://10.12.167.81:5001/';
 // var webviewURL = 'http://47.92.222.162:3001/
 // var webviewLocal = 'file:///android_asset/index.html' // blob 请求无法识别
 // var webviewSource = require("../../android/app/src/main/assets/index.html") // 报错
@@ -73,9 +73,6 @@ export default class CameraScreen extends Component {
       })
       console.log('throttleFN ')
     }, 100);
-
-
-
   }
 
   state = {
@@ -169,7 +166,6 @@ export default class CameraScreen extends Component {
 
   calcPreviewOffset(faceBounds) {
     let { targetFaceBounds } = this.state
-    console.log('targetFaceBounds', targetFaceBounds)
     // 表示还未设定过值
     if (targetFaceBounds.origin.x == -1) {
       let rs = this.facePosCheck.checkFacePosition(faceBounds)
@@ -187,19 +183,58 @@ export default class CameraScreen extends Component {
 
   }
 
-
-
   renderFace(faceData) {
     if (faceData && faceData.bounds) { // && faceData.bounds 是为了确定检测到脸
-      this.calcPreviewOffset(faceData.bounds)
       let offsetFaceData = addOffsetForFaceData(faceData)
-      console.log("faceData", faceData)
-      console.log("offsetFaceData", offsetFaceData)
+      this.calcPreviewOffset(offsetFaceData.bounds)
+      // console.log("faceData", faceData)
+      // console.log("offsetFaceData", offsetFaceData)
 
       postToWebview(this.webref, {
         faceData: offsetFaceData,
         messageType: MSG_TYPE_FACE,
       });
+      
+      let { bounds } = offsetFaceData;
+      let centerX = bounds.origin.x + bounds.size.width / 2
+      let centerY = bounds.origin.y + bounds.size.height / 2
+      let noOffsetX = centerX - offsetXPreviewDefault
+      let noOffsetY = centerY - offsetYPreviewDefault
+      console.log('noOffset',  centerX, centerY, noOffsetX, noOffsetY)
+      // 没有办法弄相对于屏幕的absolute
+      // zIndex 无法遮盖。。。不懂。。。
+
+      return (
+        <View>
+          <View
+            transform={[
+              { perspective: 600 },
+            ]}
+            style={[
+              styles.face,
+              {
+                ...bounds.size,
+                left: noOffsetX,
+                top: noOffsetY,
+                zIndex: 150
+              },
+            ]}
+          ></View>          
+          <View
+            style={{
+              position: "absolute",
+              height: 10,
+              width: 10,
+              left: noOffsetX,
+              top: noOffsetY,
+              backgroundColor: 'lime',
+              zIndex: 150
+            }}>
+          </View>             
+        </View>
+      )
+
+
     }
   }
 
@@ -315,24 +350,36 @@ export default class CameraScreen extends Component {
     )
   }
 
+
+  renderBounds() {
+    return (
+      <View className="boundsContainer" style={styles.facesContainer} pointerEvents="none">
+        {this.state.faces ? this.state.faces.map(this.renderBound) : null}
+      </View>
+    )
+  }
+
+  renderBound(){
+    
+  }
+
   componentWillUpdate() {
 
   }
 
   render() {
     let { previewOffset } = this.state
-    console.log("preview offset", previewOffset)
     return (
       <View style={styles.container}>
-        {/* <View style={styles.box1}></View> */}
+        <View style={styles.box1}></View>
         <RNCamera
           ref={(cam) => {
             this.camera = cam;
           }}
           // style={styles.preview}
           style={[styles.preview, {
-            top: offsetYPreviewDefault, //  + previewOffset.y,
-            left: offsetXPreviewDefault, // + previewOffset.x,
+            top: offsetYPreviewDefault, // + previewOffset.y,
+            left: offsetXPreviewDefault + previewOffset.x,
             width: previewWidthDefault,
             height: previewHeightDefault,
           }]}
@@ -354,24 +401,21 @@ export default class CameraScreen extends Component {
         >
           {this.renderFaces()}
           {this.renderAllContours()}
+          {this.renderBounds()}
         </RNCamera>
-        <View style={styles.webViewContainer}>
-          <WebView
-            // ref={this.webref}
-            ref={(r) => (this.webref = r)}
-            style={[styles.webview, { backgroundColor: this.state.webviewBG }]}
-            onMessage={this.onMessageFromWeb}
-            source={{
-              uri: webviewURL,
-            }}
-            onLoadEnd={this.onWebviewLoadEnd}
-            originWhitelist={['*']}
-          // source={{
-          //   baseUrl: '',
-          //   html: webviewSource
-          // }}
-          />
-        </View>
+          <View style={styles.webViewContainer}>
+            <WebView
+              // ref={this.webref}
+              ref={(r) => (this.webref = r)}
+              style={[styles.webview, { backgroundColor: this.state.webviewBG }]}
+              onMessage={this.onMessageFromWeb}
+              source={{
+                uri: webviewURL,
+              }}
+              onLoadEnd={this.onWebviewLoadEnd}
+              originWhitelist={['*']}
+            />
+          </View>
         <Toast ref="toast" position="center" />
       </View>
     );

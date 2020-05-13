@@ -49,7 +49,12 @@ export default class CamFaceCheck {
     }
 
     refreshFacePosition(faceBounds: Bounds, facePoints: Point[]) {
-        this.faceBounds = faceBounds
+        this.faceBounds = faceBounds 
+
+        let centerX = faceBounds.origin.x + faceBounds.size.width/2
+        let centerY = faceBounds.origin.y + faceBounds.size.height/2
+
+        this.faceCenterPos = new Vector2(centerX, centerY)
     }
 
     // check if face is in the center of preview
@@ -130,6 +135,12 @@ export default class CamFaceCheck {
             }
             idx++
         }
+
+        let centerX = previewCamArea.x + previewCamArea.width/2
+        let centerY = previewCamArea.y + previewCamArea.height/2
+        this.previewRect.fillStyle(0x00FFFF)
+        this.previewRect.fillRect(centerX,centerY,10,10); 
+
         this.previewRect.closePath();
         this.previewRect.strokePath();
     }
@@ -159,6 +170,13 @@ export default class CamFaceCheck {
             }
             idx++
         }
+
+        let centerX = faceBounds.origin.x + faceBounds.size.width/2
+        let centerY = faceBounds.origin.y + faceBounds.size.height/2
+
+        this.faceRect.fillStyle(0xFF00FF)
+        this.faceRect.fillRect(centerX,centerY,10,10); 
+
         this.faceRect.closePath();
         this.faceRect.strokePath();
 
@@ -230,9 +248,6 @@ export default class CamFaceCheck {
         this.camPreviewArea.x = originCamArea.x + offset.x
         this.camPreviewArea.y = originCamArea.y + offset.y
         this.drawPreviewBounds(this.camPreviewArea)
-        
-        
-
 
     }
 }
