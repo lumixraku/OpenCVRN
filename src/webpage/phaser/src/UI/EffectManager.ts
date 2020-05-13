@@ -4,9 +4,20 @@ import { EF_SCENE } from "@root/constants";
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
 
+interface AnimationPlaying {
+    hammer: boolean
+    
+}
+
 export default class EffectScene extends Phaser.Scene { 
     public coin: PhaserImage
     public hammer:PhaserImage
+    public emojiFace: PhaserImage
+
+    public animationPlaying: AnimationPlaying = {
+        hammer: false
+    }
+
     constructor() {
         super(EF_SCENE);
     }
@@ -59,7 +70,19 @@ export default class EffectScene extends Phaser.Scene {
     }
 
     addHammer() {
+        if (this.animationPlaying.hammer) {
+            return
+        }
+
+
+        this.animationPlaying.hammer = true
+        let AlternativeEmoji = ['sad', 'cry', 'sour']
+        let hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji)
+
         this.hammer = this.add.image(258, 327, 'hammer')
+        this.emojiFace = this.add.image(285,520, hitEmoji)
+        this.emojiFace.setScale(0.3)
+
         this.hammer.setScale(0.3)
         this.hammer.rotation = 1
 
@@ -67,12 +90,15 @@ export default class EffectScene extends Phaser.Scene {
             targets: this.hammer,
             rotation: 1.5,
             duration: 232,
+            hold: 332,
             yoyo: true,
             ease: 'Power3',
             onComplete: () => {
-                // cb()
                 this.hammer.destroy()
-            }            
+                this.emojiFace.destroy()
+
+                this.animationPlaying.hammer = false
+            },             
         })
     }
 

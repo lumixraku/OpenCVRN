@@ -30,6 +30,8 @@ export default class AssetsLoader {
         // scene.load.image('dogcook', 'assets/back.png');
         scene.load.image(DOGCOOK, `assets/dogeFrame/frame_00_delay-0.04s.gif`)
 
+        this.loadEmoji()
+
         this.loadDogeAnimation()
     }
 
@@ -45,5 +47,13 @@ export default class AssetsLoader {
             scene.load.image(keyname, fname)
 
         }
+    }
+
+    loadEmoji(){
+        let scene = this.scene;
+        scene.load.image('sad', `assets/sad.png`)
+        scene.load.image('cry', `assets/cry.png`)
+        scene.load.image('sour', `assets/sour.png`)
+
     }
 }

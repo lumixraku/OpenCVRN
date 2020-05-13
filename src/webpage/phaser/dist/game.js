@@ -15,9 +15,10 @@
   var EF_SCENE = 'effectScene';
   var DOGCOOK = 'dogcook';
   var CHECKING_INTERVAL = 2000; // 回头检测的最短间隔
-  var CHECKING_DURATION = 3000;
+  var FIRST_CHECK_ELAPSE = 2; // 第一次检查的时  游戏已经进行的时间
   // animation
-  var DOG_LOOKBACK_ANIMI = 'lookback';
+  var COOK_LOOKBACK_ANIMI = 'lookback';
+  var COOK_TOCOOK_ANIMI = 'cookAgain';
   //# sourceMappingURL=constants.js.map
 
   /*! *****************************************************************************
@@ -187,6 +188,7 @@
       };
       return SpinTable;
   }());
+  //# sourceMappingURL=spinTable.js.map
 
   var Point$2 = Phaser.Geom.Point;
   var Vector2 = Phaser.Math.Vector2;
@@ -363,37 +365,78 @@
       __extends(Cook, _super);
       function Cook(scene, x, y) {
           var _this = _super.call(this, scene, x, y, DOGCOOK, 0) || this;
-          _this.cooking = true;
+          _this.cooking = true; //做饭  
+          //PS  存在时间差 当cooking false checking也是false 的时候表示在扭头的过程中
+          _this.startCheckingTime = 0;
+          _this.endCheckingTime = 0; //
+          _this.checkTimeCount = 0; //回头检查次数
           // scene.add.image(0, 0, 'dog', 0)
           // let img = new Image(scene,x,y,texture);
           // scene.children.add(this);
           scene.add.existing(_this);
+          _this.addAnimationListener();
           return _this;
       }
       Cook.prototype.setOriginToTopLeft = function () {
           this.setOrigin(0, 0);
       };
+      Cook.prototype.addAnimationListener = function () {
+          var _this = this;
+          this.on('animationcomplete', function (e) {
+              console.log("animationcomplete", e);
+              var eventKey = e.key; // lookback ....
+              switch (eventKey) {
+                  // 回头继续做饭动画结束  又开始做饭了
+                  case COOK_TOCOOK_ANIMI:
+                      _this.endCheckingTime = +new Date;
+                      console.log("looking back", _this.endCheckingTime - _this.startCheckingTime);
+                      _this.checkTimeCount++;
+                      _this.cooking = true;
+                      break;
+                  case COOK_LOOKBACK_ANIMI:
+                      // this.startWatchingTime
+                      _this.checkIfEatingAnimation();
+              }
+          });
+      };
       Cook.prototype.lookBack = function () {
-          this.setTexture('doglook', 0);
-          this.checking = true;
+          // this.setTexture('doglook', 0)
           this.cooking = false;
           this.startCheckingTime = +new Date;
-          this.play(DOG_LOOKBACK_ANIMI);
+          this.play(COOK_LOOKBACK_ANIMI);
+      };
+      // 厨师回头检查的时间在 1S-2S范围内
+      Cook.prototype.checkIfEatingAnimation = function () {
+          var _this = this;
+          this.checking = true;
+          var duration = Math.random() * 1500 + 1000;
+          setTimeout(function () {
+              _this.cookAgain();
+          }, duration);
       };
       Cook.prototype.cookAgain = function () {
-          this.setTexture('dogcook', 0);
+          // this.setTexture('dogcook', 0)
           this.checking = false;
-          this.cooking = true;
-          this.endCheckingTime = +new Date;
-          console.log("looking back", this.endCheckingTime - this.startCheckingTime);
+          // this.cooking = true  应该时动画结束的时候才开始 cooking  转头有一个过程
+          // endCheckingTime 会在动画结束的时候计算
+          this.play(COOK_TOCOOK_ANIMI);
       };
       Cook.prototype.isCooking = function () {
           return this.cooking;
       };
+      Cook.prototype.isChecking = function () {
+          return this.checking;
+      };
+      Cook.prototype.isTurning = function () {
+          return !this.checking && !this.cooking;
+      };
       //是否刚刚回头过
-      Cook.prototype.ifJustChecked = function () {
-          var timeGap = +new Date - this.endCheckingTime;
-          return (timeGap < CHECKING_INTERVAL);
+      Cook.prototype.ifJustChecked = function (elapsed) {
+          if (this.endCheckingTime != 0 && this.endCheckingTime > this.startCheckingTime) {
+              var timeGap = +new Date - this.endCheckingTime;
+              return (timeGap < CHECKING_INTERVAL);
+          }
+          return true;
       };
       return Cook;
   }(Sprite));
@@ -419,6 +462,7 @@
           // 应当使用 gif 中的某一帧
           // scene.load.image('dogcook', 'assets/back.png');
           scene.load.image(DOGCOOK, "assets/dogeFrame/frame_00_delay-0.04s.gif");
+          this.loadEmoji();
           this.loadDogeAnimation();
       };
       AssetsLoader.prototype.loadDogeAnimation = function () {
@@ -431,6 +475,12 @@
               scene.load.image(keyname, fname);
           }
       };
+      AssetsLoader.prototype.loadEmoji = function () {
+          var scene = this.scene;
+          scene.load.image('sad', "assets/sad.png");
+          scene.load.image('cry', "assets/cry.png");
+          scene.load.image('sour', "assets/sour.png");
+      };
       return AssetsLoader;
   }());
   //# sourceMappingURL=assetsLoader.js.map
@@ -440,11 +490,15 @@
           // 此刻 scene 还没有准备好
           this.scene = scene;
       }
-      AnimateManager.prototype.createDoge = function () {
+      AnimateManager.prototype.registerAnimation = function () {
+          this.cookLookback();
+          this.cookAgain();
+      };
+      AnimateManager.prototype.cookLookback = function () {
           var scene = this.scene;
           var makeFrames = function () {
               var arr = [];
-              var endIndex = 47;
+              var endIndex = 33; // 到 33 的时候停下来
               for (var idx = 0; idx <= endIndex; idx++) {
                   var keyname = "dogeFrame" + idx;
                   arr.push({
@@ -453,8 +507,29 @@
               }
               return arr;
           };
+          // weired !!!
           this.doge = scene.anims.create({
-              key: DOG_LOOKBACK_ANIMI,
+              key: COOK_LOOKBACK_ANIMI,
+              frames: makeFrames(),
+              frameRate: 1 / 0.04,
+          });
+      };
+      AnimateManager.prototype.cookAgain = function () {
+          var scene = this.scene;
+          var makeFrames = function () {
+              var arr = [];
+              var endIndex = 47; // 到 33 的时候停下来
+              for (var idx = 33; idx <= endIndex; idx++) {
+                  var keyname = "dogeFrame" + idx;
+                  arr.push({
+                      key: keyname,
+                  });
+              }
+              return arr;
+          };
+          // weired !!!
+          this.doge = scene.anims.create({
+              key: COOK_TOCOOK_ANIMI,
               frames: makeFrames(),
               frameRate: 1 / 0.04,
           });
@@ -490,6 +565,13 @@
       };
       // preload 中的资源都加载完毕之后 才会调用 create
       Demo.prototype.create = function () {
+          this.timer = this.time.addEvent({
+              // delay: 500,                // ms
+              // callback: callback,
+              //args: [],
+              // callbackScope: thisArg,
+              loop: true
+          });
           this.bg = this.add.graphics();
           this.drawBackground();
           this.addCook();
@@ -502,7 +584,7 @@
           this.dialogScene = this.scene.get(UI_SCENE);
           this.effScene = this.scene.get(EF_SCENE);
           this.animateManager = new AnimateManager(this);
-          this.animateManager.createDoge();
+          this.animateManager.registerAnimation();
       };
       Demo.prototype.update = function (time, delta) {
           this.rotateTable();
@@ -516,16 +598,25 @@
           }
       };
       Demo.prototype.update60Frame = function () {
-          var _this = this;
-          var shouldLookBack = Math.random();
+          var elapsed = this.timer.getElapsedSeconds();
+          this.shouldCookLookBack(elapsed);
+      };
+      Demo.prototype.shouldCookLookBack = function (elapsed) {
           if (this.cook) {
-              var isDogCooking = this.cook.isCooking();
-              var isJustChecked = this.cook.ifJustChecked();
-              if (!isJustChecked && isDogCooking && shouldLookBack < 0.9) {
-                  this.cook.lookBack();
-                  setTimeout(function () {
-                      _this.cook.cookAgain();
-                  }, CHECKING_DURATION);
+              var shouldLookBack = Math.random();
+              var isCooking = this.cook.isCooking();
+              if (isCooking) {
+                  if (this.cook.checkTimeCount == 0) {
+                      if (elapsed > FIRST_CHECK_ELAPSE) {
+                          this.cook.lookBack();
+                      }
+                  }
+                  else {
+                      var isJustChecked = this.cook.ifJustChecked(elapsed);
+                      if (!isJustChecked && shouldLookBack < 0.9) {
+                          this.cook.lookBack();
+                      }
+                  }
               }
           }
       };
@@ -595,7 +686,7 @@
           }
       };
       Demo.prototype.refreshMouth = function (upperTop, upperBottom, lowerTop, lowerBottom) {
-          if (this.refreshMouth) {
+          if (this.mouthObj) {
               this.mouthObj.setMouthContourPoints(upperTop, upperBottom, lowerTop, lowerBottom);
           }
           else {
@@ -705,11 +796,12 @@
               onComplete: function () {
                   food.destroy();
                   // if not get caught
-                  if (!_this.cook.isCooking()) {
-                      _this.caughtAnimation();
+                  if (_this.cook.isCooking()) {
+                      _this.effScene.addCoin();
                   }
                   else {
-                      _this.effScene.addCoin();
+                      if (_this.cook.isChecking())
+                          _this.caughtAnimation();
                   }
                   _this.scoreText.text = +(_this.scoreText.text) + 1 + '';
               }
@@ -771,6 +863,9 @@
           });
       };
       Demo.prototype.refreshFaceBounds = function (bounds, facePoints) {
+          if (!this.camFaceCheck) {
+              return;
+          }
           this.camFaceCheck.refreshFacePosition(bounds, facePoints);
           this.camFaceCheck.updatePreviewPosByTarget();
           var rs = this.camFaceCheck.checkFacePosition(bounds);
@@ -806,10 +901,6 @@
                   }
               });
           }, delay);
-      };
-      Demo.prototype.showCaughtToast = function (text, last, cb) {
-          if (this.hasCaughtToast)
-              return;
       };
       return Demo;
   }(Phaser.Scene));
@@ -1167,7 +1258,11 @@
   var EffectScene = /** @class */ (function (_super) {
       __extends(EffectScene, _super);
       function EffectScene() {
-          return _super.call(this, EF_SCENE) || this;
+          var _this = _super.call(this, EF_SCENE) || this;
+          _this.animationPlaying = {
+              hammer: false
+          };
+          return _this;
       }
       EffectScene.prototype.preload = function () {
           // this.load.scenePlugin({
@@ -1214,19 +1309,29 @@
       };
       EffectScene.prototype.addHammer = function () {
           var _this = this;
+          if (this.animationPlaying.hammer) {
+              return;
+          }
+          this.animationPlaying.hammer = true;
+          var AlternativeEmoji = ['sad', 'cry', 'sour'];
+          var hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji);
           this.hammer = this.add.image(258, 327, 'hammer');
+          this.emojiFace = this.add.image(285, 520, hitEmoji);
+          this.emojiFace.setScale(0.3);
           this.hammer.setScale(0.3);
           this.hammer.rotation = 1;
           this.tweens.add({
               targets: this.hammer,
               rotation: 1.5,
               duration: 232,
+              hold: 332,
               yoyo: true,
               ease: 'Power3',
               onComplete: function () {
-                  // cb()
                   _this.hammer.destroy();
-              }
+                  _this.emojiFace.destroy();
+                  _this.animationPlaying.hammer = false;
+              },
           });
       };
       return EffectScene;
@@ -1267,7 +1372,6 @@
       };
       return BaseScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=BaseScene.js.map
 
   var offsetXPreview = 170;
   var offsetYPreview = 250;
@@ -1402,24 +1506,26 @@
           fetch('/assets/sampleContours.json').then(function (resp) {
               return resp.json();
           }).then(function (data) {
-              // 在PC上调试
-              if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
-                  var oneFace_1 = data[0];
-                  var i_1 = 0;
-                  var changeDir_1 = 0; // 0下 1上 2左 3右
-                  setInterval(function () {
-                      if (i_1++ == 2) {
-                          i_1 = 0;
-                          changeDir_1 = (++changeDir_1) % 4;
-                      }
-                      moveFace(oneFace_1, changeDir_1);
-                      var afterOffsetForFaceData = addOffsetForFaceData(oneFace_1);
-                      window.postMessage({
-                          messageType: 'face',
-                          faceData: afterOffsetForFaceData
-                      }, "*");
-                  }, 100);
-              }
+              setTimeout(function () {
+                  // 在PC上调试
+                  if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
+                      var oneFace_1 = data[0];
+                      var i_1 = 0;
+                      var changeDir_1 = 0; // 0下 1上 2左 3右
+                      setInterval(function () {
+                          if (i_1++ == 2) {
+                              i_1 = 0;
+                              changeDir_1 = (++changeDir_1) % 4;
+                          }
+                          moveFace(oneFace_1, changeDir_1);
+                          var afterOffsetForFaceData = addOffsetForFaceData(oneFace_1);
+                          window.postMessage({
+                              messageType: 'face',
+                              faceData: afterOffsetForFaceData
+                          }, "*");
+                      }, 100);
+                  }
+              }, 1000);
           });
       }, false);
       // let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
