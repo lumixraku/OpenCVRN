@@ -24,7 +24,7 @@ export default class Mouth {
 
     constructor(scene: Phaser.Scene) {
         this.mouthContour = scene.add.graphics()
-        this.mouthStateText = scene.add.text(stageWidth - 100, -100, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+        this.mouthStateText = scene.add.text(stageWidth - 100, 100, 'Hello World', { fontFamily: '"Roboto Condensed"' });
     }
 
     setMouthContourPoints(upperTop: Point[], upperBottom: Point[], lowerTop: Point[], lowerBottom: Point[]){
@@ -76,13 +76,43 @@ export default class Mouth {
     }
 
     checkIfMouthClose() {
+        if (this.lowerBottomPoints.length == 0 || this.upperBottomPoints.length == 0) {
+            return true
+        }
+
+        let lowerTipTopY = this.lowerTopPoints.map( (p)=> {
+            return p.y
+        } ).filter( (p)=> {
+            // 目前给到的数据存在 undefined
+            if (p) {
+                return p
+            }
+        })
+
+        let upperLipBottomY = this.upperBottomPoints.map( (p)=> {
+            return p.y
+        }).filter( (p)=> {
+            // 目前给到的数据存在没有y的情况  所以经过上面的map 数组中有 undefined 的情况
+            if (p) {
+                return p
+            }
+        })
+
+        let maxYOfLowerLipTop = Math.max(...lowerTipTopY)
+        let minYOfUpperLipBottom = Math.min(...upperLipBottomY)
+        console.log("----------",lowerTipTopY, maxYOfLowerLipTop)
+
         // return false
         let isClose = false
-        if (this.mouthRect.height < 30 && this.mouthRect.height / this.mouthRect.width < 0.5) {
+        // if (this.mouthRect.height < 30 && this.mouthRect.height / this.mouthRect.width < 0.5) {
+        //     isClose = true
+        // }
+        if ( Math.abs(minYOfUpperLipBottom - maxYOfLowerLipTop) < 10 ) {
             isClose = true
         }
 
-        this.mouthStateText.text = "" + this.mouthRect.height //isClose ? "close" : "open"
+        this.mouthStateText.text = "" + Math.abs(minYOfUpperLipBottom - maxYOfLowerLipTop) 
+        // this.mouthStateText.text = "" + this.mouthRect.height //isClose ? "close" : "open"
 
         return isClose
     }

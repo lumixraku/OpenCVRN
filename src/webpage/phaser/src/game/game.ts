@@ -344,7 +344,6 @@ export default class Demo extends Phaser.Scene {
         let destPos = this.mouthObj.getMouthCenter();
         for (let i = 0; i < this.foodList.length; i++) {
 
-
             let food = this.foodList[i]
             if (!food) {
                 continue
