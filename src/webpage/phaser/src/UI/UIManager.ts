@@ -6,7 +6,7 @@ import Point = Phaser.Geom.Point;
 import Rectagle = Phaser.Geom.Rectangle;
 import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
-
+import Container = Phaser.GameObjects.Container
  
 import { UI_SCENE } from "@root/constants";
 import { World } from "matter";
@@ -14,7 +14,7 @@ const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
 
 
-export default class DialogScene extends Phaser.Scene {
+export default class UIScene extends Phaser.Scene {
 
 
     public testView: UI.Dialog
@@ -22,11 +22,14 @@ export default class DialogScene extends Phaser.Scene {
     public getCaught: UI.Dialog
     public getCaughtText: PhaserText
 
+
+    public scoreArea: Container
+    public scoreText: PhaserText
+
+
     constructor() {
         super(UI_SCENE);
     }
-
-    
 
     preload() {
         this.load.scenePlugin({
@@ -34,12 +37,10 @@ export default class DialogScene extends Phaser.Scene {
             url: '/rexuiplugin.min.js',
             sceneKey: 'rexUI'
         });
-
-
     }
 
     create() {
-
+        this.createScoreArea()
         this.welcome = this.createWelcomeDialog(this, 300, 500)
         this.testView = this.createDemoDialog(this, 0, 0)
         // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
@@ -56,9 +57,6 @@ export default class DialogScene extends Phaser.Scene {
     showWelcome() {
         this.welcome.visible = true
     }
-
-
-
 
     createWelcomeDialog(scene: Scene, width: number, height: number): UI.Dialog {
 
@@ -294,7 +292,7 @@ export default class DialogScene extends Phaser.Scene {
 
     }
 
-    createCaughtText(x:number, y:number, cb: Function ):Phaser.GameObjects.Container  {
+    createCaughtText(x:number, y:number, cb: Function ):Container  {
         let containerWidth = 400
         let containerHeight = 100
         let containerPos = new Point(stageWidth/2,  stageHeight/2 * 1.6)
@@ -462,7 +460,7 @@ export default class DialogScene extends Phaser.Scene {
         let width = size.width
         let height = size.height
         bg.fillStyle(color)
-        // 没有 setOrigin 函数   graphics 的 origin 就是左上角
+        // graphics 的 origin 是左上角
         bg.fillRoundedRect(x, y, width, height, radius)
 
         if (borderWidth) {
@@ -475,6 +473,55 @@ export default class DialogScene extends Phaser.Scene {
 
         return bg
 
+    }
+
+    createScoreArea():Container {
+        let scoreAreaCenter = new Point(stageWidth/2, 50)
+        let graphicsTopLeft = new Point(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y)
+        this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y)
+        
+        let bg = this.add.graphics()
+        bg.beginPath()
+        bg.fillStyle( 0xFEDE52 ) //yellow
+        bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth, 100)
+        bg.closePath()
+
+
+        let scoreBoxWidth = 300
+        let scoreBoxHeight = 66
+        let scoreBoxRadius = scoreBoxHeight/2
+        let scoreBoxBorder = 10
+        let scoreBoxRectagle = new Rectagle( 
+            (scoreAreaCenter.x - scoreBoxWidth/2)  - scoreAreaCenter.x, 
+            (scoreAreaCenter.y - scoreBoxHeight/2) - scoreAreaCenter.y,
+            scoreBoxWidth, 
+            scoreBoxHeight
+        )
+        let scoreBox = this.drawRoundRect(scoreBoxRectagle, scoreBoxRadius, 0xFc6158,  scoreBoxBorder, 0xf9ebe9  )   
+        
+        let scoreTitlePos = new Point(scoreAreaCenter.x - 50, scoreAreaCenter.y )
+        let scoreTitle = this.add.text(
+                scoreTitlePos.x  - scoreAreaCenter.x, 
+                scoreTitlePos.y  - scoreAreaCenter.y, 
+                'score:' ,
+                { fontFamily: 'Arial', fontSize: 22, color: '#cca398' }   
+            )        
+        scoreTitle.setOrigin(0.5)
+
+        let scorePos = new Point(scoreAreaCenter.x + 0 , scoreAreaCenter.y )
+        let scoreText = this.scoreText = this.add.text(
+            scorePos.x  - scoreAreaCenter.x, 
+            scorePos.y  - scoreAreaCenter.y, 
+            '0',
+            { fontFamily: 'Arial', fontSize: 22, color: '#cca398' }   
+        )
+        scoreText.setOrigin(0.5)
+
+
+        this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText ])
+        
+
+        return this.scoreArea
     }
 
 }

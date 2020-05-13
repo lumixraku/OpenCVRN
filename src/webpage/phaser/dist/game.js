@@ -546,6 +546,7 @@
       __extends(Demo, _super);
       function Demo() {
           var _this = _super.call(this, GAME_SCENE) || this;
+          _this.score = 0;
           _this.spSpinSpeed = 1;
           _this.circleRadius = stageWidth$3 * 1.5;
           _this.tablePos = new Point$3(stageWidth$3 / 2 + _this.circleRadius / 2.2, stageHeight$3 + _this.circleRadius / 2);
@@ -581,10 +582,11 @@
           this.mouthObj = new Mouth(this);
           this.refreshMouth([], [], [], []);
           this.addText();
-          this.dialogScene = this.scene.get(UI_SCENE);
+          this.uiScene = this.scene.get(UI_SCENE);
           this.effScene = this.scene.get(EF_SCENE);
           this.animateManager = new AnimateManager(this);
           this.animateManager.registerAnimation();
+          this.addScore = this.addScore.bind(this);
       };
       Demo.prototype.update = function (time, delta) {
           this.rotateTable();
@@ -797,19 +799,18 @@
                   food.destroy();
                   // if not get caught
                   if (_this.cook.isCooking()) {
-                      _this.effScene.addCoin();
+                      _this.effScene.addCoin(_this.addScore);
                   }
                   else {
                       if (_this.cook.isChecking())
                           _this.caughtAnimation();
                   }
-                  _this.scoreText.text = +(_this.scoreText.text) + 1 + '';
               }
           });
       };
       Demo.prototype.caughtAnimation = function () {
           this.effScene.addHammer();
-          this.dialogScene.createCaughtText(stageWidth$3 / 2, stageHeight$3 / 2, function () { });
+          this.uiScene.createCaughtText(stageWidth$3 / 2, stageHeight$3 / 2, function () { });
       };
       Demo.prototype.missAnimation = function () {
       };
@@ -857,10 +858,10 @@
       Demo.prototype.addText = function () {
           // this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
           // this.testText = this.add.text(170, 170, 'Hello World', { fontFamily: '"Roboto Condensed"' });
-          this.scoreText = this.add.text(390, 50, '0', {
-              fontFamily: '"Roboto Condensed"',
-              color: 'red'
-          });
+          // this.scoreText = this.add.text(390, 50, '0', { 
+          //     fontFamily: '"Roboto Condensed"',
+          //     color: 'red'
+          // })
       };
       Demo.prototype.refreshFaceBounds = function (bounds, facePoints) {
           if (!this.camFaceCheck) {
@@ -902,6 +903,10 @@
               });
           }, delay);
       };
+      Demo.prototype.addScore = function (sc) {
+          this.score = this.score + sc;
+          this.uiScene.scoreText.text = '' + this.score;
+      };
       return Demo;
   }(Phaser.Scene));
 
@@ -909,31 +914,32 @@
   var Rectagle$3 = Phaser.Geom.Rectangle;
   var stageWidth$4 = document.body.clientWidth;
   var stageHeight$4 = document.body.clientHeight;
-  var DialogScene = /** @class */ (function (_super) {
-      __extends(DialogScene, _super);
-      function DialogScene() {
+  var UIScene = /** @class */ (function (_super) {
+      __extends(UIScene, _super);
+      function UIScene() {
           return _super.call(this, UI_SCENE) || this;
       }
-      DialogScene.prototype.preload = function () {
+      UIScene.prototype.preload = function () {
           this.load.scenePlugin({
               key: 'rexuiplugin',
               url: '/rexuiplugin.min.js',
               sceneKey: 'rexUI'
           });
       };
-      DialogScene.prototype.create = function () {
+      UIScene.prototype.create = function () {
+          this.createScoreArea();
           this.welcome = this.createWelcomeDialog(this, 300, 500);
           this.testView = this.createDemoDialog(this, 0, 0);
           // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
           this.welcome.visible = false;
           this.testView.visible = false;
       };
-      DialogScene.prototype.update = function (time, delta) {
+      UIScene.prototype.update = function (time, delta) {
       };
-      DialogScene.prototype.showWelcome = function () {
+      UIScene.prototype.showWelcome = function () {
           this.welcome.visible = true;
       };
-      DialogScene.prototype.createWelcomeDialog = function (scene, width, height) {
+      UIScene.prototype.createWelcomeDialog = function (scene, width, height) {
           var _this = this;
           var makeFixWidthPanel = function (maxwidth, content) {
               var sizer = _this.rexUI.add.fixWidthSizer({
@@ -1059,7 +1065,7 @@
           dialog.visible = false;
           return dialog;
       };
-      DialogScene.prototype.createDemoDialog = function (scene, x, y) {
+      UIScene.prototype.createDemoDialog = function (scene, x, y) {
           scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63);
           return scene.rexUI.add.dialog({
               x: x,
@@ -1100,7 +1106,7 @@
               //.drawBounds(this.add.graphics(), 0xff0000)
               .popUp(500);
       };
-      DialogScene.prototype.createCaughtText = function (x, y, cb) {
+      UIScene.prototype.createCaughtText = function (x, y, cb) {
           var _this = this;
           var containerWidth = 400;
           var containerHeight = 100;
@@ -1145,7 +1151,7 @@
           });
           return container;
       };
-      DialogScene.prototype.createGetCaughtDialog = function (x, y) {
+      UIScene.prototype.createGetCaughtDialog = function (x, y) {
           var scene = this;
           scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63);
           // 你被抓住了 计划从左往右显示
@@ -1212,7 +1218,7 @@
           // })
           return popup;
       };
-      DialogScene.prototype.createButton = function (scene, text, color, space) {
+      UIScene.prototype.createButton = function (scene, text, color, space) {
           return scene.rexUI.add.label({
               x: 0,
               y: 100,
@@ -1230,7 +1236,7 @@
               }
           });
       };
-      DialogScene.prototype.drawRoundRect = function (size, radius, color, borderWidth, borderColor) {
+      UIScene.prototype.drawRoundRect = function (size, radius, color, borderWidth, borderColor) {
           var bg = this.add.graphics();
           bg.clear();
           bg.beginPath();
@@ -1239,7 +1245,7 @@
           var width = size.width;
           var height = size.height;
           bg.fillStyle(color);
-          // 没有 setOrigin 函数   graphics 的 origin 就是左上角
+          // graphics 的 origin 是左上角
           bg.fillRoundedRect(x, y, width, height, radius);
           if (borderWidth) {
               var x2 = x + borderWidth;
@@ -1249,9 +1255,33 @@
           }
           return bg;
       };
-      return DialogScene;
+      UIScene.prototype.createScoreArea = function () {
+          var scoreAreaCenter = new Point$4(stageWidth$4 / 2, 50);
+          var graphicsTopLeft = new Point$4(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y);
+          this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y);
+          var bg = this.add.graphics();
+          bg.beginPath();
+          bg.fillStyle(0xFEDE52); //yellow
+          bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth$4, 100);
+          bg.closePath();
+          var scoreBoxWidth = 300;
+          var scoreBoxHeight = 66;
+          var scoreBoxRadius = scoreBoxHeight / 2;
+          var scoreBoxBorder = 10;
+          var scoreBoxRectagle = new Rectagle$3((scoreAreaCenter.x - scoreBoxWidth / 2) - scoreAreaCenter.x, (scoreAreaCenter.y - scoreBoxHeight / 2) - scoreAreaCenter.y, scoreBoxWidth, scoreBoxHeight);
+          var scoreBox = this.drawRoundRect(scoreBoxRectagle, scoreBoxRadius, 0xFc6158, scoreBoxBorder, 0xf9ebe9);
+          var scoreTitlePos = new Point$4(scoreAreaCenter.x - 50, scoreAreaCenter.y);
+          var scoreTitle = this.add.text(scoreTitlePos.x - scoreAreaCenter.x, scoreTitlePos.y - scoreAreaCenter.y, 'score:', { fontFamily: 'Arial', fontSize: 22, color: '#cca398' });
+          scoreTitle.setOrigin(0.5);
+          var scorePos = new Point$4(scoreAreaCenter.x + 0, scoreAreaCenter.y);
+          var scoreText = this.scoreText = this.add.text(scorePos.x - scoreAreaCenter.x, scorePos.y - scoreAreaCenter.y, '0', { fontFamily: 'Arial', fontSize: 22, color: '#cca398' });
+          scoreText.setOrigin(0.5);
+          this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText]);
+          return this.scoreArea;
+      };
+      return UIScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=DialogManager.js.map
+  //# sourceMappingURL=UIManager.js.map
 
   var stageWidth$5 = document.body.clientWidth;
   var stageHeight$5 = document.body.clientHeight;
@@ -1275,7 +1305,7 @@
       };
       EffectScene.prototype.create = function () {
       };
-      EffectScene.prototype.addCoin = function () {
+      EffectScene.prototype.addCoin = function (cb) {
           var _this = this;
           this.coin = this.add.image(stageWidth$5 / 2, stageHeight$5 / 2, 'coin');
           // this.coin.displayWidth = 64
@@ -1300,7 +1330,7 @@
                       duration: 432,
                       ease: 'Circ',
                       onComplete: function () {
-                          // cb()
+                          cb(1);
                           _this.coin.destroy();
                       }
                   });
@@ -1557,7 +1587,7 @@
       parent: 'phaser-example',
       width: stageWidth$7,
       height: stageHeight$7,
-      scene: [BaseScene, Demo, EffectScene, DialogScene],
+      scene: [BaseScene, Demo, EffectScene, UIScene],
       transparent: true,
       physics: {
           "default": 'arcade',
