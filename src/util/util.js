@@ -12,40 +12,40 @@ let lasttime = +new Date
 
 
 
-const	postToWebview = (webview, data) => {
+const postToWebview = (webview, data) => {
 
-		if (!webview) {
-			return
-		}
-	  // Ok postMessage 可以放对象
-		// var runJS = `
-		// // 	window.postMessage({a: 1})
-		// `;
-		// 当 data = {a:1} 时
-		// var runJS = `
-		// 	window.postMessage(${data})
-		// `;
-		// 这么做实际上是 window.postMessage([object Object])
+	if (!webview) {
+		return
+	}
+	// Ok postMessage 可以放对象
+	// var runJS = `
+	// // 	window.postMessage({a: 1})
+	// `;
+	// 当 data = {a:1} 时
+	// var runJS = `
+	// 	window.postMessage(${data})
+	// `;
+	// 这么做实际上是 window.postMessage([object Object])
 
-		var dataStr = ""
+	var dataStr = ""
 
-		// console.log("time", (+new Date) - lasttime)
-		lasttime = +new Date
+	// console.log("time", (+new Date) - lasttime)
+	lasttime = +new Date
 
-		if ( typeof(data) != "string" ) {
-			dataStr = JSON.stringify(data)
-		}else{
-			dataStr = data;
-		}
-		var runJS = `
+	if (typeof (data) != "string") {
+		dataStr = JSON.stringify(data)
+	} else {
+		dataStr = data;
+	}
+	var runJS = `
 			window.postMessage(${dataStr})
 		`;
 
-		webview.injectJavaScript(runJS);
-	}
+	webview.injectJavaScript(runJS);
+}
 
 
-const addOffsetForFaceData = (target)  => {
+const addOffsetForFaceData = (target) => {
 	const checkedType = (target) => {
 		return Object.prototype.toString.call(target).slice(8, -1)
 	}
@@ -73,6 +73,10 @@ const addOffsetForFaceData = (target)  => {
 			//继续遍历获取到value值
 			result[key] = addOffsetForFaceData(value)
 		} else { //获取到value值是基本的数据类型或者是函数。
+			// 一些诡异的点 检测到的(0, 0) 这样的情况
+			if (value === 0) {
+				continue
+			}
 
 			if (key == "x") {
 				result[key] = offsetXPreviewDefault + (value)

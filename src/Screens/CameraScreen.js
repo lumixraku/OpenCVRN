@@ -21,7 +21,7 @@ import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, MSG_TYPE_FACE_TARG
 
 import _ from 'underscore'
 
-var webviewURL = 'http://10.12.167.197:5001/';
+var webviewURL = 'http://10.12.113.125:5001/';
 // var webviewURL = 'http://47.92.222.162:3001/
 // var webviewLocal = 'file:///android_asset/index.html' // blob 请求无法识别
 // var webviewSource = require("../../android/app/src/main/assets/index.html") // 报错
@@ -159,6 +159,7 @@ export default class CameraScreen extends Component {
 
 
   facesDetected(detectData) {
+    // console.log('facesDetected', JSON.stringify(detectData.faces))
     this.setState({
       faces: detectData.faces,
     })
@@ -166,7 +167,7 @@ export default class CameraScreen extends Component {
 
 
 
-  calcFaceOffset(faceBounds) {
+  calcPreviewOffset(faceBounds) {
     let { targetFaceBounds } = this.state
     console.log('targetFaceBounds', targetFaceBounds)
     // 表示还未设定过值
@@ -189,11 +190,14 @@ export default class CameraScreen extends Component {
 
 
   renderFace(faceData) {
-    if (faceData && faceData.bounds) {
+    if (faceData && faceData.bounds) { // && faceData.bounds 是为了确定检测到脸
+      this.calcPreviewOffset(faceData.bounds)
+      let offsetFaceData = addOffsetForFaceData(faceData)
       console.log("faceData", faceData)
-      this.calcFaceOffset(faceData.bounds)
+      console.log("offsetFaceData", offsetFaceData)
+
       postToWebview(this.webref, {
-        faceData: addOffsetForFaceData(faceData),
+        faceData: offsetFaceData,
         messageType: MSG_TYPE_FACE,
       });
     }
@@ -286,7 +290,6 @@ export default class CameraScreen extends Component {
 
   renderFaces() {
 
-
     return (
       <View style={styles.facesContainer} pointerEvents="none">
         {this.state.faces ? this.state.faces.map(this.renderFace) : null}
@@ -328,8 +331,8 @@ export default class CameraScreen extends Component {
           }}
           // style={styles.preview}
           style={[styles.preview, {
-            top: offsetYPreviewDefault + previewOffset.y,
-            left: offsetXPreviewDefault + previewOffset.x,
+            top: offsetYPreviewDefault, //  + previewOffset.y,
+            left: offsetXPreviewDefault, // + previewOffset.x,
             width: previewWidthDefault,
             height: previewHeightDefault,
           }]}

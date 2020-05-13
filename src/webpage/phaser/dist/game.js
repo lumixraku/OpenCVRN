@@ -67,7 +67,7 @@
       function Mouth(scene) {
           this.mouthRect = new Rectagle(0, 0, 0, 0);
           this.mouthContour = scene.add.graphics();
-          this.mouthStateText = scene.add.text(stageWidth - 100, -100, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+          this.mouthStateText = scene.add.text(stageWidth - 100, 100, 'Hello World', { fontFamily: '"Roboto Condensed"' });
       }
       Mouth.prototype.setMouthContourPoints = function (upperTop, upperBottom, lowerTop, lowerBottom) {
           this.upperTopPoints = upperTop;
@@ -113,12 +113,38 @@
           this.mouthContour.strokePath();
       };
       Mouth.prototype.checkIfMouthClose = function () {
+          if (this.lowerBottomPoints.length == 0 || this.upperBottomPoints.length == 0) {
+              return true;
+          }
+          var lowerTipTopY = this.lowerTopPoints.map(function (p) {
+              return p.y;
+          }).filter(function (p) {
+              // 目前给到的数据存在 undefined
+              if (p) {
+                  return p;
+              }
+          });
+          var upperLipBottomY = this.upperBottomPoints.map(function (p) {
+              return p.y;
+          }).filter(function (p) {
+              // 目前给到的数据存在没有y的情况  所以经过上面的map 数组中有 undefined 的情况
+              if (p) {
+                  return p;
+              }
+          });
+          var maxYOfLowerLipTop = Math.max.apply(Math, lowerTipTopY);
+          var minYOfUpperLipBottom = Math.min.apply(Math, upperLipBottomY);
+          console.log("----------", lowerTipTopY, maxYOfLowerLipTop);
           // return false
           var isClose = false;
-          if (this.mouthRect.height < 30 && this.mouthRect.height / this.mouthRect.width < 0.5) {
+          // if (this.mouthRect.height < 30 && this.mouthRect.height / this.mouthRect.width < 0.5) {
+          //     isClose = true
+          // }
+          if (Math.abs(minYOfUpperLipBottom - maxYOfLowerLipTop) < 10) {
               isClose = true;
           }
-          this.mouthStateText.text = "" + this.mouthRect.height; //isClose ? "close" : "open"
+          this.mouthStateText.text = "" + Math.abs(minYOfUpperLipBottom - maxYOfLowerLipTop);
+          // this.mouthStateText.text = "" + this.mouthRect.height //isClose ? "close" : "open"
           return isClose;
       };
       // 得到嘴巴中心点 用于确定动画结束的位置
@@ -130,6 +156,180 @@
       return Mouth;
   }());
   //# sourceMappingURL=mouth.js.map
+
+  var offsetXPreview = 170;
+  var offsetYPreview = 250;
+  var previewWidth = 198;
+  var previewHeight = previewWidth * 16 / 9;
+  var isPC = window.navigator.userAgent.indexOf("PCMozilla") != -1;
+  // 给坐标加上取景器的偏移信息
+  // 原本的坐标信息是人脸相对取景器的位置
+  // 现在坐标信息变为相对整个画布的位置
+  function addOffsetForFaceData(target) {
+      var checkedType = function (target) {
+          return Object.prototype.toString.call(target).slice(8, -1);
+      };
+      //判断拷贝的数据类型
+      //初始化变量result 成为最终克隆的数据
+      var result;
+      var targetType = checkedType(target);
+      if (targetType === 'Object') {
+          result = {};
+      }
+      else if (targetType === 'Array') {
+          result = [];
+      }
+      else {
+          return target;
+      }
+      //遍历目标数据
+      for (var _i = 0, _a = Object.entries(target); _i < _a.length; _i++) {
+          var _b = _a[_i], key = _b[0], value = _b[1];
+          //获取遍历数据结构的每一项值。
+          // let value = target[key]
+          //判断目标结构里的每一值是否存在对象/数组
+          if (checkedType(value) === 'Object' ||
+              checkedType(value) === 'Array') { //对象/数组里嵌套了对象/数组
+              //继续遍历获取到value值
+              result[key] = addOffsetForFaceData(value);
+          }
+          else { //获取到value值是基本的数据类型或者是函数。
+              if (key == "x") {
+                  result[key] = offsetXPreview + value;
+              }
+              else if (key == "y") {
+                  result[key] = offsetYPreview + value;
+              }
+              else {
+                  result[key] = value;
+              }
+          }
+      }
+      return result;
+  }
+  // set preview area
+  function setPreview() {
+      window.addEventListener("load", function () {
+          setTimeout(function () {
+              window.postMessage({
+                  messageType: MSG_TYPE_CAM,
+                  previewArea: {
+                      y: offsetYPreview,
+                      x: offsetXPreview,
+                      width: previewWidth,
+                      height: previewHeight
+                  },
+              }, "*");
+          }, 1000);
+      }, false);
+  }
+  // 测试嘴巴位置
+  function changeMouth(game) {
+      //contours sample data
+      window.addEventListener("load", function () {
+          var offsetSpeed = 3;
+          var movingFaceBounds = function (bounds, dir) {
+              var offset = 0;
+              // dir 0下 1左 2上 3右
+              if (dir == 0 || dir == 2) {
+                  offset = dir == 2 ? -offsetSpeed : offsetSpeed;
+                  bounds.origin.y = bounds.origin.y + offset;
+              }
+              else {
+                  offset = dir == 1 ? -offsetSpeed : offsetSpeed;
+                  bounds.origin.x = bounds.origin.x + offset;
+              }
+          };
+          var movingYPoints = function (points, dir) {
+              // dir 0下 1左 2上 3右
+              var offset = 0;
+              if (dir == 2) {
+                  offset = -offsetSpeed;
+              }
+              else {
+                  offset = offsetSpeed;
+              }
+              for (var _i = 0, points_1 = points; _i < points_1.length; _i++) {
+                  var p = points_1[_i];
+                  p.y = p.y + offset;
+              }
+          };
+          var movingXPoints = function (points, dir) {
+              var offset = 0;
+              if (dir == 1) {
+                  offset = -offsetSpeed;
+              }
+              else {
+                  offset = offsetSpeed;
+              }
+              for (var _i = 0, points_2 = points; _i < points_2.length; _i++) {
+                  var p = points_2[_i];
+                  p.x = p.x + offset;
+              }
+          };
+          var moveFace = function (oneFace, dir) {
+              // dir 0下 1左 2上 3右
+              if (dir == 0 || dir == 2) {
+                  movingYPoints(oneFace.lowerLipBottom, dir);
+                  movingYPoints(oneFace.lowerLipTop, dir);
+                  movingYPoints(oneFace.upperLipBottom, dir);
+                  movingYPoints(oneFace.upperLipTop, dir);
+                  movingFaceBounds(oneFace.bounds, dir);
+              }
+              else {
+                  movingXPoints(oneFace.lowerLipBottom, dir);
+                  movingXPoints(oneFace.lowerLipTop, dir);
+                  movingXPoints(oneFace.upperLipBottom, dir);
+                  movingXPoints(oneFace.upperLipTop, dir);
+                  movingFaceBounds(oneFace.bounds, dir);
+              }
+          };
+          // 这个数据是和取景器大小有关的数据 
+          // 当 RN 的部分设置了取景器大小的时候, 返回的脸的位置也根据 RN 这里的实际尺寸有所压缩
+          // 但是和取景器的位移无关  毕竟安卓端也不知道取景器的相对位置
+          fetch('/assets/sampleContours.json').then(function (resp) {
+              return resp.json();
+          }).then(function (data) {
+              setTimeout(function () {
+                  // 在PC上调试
+                  if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
+                      var oneFace_1 = data[0];
+                      var i_1 = 0;
+                      var changeDir_1 = 0; // 0下 1上 2左 3右
+                      setInterval(function () {
+                          if (i_1++ == 2) {
+                              i_1 = 0;
+                              changeDir_1 = (++changeDir_1) % 4;
+                          }
+                          moveFace(oneFace_1, changeDir_1);
+                          var afterOffsetForFaceData = addOffsetForFaceData(oneFace_1);
+                          window.postMessage({
+                              messageType: 'face',
+                              faceData: afterOffsetForFaceData
+                          }, "*");
+                      }, 100);
+                  }
+              }, 1000);
+          });
+      }, false);
+      // let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
+  }
+  // 获取鼠标点击位置
+  function testClickEvent(game) {
+      window.addEventListener('load', function () {
+          setTimeout(function () {
+              game.scene.getScene(GAME_SCENE).input.on('pointerup', function (pointer) {
+                  var touchX = pointer.x;
+                  var touchY = pointer.y;
+                  // let x = game.input.mousePointer.x;
+                  // let y = game.input.mousePointer.y;
+                  console.log('clickXY', touchX, touchY);
+                  // ...
+              });
+          });
+      }, false);
+  }
+  //# sourceMappingURL=test.js.map
 
   var Point$1 = Phaser.Geom.Point;
   var stageWidth$1 = document.body.clientWidth;
@@ -150,9 +350,9 @@
       }
       SpinTable.prototype.addToContainer = function (scene) {
           this.spSpin = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'table');
-          // if (isPC) {
-          this.spSpin.alpha = 0.5;
-          // }
+          if (isPC) {
+              this.spSpin.alpha = 0.5;
+          }
           var bds = this.spSpin.getBounds();
           var width = bds.width;
           this.spSpin.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2));
@@ -909,6 +1109,7 @@
       };
       return Demo;
   }(Phaser.Scene));
+  //# sourceMappingURL=game.js.map
 
   var Point$4 = Phaser.Geom.Point;
   var Rectagle$3 = Phaser.Geom.Rectangle;
@@ -1402,180 +1603,7 @@
       };
       return BaseScene;
   }(Phaser.Scene));
-
-  var offsetXPreview = 170;
-  var offsetYPreview = 250;
-  var previewWidth = 198;
-  var previewHeight = previewWidth * 16 / 9;
-  var isPC = window.navigator.userAgent.indexOf("PCMozilla") != -1;
-  // 给坐标加上取景器的偏移信息
-  // 原本的坐标信息是人脸相对取景器的位置
-  // 现在坐标信息变为相对整个画布的位置
-  function addOffsetForFaceData(target) {
-      var checkedType = function (target) {
-          return Object.prototype.toString.call(target).slice(8, -1);
-      };
-      //判断拷贝的数据类型
-      //初始化变量result 成为最终克隆的数据
-      var result;
-      var targetType = checkedType(target);
-      if (targetType === 'Object') {
-          result = {};
-      }
-      else if (targetType === 'Array') {
-          result = [];
-      }
-      else {
-          return target;
-      }
-      //遍历目标数据
-      for (var _i = 0, _a = Object.entries(target); _i < _a.length; _i++) {
-          var _b = _a[_i], key = _b[0], value = _b[1];
-          //获取遍历数据结构的每一项值。
-          // let value = target[key]
-          //判断目标结构里的每一值是否存在对象/数组
-          if (checkedType(value) === 'Object' ||
-              checkedType(value) === 'Array') { //对象/数组里嵌套了对象/数组
-              //继续遍历获取到value值
-              result[key] = addOffsetForFaceData(value);
-          }
-          else { //获取到value值是基本的数据类型或者是函数。
-              if (key == "x") {
-                  result[key] = offsetXPreview + value;
-              }
-              else if (key == "y") {
-                  result[key] = offsetYPreview + value;
-              }
-              else {
-                  result[key] = value;
-              }
-          }
-      }
-      return result;
-  }
-  // set preview area
-  function setPreview() {
-      window.addEventListener("load", function () {
-          setTimeout(function () {
-              window.postMessage({
-                  messageType: MSG_TYPE_CAM,
-                  previewArea: {
-                      y: offsetYPreview,
-                      x: offsetXPreview,
-                      width: previewWidth,
-                      height: previewHeight
-                  },
-              }, "*");
-          }, 1000);
-      }, false);
-  }
-  // 测试嘴巴位置
-  function changeMouth(game) {
-      //contours sample data
-      window.addEventListener("load", function () {
-          var offsetSpeed = 3;
-          var movingFaceBounds = function (bounds, dir) {
-              var offset = 0;
-              // dir 0下 1左 2上 3右
-              if (dir == 0 || dir == 2) {
-                  offset = dir == 2 ? -offsetSpeed : offsetSpeed;
-                  bounds.origin.y = bounds.origin.y + offset;
-              }
-              else {
-                  offset = dir == 1 ? -offsetSpeed : offsetSpeed;
-                  bounds.origin.x = bounds.origin.x + offset;
-              }
-          };
-          var movingYPoints = function (points, dir) {
-              // dir 0下 1左 2上 3右
-              var offset = 0;
-              if (dir == 2) {
-                  offset = -offsetSpeed;
-              }
-              else {
-                  offset = offsetSpeed;
-              }
-              for (var _i = 0, points_1 = points; _i < points_1.length; _i++) {
-                  var p = points_1[_i];
-                  p.y = p.y + offset;
-              }
-          };
-          var movingXPoints = function (points, dir) {
-              var offset = 0;
-              if (dir == 1) {
-                  offset = -offsetSpeed;
-              }
-              else {
-                  offset = offsetSpeed;
-              }
-              for (var _i = 0, points_2 = points; _i < points_2.length; _i++) {
-                  var p = points_2[_i];
-                  p.x = p.x + offset;
-              }
-          };
-          var moveFace = function (oneFace, dir) {
-              // dir 0下 1左 2上 3右
-              if (dir == 0 || dir == 2) {
-                  movingYPoints(oneFace.lowerLipBottom, dir);
-                  movingYPoints(oneFace.lowerLipTop, dir);
-                  movingYPoints(oneFace.upperLipBottom, dir);
-                  movingYPoints(oneFace.upperLipTop, dir);
-                  movingFaceBounds(oneFace.bounds, dir);
-              }
-              else {
-                  movingXPoints(oneFace.lowerLipBottom, dir);
-                  movingXPoints(oneFace.lowerLipTop, dir);
-                  movingXPoints(oneFace.upperLipBottom, dir);
-                  movingXPoints(oneFace.upperLipTop, dir);
-                  movingFaceBounds(oneFace.bounds, dir);
-              }
-          };
-          // 这个数据是和取景器大小有关的数据 
-          // 当 RN 的部分设置了取景器大小的时候, 返回的脸的位置也根据 RN 这里的实际尺寸有所压缩
-          // 但是和取景器的位移无关  毕竟安卓端也不知道取景器的相对位置
-          fetch('/assets/sampleContours.json').then(function (resp) {
-              return resp.json();
-          }).then(function (data) {
-              setTimeout(function () {
-                  // 在PC上调试
-                  if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
-                      var oneFace_1 = data[0];
-                      var i_1 = 0;
-                      var changeDir_1 = 0; // 0下 1上 2左 3右
-                      setInterval(function () {
-                          if (i_1++ == 2) {
-                              i_1 = 0;
-                              changeDir_1 = (++changeDir_1) % 4;
-                          }
-                          moveFace(oneFace_1, changeDir_1);
-                          var afterOffsetForFaceData = addOffsetForFaceData(oneFace_1);
-                          window.postMessage({
-                              messageType: 'face',
-                              faceData: afterOffsetForFaceData
-                          }, "*");
-                      }, 100);
-                  }
-              }, 1000);
-          });
-      }, false);
-      // let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
-  }
-  // 获取鼠标点击位置
-  function testClickEvent(game) {
-      window.addEventListener('load', function () {
-          setTimeout(function () {
-              game.scene.getScene(GAME_SCENE).input.on('pointerup', function (pointer) {
-                  var touchX = pointer.x;
-                  var touchY = pointer.y;
-                  // let x = game.input.mousePointer.x;
-                  // let y = game.input.mousePointer.y;
-                  console.log('clickXY', touchX, touchY);
-                  // ...
-              });
-          });
-      }, false);
-  }
-  //# sourceMappingURL=test.js.map
+  //# sourceMappingURL=BaseScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
@@ -1602,6 +1630,7 @@
   changeMouth();
   setPreview();
   testClickEvent(game);
+  //# sourceMappingURL=index.js.map
 
 }());
 //# sourceMappingURL=game.js.map

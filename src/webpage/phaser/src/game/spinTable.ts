@@ -38,10 +38,10 @@ export default class SpinTable {
 
     addToContainer(scene: Scene){
         this.spSpin = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'table');
-        // if (isPC) {
+        if (isPC) {
             this.spSpin.alpha = 0.5
 
-        // }
+        }
         
 
         let bds: Rectagle = this.spSpin.getBounds()
