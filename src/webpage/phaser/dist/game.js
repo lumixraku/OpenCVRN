@@ -227,63 +227,6 @@
   function changeMouth(game) {
       //contours sample data
       window.addEventListener("load", function () {
-          var offsetSpeed = 3;
-          var movingFaceBounds = function (bounds, dir) {
-              var offset = 0;
-              // dir 0下 1左 2上 3右
-              if (dir == 0 || dir == 2) {
-                  offset = dir == 2 ? -offsetSpeed : offsetSpeed;
-                  bounds.origin.y = bounds.origin.y + offset;
-              }
-              else {
-                  offset = dir == 1 ? -offsetSpeed : offsetSpeed;
-                  bounds.origin.x = bounds.origin.x + offset;
-              }
-          };
-          var movingYPoints = function (points, dir) {
-              // dir 0下 1左 2上 3右
-              var offset = 0;
-              if (dir == 2) {
-                  offset = -offsetSpeed;
-              }
-              else {
-                  offset = offsetSpeed;
-              }
-              for (var _i = 0, points_1 = points; _i < points_1.length; _i++) {
-                  var p = points_1[_i];
-                  p.y = p.y + offset;
-              }
-          };
-          var movingXPoints = function (points, dir) {
-              var offset = 0;
-              if (dir == 1) {
-                  offset = -offsetSpeed;
-              }
-              else {
-                  offset = offsetSpeed;
-              }
-              for (var _i = 0, points_2 = points; _i < points_2.length; _i++) {
-                  var p = points_2[_i];
-                  p.x = p.x + offset;
-              }
-          };
-          var moveFace = function (oneFace, dir) {
-              // dir 0下 1左 2上 3右
-              if (dir == 0 || dir == 2) {
-                  movingYPoints(oneFace.lowerLipBottom, dir);
-                  movingYPoints(oneFace.lowerLipTop, dir);
-                  movingYPoints(oneFace.upperLipBottom, dir);
-                  movingYPoints(oneFace.upperLipTop, dir);
-                  movingFaceBounds(oneFace.bounds, dir);
-              }
-              else {
-                  movingXPoints(oneFace.lowerLipBottom, dir);
-                  movingXPoints(oneFace.lowerLipTop, dir);
-                  movingXPoints(oneFace.upperLipBottom, dir);
-                  movingXPoints(oneFace.upperLipTop, dir);
-                  movingFaceBounds(oneFace.bounds, dir);
-              }
-          };
           // 这个数据是和取景器大小有关的数据 
           // 当 RN 的部分设置了取景器大小的时候, 返回的脸的位置也根据 RN 这里的实际尺寸有所压缩
           // 但是和取景器的位移无关  毕竟安卓端也不知道取景器的相对位置
@@ -294,14 +237,8 @@
                   // 在PC上调试
                   if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
                       var oneFace_1 = data[0];
-                      var i_1 = 0;
-                      var changeDir_1 = 0; // 0下 1上 2左 3右
                       setInterval(function () {
-                          if (i_1++ == 2) {
-                              i_1 = 0;
-                              changeDir_1 = (++changeDir_1) % 4;
-                          }
-                          moveFace(oneFace_1, changeDir_1);
+                          // moveFace(oneFace, changeDir)
                           var afterOffsetForFaceData = addOffsetForFaceData(oneFace_1);
                           window.postMessage({
                               messageType: 'face',
@@ -404,6 +341,9 @@
       }
       CamFaceCheck.prototype.refreshFacePosition = function (faceBounds, facePoints) {
           this.faceBounds = faceBounds;
+          var centerX = faceBounds.origin.x + faceBounds.size.width / 2;
+          var centerY = faceBounds.origin.y + faceBounds.size.height / 2;
+          this.faceCenterPos = new Vector2(centerX, centerY);
       };
       // check if face is in the center of preview
       // private 
@@ -471,6 +411,10 @@
               }
               idx++;
           }
+          var centerX = previewCamArea.x + previewCamArea.width / 2;
+          var centerY = previewCamArea.y + previewCamArea.height / 2;
+          this.previewRect.fillStyle(0x00FFFF);
+          this.previewRect.fillRect(centerX, centerY, 10, 10);
           this.previewRect.closePath();
           this.previewRect.strokePath();
       };
@@ -497,6 +441,10 @@
               }
               idx++;
           }
+          var centerX = faceBounds.origin.x + faceBounds.size.width / 2;
+          var centerY = faceBounds.origin.y + faceBounds.size.height / 2;
+          this.faceRect.fillStyle(0xFF00FF);
+          this.faceRect.fillRect(centerX, centerY, 10, 10);
           this.faceRect.closePath();
           this.faceRect.strokePath();
       };
@@ -1630,7 +1578,6 @@
   changeMouth();
   setPreview();
   testClickEvent(game);
-  //# sourceMappingURL=index.js.map
 
 }());
 //# sourceMappingURL=game.js.map

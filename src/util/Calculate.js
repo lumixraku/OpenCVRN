@@ -2,11 +2,11 @@
 
 export default class FacePosCheck {
   constructor(offsetXPreview, offsetYPreview, previewWidth, previewHeight) {
-    this.offsetXPreview = offsetXPreview
-    this.offsetYPreview = offsetYPreview
+    this.offsetXPreviewDefault = offsetXPreview
+    this.offsetYPreviewDefault = offsetYPreview
 
-    this.previewWidth = previewWidth
-    this.previewHeight = previewHeight
+    this.previewWidthDefault = previewWidth
+    this.previewHeightDefault = previewHeight
   }
   checkFacePosition(faceBounds) {
     let rs = {
@@ -14,7 +14,7 @@ export default class FacePosCheck {
       bounds: null,
       advice: 'still no face'
     }
-    if (!this.offsetXPreview == 0) {
+    if (!this.offsetXPreviewDefault == 0) {
       return rs
     }
     if (faceBounds) {
@@ -26,10 +26,10 @@ export default class FacePosCheck {
 
       this.drawFaceBounds(faceBounds)
       // this.drawPreviewBounds(this.camPreviewArea)
-      let minPreviewX = this.offsetXPreview
-      let maxPreviewX = this.offsetXPreview + this.previewWidth
-      let minPreviewY = this.offsetYPreview
-      let maxPreviewY = this.offsetYPreview + this.previewHeight
+      let minPreviewX = this.offsetXPreviewDefault
+      let maxPreviewX = this.offsetXPreviewDefault + this.previewWidthDefault
+      let minPreviewY = this.offsetYPreviewDefault
+      let maxPreviewY = this.offsetYPreviewDefault + this.previewHeightDefault
 
       let paddingLeft = minFaceX - minPreviewX
       let paddingRight = maxPreviewX - maxFaceX
@@ -46,7 +46,7 @@ export default class FacePosCheck {
         return {
           pass: true,
           bounds: faceBounds,
-          advice:'Hold your phone!'
+          advice: 'Hold your phone!'
         }
       }
 
@@ -56,16 +56,36 @@ export default class FacePosCheck {
 
   }
 
-  calcOffset(faceBounds, targetFaceBounds){
-    let targetCenterX = targetFaceBounds.origin.x + targetFaceBounds.size.width
-    let targetCenterY = targetFaceBounds.origin.y + targetFaceBounds.size.height
+  calcOffset(faceBounds, targetFaceBounds) {
+    // let targetCenterX = targetFaceBounds.origin.x + targetFaceBounds.size.width
+    // let targetCenterY = targetFaceBounds.origin.y + targetFaceBounds.size.height
+
+    let targetCenterX = this.offsetXPreviewDefault + this.previewWidthDefault / 2
+    let targetCenterY = this.offsetYPreviewDefault + this.previewHeightDefault / 2
 
     let faceCenterX = faceBounds.origin.x + faceBounds.size.width
     let faceCenterY = faceBounds.origin.y + faceBounds.size.height
 
-    return {
-      x: targetCenterX - faceCenterX,
-      y: targetCenterY - faceCenterY
+    let adjustX = targetCenterX - faceCenterX
+    let adjustY = targetCenterY - faceCenterY
+
+    // 缩小变化范围
+    let maxRangeX = 10
+    let maxRangeY = 10
+    if (Math.abs(adjustX) > maxRangeX) {
+      adjustX = adjustX > 0 ? maxRangeX : -maxRangeX
     }
- }
+    if (Math.abs(adjustY) > maxRangeY) {
+      adjustY = adjustY > 0 ? maxRangeY : -maxRangeY
+    }
+
+    console.log('adjustXY  ', faceCenterX, faceCenterY, targetCenterX , targetCenterY  )
+    console.log('adjust', adjustX)
+
+
+    return {
+      x: adjustX,
+      y: adjustY
+    }
+  }
 }
