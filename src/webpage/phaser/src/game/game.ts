@@ -24,7 +24,7 @@ import CamFaceCheck, { FaceInCircle } from './facePosCheck';
 import Cook from './cook';
 import { UIPlugin } from 'UI';
 import { Scene } from 'phaser';
-import DialogScene from '@root/UI/DialogManager';
+import UIScene from '@root/UI/UIManager';
 import EffectScene from '@root/UI/EffectManager';
 import AssetsLoader from './assetsLoader';
 import AnimateManager from './animate';
@@ -34,6 +34,8 @@ export default class Demo extends Phaser.Scene {
     public assetsLoader: AssetsLoader
     public animateManager: AnimateManager
     public timer: Phaser.Time.TimerEvent
+    public score: number = 0
+
 
     // // 旋转圆心
     public spinTable: SpinTable
@@ -62,7 +64,7 @@ export default class Demo extends Phaser.Scene {
     //text
     public mouthStateText: PhaserText;
     private toastText: PhaserText
-    private scoreText: PhaserText
+    // private scoreText: PhaserText
     private testText: PhaserText
     private hasCaughtToast: boolean
     
@@ -72,8 +74,9 @@ export default class Demo extends Phaser.Scene {
     private previewArea: Rectagle = new Rectagle(0, 0, 0, 0)
 
     // scene
-    private dialogScene: DialogScene;
+    private uiScene: UIScene;
     private effScene: EffectScene;
+
 
 
     constructor() {
@@ -114,13 +117,14 @@ export default class Demo extends Phaser.Scene {
 
         this.addText();
         
-        this.dialogScene =  this.scene.get(UI_SCENE) as DialogScene
+        this.uiScene =  this.scene.get(UI_SCENE) as UIScene
         this.effScene = this.scene.get(EF_SCENE) as EffectScene
         
 
         this.animateManager = new AnimateManager(this)        
         this.animateManager.registerAnimation()
-        
+
+        this.addScore = this.addScore.bind(this)
     }
 
 
@@ -393,13 +397,14 @@ export default class Demo extends Phaser.Scene {
 
                 // if not get caught
                 if (this.cook.isCooking()) {
-                    this.effScene.addCoin()
+                    
+                    this.effScene.addCoin(this.addScore)
                 }else{
                     if (this.cook.isChecking())
                     this.caughtAnimation()
 
                 }
-                this.scoreText.text = +(this.scoreText.text) + 1 + ''
+                
             }
         })
         
@@ -407,13 +412,16 @@ export default class Demo extends Phaser.Scene {
 
     caughtAnimation() {
         this.effScene.addHammer()
-        this.dialogScene.createCaughtText(stageWidth/2, stageHeight/2, ()=> {})
+        this.uiScene.createCaughtText(stageWidth/2, stageHeight/2, ()=> {})
 
     }
 
     missAnimation(){
 
     }
+
+
+
 
     drawHollowBackground() {
         let faceCenter = new Point(300, 450)
@@ -469,10 +477,10 @@ export default class Demo extends Phaser.Scene {
         // this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
         // this.testText = this.add.text(170, 170, 'Hello World', { fontFamily: '"Roboto Condensed"' });
         
-        this.scoreText = this.add.text(390, 50, '0', { 
-            fontFamily: '"Roboto Condensed"',
-            color: 'red'
-        })
+        // this.scoreText = this.add.text(390, 50, '0', { 
+        //     fontFamily: '"Roboto Condensed"',
+        //     color: 'red'
+        // })
         
 
     }
@@ -524,5 +532,9 @@ export default class Demo extends Phaser.Scene {
     
     }
 
+    addScore(sc: number) {
+        this.score = this.score + sc
+        this.uiScene.scoreText.text = '' + this.score
+    }
 
 }

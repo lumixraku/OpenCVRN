@@ -12,7 +12,7 @@ const stageHeight = document.body.clientHeight;
 
 
 import GameScene from '@game/game'
-import DialogScene from '@root/UI/DialogManager'
+import UIScene from '@root/UI/UIManager'
 import EFScene from '@root/UI/EffectManager'
 import BaseScene from './BaseScene';
 
@@ -23,7 +23,7 @@ const config: Phaser.Types.Core.GameConfig = {
     parent: 'phaser-example',
     width: stageWidth,
     height: stageHeight,
-    scene: [ BaseScene, GameScene,EFScene, DialogScene],
+    scene: [ BaseScene, GameScene,EFScene, UIScene],
     transparent: true,
     physics: {
         default: 'arcade',

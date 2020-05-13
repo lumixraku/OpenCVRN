@@ -34,14 +34,14 @@ export default class EffectScene extends Phaser.Scene {
     create(){
     }
     
-    addCoin() {
+    addCoin(cb: Function) {
         this.coin = this.add.image(stageWidth/2, stageHeight/2, 'coin')
         // this.coin.displayWidth = 64
         // this.coin.displayHeight = 64
         // scale 是根据原图的大小而言的。
         this.coin.setScale(0.1)
 
-
+        let self = this
         let dest = {
             x: 390, y:50
         }
@@ -61,7 +61,7 @@ export default class EffectScene extends Phaser.Scene {
                     duration: 432,
                     ease: 'Circ',
                     onComplete: () => {
-                        // cb()
+                        cb(1)
                         this.coin.destroy()
                     }
                 })                 
