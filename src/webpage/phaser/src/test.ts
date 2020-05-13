@@ -159,30 +159,30 @@ function changeMouth(game: Phaser.Game) {
     fetch('/assets/sampleContours.json').then(resp => {
       return resp.json()
     }).then(data => {
-      // 在PC上调试
-      if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
-        let oneFace: FaceData = data[0]
-        let i = 0
+      setTimeout(() => {
+        // 在PC上调试
+        if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
+          let oneFace: FaceData = data[0]
+          let i = 0
 
-        let changeDir = 0  // 0下 1上 2左 3右
-        setInterval(() => {
-          if (i++ == 2) {
-            i = 0
-            changeDir = (++changeDir) % 4
-          }
+          let changeDir = 0  // 0下 1上 2左 3右
+          setInterval(() => {
+            if (i++ == 2) {
+              i = 0
+              changeDir = (++changeDir) % 4
+            }
 
-          moveFace(oneFace, changeDir)
-          let afterOffsetForFaceData = addOffsetForFaceData(oneFace)
+            moveFace(oneFace, changeDir)
+            let afterOffsetForFaceData = addOffsetForFaceData(oneFace)
 
-          window.postMessage({
-            messageType: 'face',
-            faceData: afterOffsetForFaceData
-          }, "*")
+            window.postMessage({
+              messageType: 'face',
+              faceData: afterOffsetForFaceData
+            }, "*")
 
-        }, 100)
-      }
-
-
+          }, 100)
+        }
+      }, 1000)
     })
   }, false)
 
@@ -194,17 +194,17 @@ function changeMouth(game: Phaser.Game) {
 
 
 // 获取鼠标点击位置
-function testClickEvent(game:Phaser.Game) {
-  window.addEventListener('load', ()=> {
-    setTimeout( ()=> {
-      game.scene.getScene(GAME_SCENE).input.on('pointerup', function(pointer){
+function testClickEvent(game: Phaser.Game) {
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      game.scene.getScene(GAME_SCENE).input.on('pointerup', function (pointer) {
         var touchX = pointer.x;
         var touchY = pointer.y;
         // let x = game.input.mousePointer.x;
         // let y = game.input.mousePointer.y;
         console.log('clickXY', touchX, touchY)
         // ...
-     });
+      });
 
     })
   }, false)

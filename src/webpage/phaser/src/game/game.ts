@@ -12,7 +12,7 @@ const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
 // 在 RN 中得到的宽和高 是411 * 823
 // 在 webview 得到的宽高是 412 * 804  // 因为我的APP 并没有打开全屏
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION } from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE } from '@root/constants';
 import { isPC } from '@root/test'
 
 
@@ -33,6 +33,7 @@ import AnimateManager from './animate';
 export default class Demo extends Phaser.Scene {
     public assetsLoader: AssetsLoader
     public animateManager: AnimateManager
+    public timer: Phaser.Time.TimerEvent
 
     // // 旋转圆心
     public spinTable: SpinTable
@@ -79,8 +80,6 @@ export default class Demo extends Phaser.Scene {
         super(GAME_SCENE);
         this.assetsLoader = new AssetsLoader(this)
         this.messageListener()
-
-
     }
 
     preload() {
@@ -90,6 +89,17 @@ export default class Demo extends Phaser.Scene {
 
     // preload 中的资源都加载完毕之后 才会调用 create
     create() {
+
+        
+        this.timer = this.time.addEvent({
+            // delay: 500,                // ms
+            // callback: callback,
+            //args: [],
+            // callbackScope: thisArg,
+            loop: true
+        });        
+
+
         this.bg = this.add.graphics()
 
         this.drawBackground()
@@ -109,7 +119,7 @@ export default class Demo extends Phaser.Scene {
         
 
         this.animateManager = new AnimateManager(this)        
-        this.animateManager.createDoge()
+        this.animateManager.registerAnimation()
         
     }
 
@@ -132,19 +142,33 @@ export default class Demo extends Phaser.Scene {
     }
 
     update60Frame() {
-        let shouldLookBack =  Math.random()
-
-        if (this.cook) {
-            let isDogCooking = this.cook.isCooking()
-            let isJustChecked = this.cook.ifJustChecked()
-            if (!isJustChecked && isDogCooking && shouldLookBack < 0.9) {
-                this.cook.lookBack()
-                setTimeout(()=> {
-                    this.cook.cookAgain()
-                }, CHECKING_DURATION)
-            }
-        }        
+        let elapsed = this.timer.getElapsedSeconds()
+        this.shouldCookLookBack(elapsed)
     }
+    
+    shouldCookLookBack(elapsed: number) {
+        if (this.cook) {
+            let shouldLookBack =  Math.random()
+            let isCooking = this.cook.isCooking()
+            if (isCooking) {
+
+                if (this.cook.checkTimeCount== 0 ) {
+                    if (elapsed > FIRST_CHECK_ELAPSE ) {
+                        this.cook.lookBack()
+                    }
+                } else {
+    
+                    let isJustChecked = this.cook.ifJustChecked(elapsed)
+                    if (!isJustChecked  && shouldLookBack < 0.9) {
+                        this.cook.lookBack()
+                    }
+                }
+            }
+
+
+        }
+    }
+
 
     rotateTable() {
         // 右手顺时针
@@ -229,7 +253,7 @@ export default class Demo extends Phaser.Scene {
 
 
     refreshMouth(upperTop: Point[], upperBottom: Point[], lowerTop: Point[], lowerBottom: Point[]) {
-        if (this.refreshMouth) {
+        if (this.mouthObj) {
             this.mouthObj.setMouthContourPoints(upperTop, upperBottom, lowerTop, lowerBottom)
 
         } else {
@@ -263,7 +287,7 @@ export default class Demo extends Phaser.Scene {
             let msg = {
                 messageType: MSG_TYPE_WEBVIEW_READY,
                 event: "bindMessage",
-                time: +new Date
+                time: +new Date 
             }
             window["ReactNativeWebView"].postMessage(JSON.stringify(msg));
         }
@@ -368,10 +392,11 @@ export default class Demo extends Phaser.Scene {
                 food.destroy()
 
                 // if not get caught
-                if (!this.cook.isCooking()) {
-                    this.caughtAnimation()
-                }else{
+                if (this.cook.isCooking()) {
                     this.effScene.addCoin()
+                }else{
+                    if (this.cook.isChecking())
+                    this.caughtAnimation()
 
                 }
                 this.scoreText.text = +(this.scoreText.text) + 1 + ''
@@ -453,6 +478,10 @@ export default class Demo extends Phaser.Scene {
     }
 
     refreshFaceBounds(bounds: Bounds, facePoints: Point[]) {   
+        if (!this.camFaceCheck) {
+            return
+        }
+
         this.camFaceCheck.refreshFacePosition(bounds, facePoints)  
         this.camFaceCheck.updatePreviewPosByTarget()
 
@@ -495,10 +524,5 @@ export default class Demo extends Phaser.Scene {
     
     }
 
-    showCaughtToast(text: string, last: number, cb: Function) {
-        if (this.hasCaughtToast) return
-
-        
-    }    
 
 }
