@@ -63,15 +63,15 @@ export default class FacePosCheck {
     let targetCenterX = this.offsetXPreviewDefault + this.previewWidthDefault / 2
     let targetCenterY = this.offsetYPreviewDefault + this.previewHeightDefault / 2
 
-    let faceCenterX = faceBounds.origin.x + faceBounds.size.width
-    let faceCenterY = faceBounds.origin.y + faceBounds.size.height
+    let faceCenterX = faceBounds.origin.x + faceBounds.size.width/2
+    let faceCenterY = faceBounds.origin.y + faceBounds.size.height/2
 
     let adjustX = targetCenterX - faceCenterX
     let adjustY = targetCenterY - faceCenterY
 
     // 缩小变化范围
-    let maxRangeX = 10
-    let maxRangeY = 10
+    let maxRangeX = 50
+    let maxRangeY = 50
     if (Math.abs(adjustX) > maxRangeX) {
       adjustX = adjustX > 0 ? maxRangeX : -maxRangeX
     }
