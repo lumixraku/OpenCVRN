@@ -225,7 +225,7 @@ export default class Demo extends Phaser.Scene {
                     let food = this.add.image(0, 0, foodTextureKey) as Food
 
                     food.name = `Food${i}`
-                    food.setScale(2, 2)
+                    food.setScale(2)
 
                     this.foodList[i] = food
 
@@ -541,7 +541,7 @@ export default class Demo extends Phaser.Scene {
 
     addScore(sc: number) {
         this.score = this.score + sc
-        this.uiScene.scoreText.text = '' + this.score
+        this.effScene.scoreText.text = '' + this.score
     }
 
 }

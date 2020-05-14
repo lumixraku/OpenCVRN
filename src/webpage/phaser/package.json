@@ -9,7 +9,8 @@
     "startTemplate": "npm run build && webpack-dev-server --port=8000",
     "dev": "rollup --watch --config rollup.config.dev.js",
     "build": "rollup --config rollup.config.dist.js",
-    "watch": "rollup --watch --config rollup.config.dev.js"
+    "watch": "rollup --watch --config rollup.config.dev.js",
+    "esdev": "node esbuild.js"
   },
   "repository": {
     "type": "git",
@@ -39,6 +40,7 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
+    "esbuild": "^0.3.2",
     "phaser3-rex-plugins": "/Users/luonan/repos/phaser3-rex-plugins"
   }
 }

@@ -20,7 +20,6 @@
   var COOK_LOOKBACK_ANIMI = 'lookback';
   var COOK_TOCOOK_ANIMI = 'cookAgain';
   var HIT_DIZZY = 'hitDizzy';
-  //# sourceMappingURL=constants.js.map
 
   /*! *****************************************************************************
   Copyright (c) Microsoft Corporation. All rights reserved.
@@ -155,7 +154,6 @@
       };
       return Mouth;
   }());
-  //# sourceMappingURL=mouth.js.map
 
   var offsetXPreview = 170;
   var offsetYPreview = 250;
@@ -266,16 +264,18 @@
           });
       }, false);
   }
-  //# sourceMappingURL=test.js.map
 
   var Point$1 = Phaser.Geom.Point;
   var stageWidth$1 = document.body.clientWidth;
   var stageHeight$1 = document.body.clientHeight;
+  // import { isPC } from '../test'
   var angle2Rad = function (angle) {
       return (Math.PI / 180) * angle;
   };
   var SpinTable = /** @class */ (function () {
       function SpinTable(pos, radius, spinSpeed) {
+          this.angle = 0;
+          this.rotation = 0;
           this.spSpinSpeed = 1;
           this.circleRadius = stageWidth$1;
           this.circleCenter = new Point$1(stageWidth$1 / 2, stageHeight$1 + this.circleRadius / 2.3);
@@ -286,13 +286,13 @@
           this.spSpinSpeed = spinSpeed;
       }
       SpinTable.prototype.addToContainer = function (scene) {
-          this.spSpin = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'table');
+          this.spinTable = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'table');
           if (isPC) {
-              this.spSpin.alpha = 0.5;
+              this.spinTable.alpha = 0.5;
           }
-          var bds = this.spSpin.getBounds();
+          var bds = this.spinTable.getBounds();
           var width = bds.width;
-          this.spSpin.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2));
+          this.spinTable.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2));
           this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);
       };
       SpinTable.prototype.setTableCapacity = function (tableCapacity) {
@@ -303,10 +303,11 @@
           // 角度从x轴正方向开始算  顺时针旋转
           // rotate 是使用的弧度
           // angle 是角度
-          this.spSpin.angle += this.spSpinSpeed;
+          this.angle += this.spSpinSpeed;
+          // this.spinTable.angle = this.angle
       };
       SpinTable.prototype.getAngle = function () {
-          return this.spSpin.angle;
+          return this.angle;
       };
       // 计算第 i 个食物的在当前桌面上的角度
       // 桌子是顺时针旋转  但是食物的摆放顺序是逆时针
@@ -325,7 +326,6 @@
       };
       return SpinTable;
   }());
-  //# sourceMappingURL=spinTable.js.map
 
   var Point$2 = Phaser.Geom.Point;
   var Vector2 = Phaser.Math.Vector2;
@@ -504,9 +504,9 @@
       };
       return CamFaceCheck;
   }());
-  //# sourceMappingURL=facePosCheck.js.map
 
   var Sprite = Phaser.GameObjects.Sprite;
+  // import { DOGLOOK, DOGCOOK, CHECKING_INTERVAL, COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI } from '../constants'
   // Phaser.Sprite 中可以 play 动画
   // 但是 Phaser.Image 不行
   var Cook = /** @class */ (function (_super) {
@@ -588,8 +588,8 @@
       };
       return Cook;
   }(Sprite));
-  //# sourceMappingURL=cook.js.map
 
+  // import { DOGCOOK } from "../constants";
   var AssetsLoader = /** @class */ (function () {
       function AssetsLoader(scene) {
           this.scene = scene;
@@ -631,8 +631,8 @@
       };
       return AssetsLoader;
   }());
-  //# sourceMappingURL=assetsLoader.js.map
 
+  // import { COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI, HIT_DIZZY } from "../constants";
   var AnimateManager = /** @class */ (function () {
       function AnimateManager(scene) {
           // 此刻 scene 还没有准备好
@@ -697,7 +697,6 @@
       };
       return AnimateManager;
   }());
-  //# sourceMappingURL=animate.js.map
 
   var Point$3 = Phaser.Geom.Point;
   var Rectagle$2 = Phaser.Geom.Rectangle;
@@ -825,7 +824,7 @@
                       var foodTextureKey = "food" + i;
                       var food = this.add.image(0, 0, foodTextureKey);
                       food.name = "Food" + i;
-                      food.setScale(2, 2);
+                      food.setScale(2);
                       this.foodList[i] = food;
                       // console.log("angle add", rawAngle, mathAngle, food.name)
                       // this.foodList.push(food)
@@ -1073,10 +1072,30 @@
       };
       Demo.prototype.addScore = function (sc) {
           this.score = this.score + sc;
-          this.uiScene.scoreText.text = '' + this.score;
+          this.effScene.scoreText.text = '' + this.score;
       };
       return Demo;
   }(Phaser.Scene));
+
+  var drawRoundRect = function (scene, size, radius, color, borderWidth, borderColor) {
+      var bg = scene.add.graphics();
+      bg.clear();
+      bg.beginPath();
+      var x = size.x;
+      var y = size.y;
+      var width = size.width;
+      var height = size.height;
+      bg.fillStyle(color);
+      // graphics 的 origin 是左上角
+      bg.fillRoundedRect(x, y, width, height, radius);
+      if (borderWidth) {
+          var x2 = x + borderWidth;
+          var y2 = y + borderWidth;
+          bg.fillStyle(borderColor);
+          bg.fillRoundedRect(x2, y2, width - 2 * borderWidth, height - 2 * borderWidth, radius - borderWidth);
+      }
+      return bg;
+  };
 
   var Point$4 = Phaser.Geom.Point;
   var Rectagle$3 = Phaser.Geom.Rectangle;
@@ -1100,7 +1119,6 @@
           });
       };
       UIScene.prototype.create = function () {
-          this.createScoreArea();
           this.welcome = this.createWelcomeDialog(this, 300, 500);
           this.testView = this.createDemoDialog(this, 0, 0);
           // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
@@ -1302,7 +1320,7 @@
           // 而 container 的默认origin 是中心位置， （且无法更改？？）
           // 添加元素的时候也是将子元素的origin 和 父容器的origin 对齐
           // graphic 的 origin 是左上角
-          var bg = this.drawRoundRect(new Rectagle$3(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, 0x99aaee, 5, 0xaabbff);
+          var bg = drawRoundRect(this, new Rectagle$3(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, 0x99aaee, 5, 0xaabbff);
           var AlternativeEmoji = ['sad', 'cry', 'sour'];
           var hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji);
           var emojiPos = TopLeftToCenter(400, 100, new Point$4(50, 50));
@@ -1421,54 +1439,11 @@
               }
           });
       };
-      UIScene.prototype.drawRoundRect = function (size, radius, color, borderWidth, borderColor) {
-          var bg = this.add.graphics();
-          bg.clear();
-          bg.beginPath();
-          var x = size.x;
-          var y = size.y;
-          var width = size.width;
-          var height = size.height;
-          bg.fillStyle(color);
-          // graphics 的 origin 是左上角
-          bg.fillRoundedRect(x, y, width, height, radius);
-          if (borderWidth) {
-              var x2 = x + borderWidth;
-              var y2 = y + borderWidth;
-              bg.fillStyle(borderColor);
-              bg.fillRoundedRect(x2, y2, width - 2 * borderWidth, height - 2 * borderWidth, radius - borderWidth);
-          }
-          return bg;
-      };
-      UIScene.prototype.createScoreArea = function () {
-          var scoreAreaCenter = new Point$4(stageWidth$4 / 2, 50);
-          var graphicsTopLeft = new Point$4(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y);
-          this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y);
-          var bg = this.add.graphics();
-          bg.beginPath();
-          bg.fillStyle(0xFEDE52); //yellow
-          bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth$4, 100);
-          bg.closePath();
-          var scoreBoxWidth = 300;
-          var scoreBoxHeight = 66;
-          var scoreBoxRadius = scoreBoxHeight / 2;
-          var scoreBoxBorder = 10;
-          var scoreBoxRectagle = new Rectagle$3((scoreAreaCenter.x - scoreBoxWidth / 2) - scoreAreaCenter.x, (scoreAreaCenter.y - scoreBoxHeight / 2) - scoreAreaCenter.y, scoreBoxWidth, scoreBoxHeight);
-          var scoreBox = this.drawRoundRect(scoreBoxRectagle, scoreBoxRadius, 0xFc6158, scoreBoxBorder, 0xf9ebe9);
-          var scoreTitlePos = new Point$4(scoreAreaCenter.x - 50, scoreAreaCenter.y);
-          var scoreTitle = this.add.text(scoreTitlePos.x - scoreAreaCenter.x, scoreTitlePos.y - scoreAreaCenter.y, 'score:', { fontFamily: 'Arial', fontSize: 22, color: '#cca398' });
-          scoreTitle.setOrigin(0.5);
-          var scorePos = new Point$4(scoreAreaCenter.x + 0, scoreAreaCenter.y);
-          var scoreText = this.scoreText = this.add.text(scorePos.x - scoreAreaCenter.x, scorePos.y - scoreAreaCenter.y, '0', { fontFamily: 'Arial', fontSize: 22, color: '#cca398' });
-          scoreText.setOrigin(0.5);
-          this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText]);
-          return this.scoreArea;
-      };
       return UIScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=UIScene.js.map
 
   var Point$5 = Phaser.Geom.Point;
+  var Rectagle$4 = Phaser.Geom.Rectangle;
   var stageWidth$5 = document.body.clientWidth;
   var stageHeight$5 = document.body.clientHeight;
   var EffectScene = /** @class */ (function (_super) {
@@ -1492,8 +1467,9 @@
           this.load.image('dizzy2', 'assets/dizzy2.png');
       };
       EffectScene.prototype.create = function () {
+          this.createScoreArea();
       };
-      EffectScene.prototype.addCoin = function (cb) {
+      EffectScene.prototype.addCoin = function (addScoreCount) {
           var _this = this;
           this.coin = this.add.image(stageWidth$5 / 2, stageHeight$5 / 2, 'coin');
           // this.coin.displayWidth = 64
@@ -1501,7 +1477,7 @@
           // scale 是根据原图的大小而言的。
           this.coin.setScale(0.1);
           var dest = {
-              x: 390, y: 50
+              x: 210, y: 50
           };
           this.tweens.add({
               targets: this.coin,
@@ -1514,11 +1490,11 @@
                       targets: _this.coin,
                       x: dest.x,
                       y: dest.y,
-                      scale: 0,
-                      duration: 432,
+                      scale: 0.1,
+                      duration: 332,
                       ease: 'Circ',
                       onComplete: function () {
-                          cb(1);
+                          addScoreCount(1);
                           _this.coin.destroy();
                       }
                   });
@@ -1560,9 +1536,32 @@
           this.dizzy = this.add.sprite(dizzyPos.x, dizzyPos.y, 'dizzy1');
           return this.dizzy;
       };
+      EffectScene.prototype.createScoreArea = function () {
+          var scoreAreaCenter = new Point$5(stageWidth$5 / 2, 50);
+          var graphicsTopLeft = new Point$5(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y);
+          this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y);
+          var bg = this.add.graphics();
+          bg.beginPath();
+          bg.fillStyle(0xFEDE52); //yellow
+          bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth$5, 100);
+          bg.closePath();
+          var scoreBoxWidth = 300;
+          var scoreBoxHeight = 66;
+          var scoreBoxRadius = scoreBoxHeight / 2;
+          var scoreBoxBorder = 10;
+          var scoreBoxRectagle = new Rectagle$4((scoreAreaCenter.x - scoreBoxWidth / 2) - scoreAreaCenter.x, (scoreAreaCenter.y - scoreBoxHeight / 2) - scoreAreaCenter.y, scoreBoxWidth, scoreBoxHeight);
+          var scoreBox = drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, 0xFc6158, scoreBoxBorder, 0xf9ebe9);
+          var scoreTitlePos = new Point$5(scoreAreaCenter.x - 50, scoreAreaCenter.y);
+          var scoreTitle = this.add.text(scoreTitlePos.x - scoreAreaCenter.x, scoreTitlePos.y - scoreAreaCenter.y, 'score:', { fontFamily: 'Arial', fontSize: 22, color: '#cca398' });
+          scoreTitle.setOrigin(0.5);
+          var scorePos = new Point$5(scoreAreaCenter.x + 0, scoreAreaCenter.y);
+          var scoreText = this.scoreText = this.add.text(scorePos.x - scoreAreaCenter.x, scorePos.y - scoreAreaCenter.y, '0', { fontFamily: 'Arial', fontSize: 22, color: '#cca398' });
+          scoreText.setOrigin(0.5);
+          this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText]);
+          return this.scoreArea;
+      };
       return EffectScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=EffectScene.js.map
 
   var stageWidth$6 = document.body.clientWidth;
   var stageHeight$6 = document.body.clientHeight;

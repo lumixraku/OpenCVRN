@@ -8,8 +8,9 @@ import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
 import Container = Phaser.GameObjects.Container
 
-import { UI_SCENE } from "@root/constants";
+import { UI_SCENE } from "../constants";
 import { World } from "matter";
+import { drawRoundRect } from "./UIUtil";
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
 
@@ -51,7 +52,6 @@ export default class UIScene extends Phaser.Scene {
     }
 
     create() {
-        this.createScoreArea()
         this.welcome = this.createWelcomeDialog(this, 300, 500)
         this.testView = this.createDemoDialog(this, 0, 0)
         // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
@@ -331,7 +331,8 @@ export default class UIScene extends Phaser.Scene {
         // 而 container 的默认origin 是中心位置， （且无法更改？？）
         // 添加元素的时候也是将子元素的origin 和 父容器的origin 对齐
         // graphic 的 origin 是左上角
-        let bg = this.drawRoundRect(
+        let bg = drawRoundRect(
+            this,
             new Rectagle(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight),
             20,
             0x99aaee,
@@ -478,81 +479,6 @@ export default class UIScene extends Phaser.Scene {
         });
     }
 
-    drawRoundRect(size: Rectagle, radius: number, color: any, borderWidth?: number, borderColor?: any) {
-
-
-        let bg = this.add.graphics()
-        bg.clear()
-        bg.beginPath()
-
-        let x = size.x
-        let y = size.y
-        let width = size.width
-        let height = size.height
-        bg.fillStyle(color)
-        // graphics 的 origin 是左上角
-        bg.fillRoundedRect(x, y, width, height, radius)
-
-        if (borderWidth) {
-            let x2 = x + borderWidth
-            let y2 = y + borderWidth
-            bg.fillStyle(borderColor)
-            bg.fillRoundedRect(x2, y2, width - 2 * borderWidth, height - 2 * borderWidth, radius - borderWidth)
-        }
-
-
-        return bg
-
-    }
-
-    createScoreArea(): Container {
-        let scoreAreaCenter = new Point(stageWidth / 2, 50)
-        let graphicsTopLeft = new Point(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y)
-        this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y)
-
-        let bg = this.add.graphics()
-        bg.beginPath()
-        bg.fillStyle(0xFEDE52) //yellow
-        bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth, 100)
-        bg.closePath()
-
-
-        let scoreBoxWidth = 300
-        let scoreBoxHeight = 66
-        let scoreBoxRadius = scoreBoxHeight / 2
-        let scoreBoxBorder = 10
-        let scoreBoxRectagle = new Rectagle(
-            (scoreAreaCenter.x - scoreBoxWidth / 2) - scoreAreaCenter.x,
-            (scoreAreaCenter.y - scoreBoxHeight / 2) - scoreAreaCenter.y,
-            scoreBoxWidth,
-            scoreBoxHeight
-        )
-        let scoreBox = this.drawRoundRect(scoreBoxRectagle, scoreBoxRadius, 0xFc6158, scoreBoxBorder, 0xf9ebe9)
-
-        let scoreTitlePos = new Point(scoreAreaCenter.x - 50, scoreAreaCenter.y)
-        let scoreTitle = this.add.text(
-            scoreTitlePos.x - scoreAreaCenter.x,
-            scoreTitlePos.y - scoreAreaCenter.y,
-            'score:',
-            { fontFamily: 'Arial', fontSize: 22, color: '#cca398' }
-        )
-        scoreTitle.setOrigin(0.5)
-
-        let scorePos = new Point(scoreAreaCenter.x + 0, scoreAreaCenter.y)
-        let scoreText = this.scoreText = this.add.text(
-            scorePos.x - scoreAreaCenter.x,
-            scorePos.y - scoreAreaCenter.y,
-            '0',
-            { fontFamily: 'Arial', fontSize: 22, color: '#cca398' }
-        )
-        scoreText.setOrigin(0.5)
-
-
-        this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText])
-
-
-        return this.scoreArea
-    }
 
 }
 

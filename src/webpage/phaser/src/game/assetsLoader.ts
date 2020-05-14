@@ -1,5 +1,6 @@
 import { Scene } from "phaser";
 import { DOGCOOK } from "@root/constants";
+// import { DOGCOOK } from "../constants";
 
 
 
