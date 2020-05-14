@@ -20,6 +20,7 @@
   var COOK_LOOKBACK_ANIMI = 'lookback';
   var COOK_TOCOOK_ANIMI = 'cookAgain';
   var HIT_DIZZY = 'hitDizzy';
+  //# sourceMappingURL=constants.js.map
 
   /*! *****************************************************************************
   Copyright (c) Microsoft Corporation. All rights reserved.
@@ -154,6 +155,7 @@
       };
       return Mouth;
   }());
+  //# sourceMappingURL=mouth.js.map
 
   var offsetXPreview = 170;
   var offsetYPreview = 250;
@@ -264,6 +266,7 @@
           });
       }, false);
   }
+  //# sourceMappingURL=test.js.map
 
   var Point$1 = Phaser.Geom.Point;
   var stageWidth$1 = document.body.clientWidth;
@@ -274,13 +277,14 @@
   };
   var SpinTable = /** @class */ (function () {
       function SpinTable(pos, radius, spinSpeed) {
-          this.angle = 0;
-          this.rotation = 0;
+          this.angleVal = 0;
+          this.rotationVal = 0;
           this.spSpinSpeed = 1;
           this.circleRadius = stageWidth$1;
           this.circleCenter = new Point$1(stageWidth$1 / 2, stageHeight$1 + this.circleRadius / 2.3);
           this.distanceAngle = 60; //食物和食物之间的间隔(角度)
           this.tableCapacity = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
+          this.distanceRad = 2 * Math.PI / this.tableCapacity;
           this.circleCenter = pos;
           this.circleRadius = radius;
           this.spSpinSpeed = spinSpeed;
@@ -303,15 +307,19 @@
           // 角度从x轴正方向开始算  顺时针旋转
           // rotate 是使用的弧度
           // angle 是角度
-          this.angle += this.spSpinSpeed;
-          // this.spinTable.angle = this.angle
+          this.angleVal += this.spSpinSpeed;
+          this.rotationVal += angle2Rad(this.spSpinSpeed);
+          this.spinTable.rotation = this.rotationVal;
       };
       SpinTable.prototype.getAngle = function () {
-          return this.angle;
+          return this.angleVal;
       };
-      // 计算第 i 个食物的在当前桌面上的角度
-      // 桌子是顺时针旋转  但是食物的摆放顺序是逆时针
-      // i starts from 0
+      /**
+       * 计算第 i 个食物的在当前桌面上的角度
+       * 桌子是顺时针旋转  但是食物的摆放顺序是逆时针
+       * i starts from 0
+       * @param i
+       */
       SpinTable.prototype.calcFoodIAngle = function (i) {
           var rawAngle = this.getAngle();
           var angle = rawAngle + this.distanceAngle * (this.tableCapacity - i);
@@ -319,13 +327,28 @@
           // 另外注意一下这里的 angle 按照正始终顺序旋转 在第一象限是 0 ~ -90  第二象限是 -90 ~ -180
           // 第四象限是 0 ~ 90  第三象限是 90 ~ 180
       };
+      /**
+       * 计算第 i 个食物的在当前桌面上的角度
+       * 桌子是顺时针旋转  但是食物的摆放顺序是逆时针
+       */
+      SpinTable.prototype.calcFoodIRad = function (i) {
+          var rawRad = this.rotationVal;
+          var rad = rawRad + this.distanceRad * (this.tableCapacity - i);
+          return rad;
+      };
       SpinTable.prototype.calcAngleToPoint = function (angle) {
           var point = new Phaser.Geom.Point(0, 0);
           Phaser.Geom.Circle.CircumferencePoint(this.circle, angle2Rad(angle), point);
           return point;
       };
+      SpinTable.prototype.caleRadToPoint = function (rad) {
+          var point = new Phaser.Geom.Point(0, 0);
+          Phaser.Geom.Circle.CircumferencePoint(this.circle, rad, point);
+          return point;
+      };
       return SpinTable;
   }());
+  //# sourceMappingURL=spinTable.js.map
 
   var Point$2 = Phaser.Geom.Point;
   var Vector2 = Phaser.Math.Vector2;
@@ -504,6 +527,7 @@
       };
       return CamFaceCheck;
   }());
+  //# sourceMappingURL=facePosCheck.js.map
 
   var Sprite = Phaser.GameObjects.Sprite;
   // import { DOGLOOK, DOGCOOK, CHECKING_INTERVAL, COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI } from '../constants'
@@ -588,6 +612,7 @@
       };
       return Cook;
   }(Sprite));
+  //# sourceMappingURL=cook.js.map
 
   // import { DOGCOOK } from "../constants";
   var AssetsLoader = /** @class */ (function () {
@@ -631,6 +656,7 @@
       };
       return AssetsLoader;
   }());
+  //# sourceMappingURL=assetsLoader.js.map
 
   // import { COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI, HIT_DIZZY } from "../constants";
   var AnimateManager = /** @class */ (function () {
@@ -697,6 +723,7 @@
       };
       return AnimateManager;
   }());
+  //# sourceMappingURL=animate.js.map
 
   var Point$3 = Phaser.Geom.Point;
   var Rectagle$2 = Phaser.Geom.Rectangle;
@@ -762,7 +789,6 @@
       Demo.prototype.update60Frame = function () {
           var elapsed = this.timer.getElapsedSeconds();
           this.shouldCookLookBack(elapsed);
-          // console.log(this.game.loop.actualFps)
           this.fpsText.text = this.game.loop.actualFps + '';
       };
       Demo.prototype.shouldCookLookBack = function (elapsed) {
@@ -842,9 +868,10 @@
               // let angle = rawAngle + this.distanceAngle * (this.tableCapacity  - i)
               // 另外注意一下这里的 angle 按照正始终顺序旋转 在第一象限是 0 ~ -90  第二象限是 -90 ~ -180
               // 第四象限是 0 ~ 90  第三象限是 90 ~ 180
-              var foodAngle = this.spinTable.calcFoodIAngle(i); //当前食物在桌上的角度
-              var point = this.spinTable.calcAngleToPoint(foodAngle);
-              // Phaser.Geom.Circle.CircumferencePoint(this.circle, angle2Rad(angle) , point);
+              // let foodAngle = this.spinTable.calcFoodIAngle(i) //当前食物在桌上的角度
+              // let point = this.spinTable.calcAngleToPoint(foodAngle)
+              var foodRad = this.spinTable.calcFoodIRad(i);
+              var point = this.spinTable.caleRadToPoint(foodRad);
               food.x = point.x;
               food.y = point.y;
           }
@@ -1076,6 +1103,7 @@
       };
       return Demo;
   }(Phaser.Scene));
+  //# sourceMappingURL=game.js.map
 
   var drawRoundRect = function (scene, size, radius, color, borderWidth, borderColor) {
       var bg = scene.add.graphics();
@@ -1096,6 +1124,7 @@
       }
       return bg;
   };
+  //# sourceMappingURL=UIUtil.js.map
 
   var Point$4 = Phaser.Geom.Point;
   var Rectagle$3 = Phaser.Geom.Rectangle;
@@ -1441,6 +1470,7 @@
       };
       return UIScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=UIScene.js.map
 
   var Point$5 = Phaser.Geom.Point;
   var Rectagle$4 = Phaser.Geom.Rectangle;
@@ -1562,6 +1592,7 @@
       };
       return EffectScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=EffectScene.js.map
 
   var stageWidth$6 = document.body.clientWidth;
   var stageHeight$6 = document.body.clientHeight;
@@ -1597,6 +1628,7 @@
       };
       return BaseScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=BaseScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
@@ -1623,6 +1655,7 @@
   changeMouth();
   setPreview();
   testClickEvent(game);
+  //# sourceMappingURL=index.js.map
 
 }());
 //# sourceMappingURL=game.js.map
