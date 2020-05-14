@@ -1,6 +1,4 @@
 
-import _ from "underscore";
-
 import { StyleSheet, Dimensions } from 'react-native';
 
 import { offsetXPreviewDefault, offsetYPreviewDefault, previewWidthDefault, previewHeightDefault } from '../Styles/Screens/CameraStyle';
@@ -37,6 +35,7 @@ const postToWebview = (webview, data) => {
 	} else {
 		dataStr = data;
 	}
+	console.log("POST TO WEB",  dataStr)
 	var runJS = `
 			window.postMessage(${dataStr})
 		`;

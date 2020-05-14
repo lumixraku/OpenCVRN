@@ -18,12 +18,14 @@ export default class Mouth {
     public lowerBottomPoints: Point[];
 
     public mouthContour: Graphics;
+    public mouthCenter: Graphics;
     public mouthStateText: PhaserText;
 
     // private mouthColor: Graphics;
 
     constructor(scene: Phaser.Scene) {
         this.mouthContour = scene.add.graphics()
+        this.mouthCenter = scene.add.graphics()
         this.mouthStateText = scene.add.text(stageWidth - 100, 100, 'Hello World', { fontFamily: '"Roboto Condensed"' });
     }
 
@@ -46,19 +48,27 @@ export default class Mouth {
         let yVals = mouthPoints.map(p => {
             return p.y
         })
+        console.log('mouth vals', mouthPoints.length)
 
         let minX = Math.min(...xVals)
         let maxX = Math.max(...xVals)
         let minY = Math.min(...yVals)
         let maxY = Math.max(...yVals)
 
+        this.mouthCenter.clear()
+        var circle = new Phaser.Geom.Circle( minX + (maxX - minX)/2,  minY + (maxY - minY) /2, 5);
+        this.mouthCenter.fillCircleShape(circle);
+
+        console.log('center',mouthPoints, minX, minY, maxX, maxY, circle.x, circle.y )
+
+        
         this.mouthRect.setPosition(minX, minY);
         this.mouthRect.setSize(maxX - minX, maxY - minY)
     }
     drawContour(){
         let mouthPoints = this.mouthAllPoints;
         this.mouthContour.clear()
-        this.mouthContour.lineStyle(5, 0xFF00FF, 1.0);
+        this.mouthContour.lineStyle(5, 0xFFBBFF, 1.0);
         this.mouthContour.beginPath();
 
         let idx = 0
@@ -71,6 +81,9 @@ export default class Mouth {
             idx++
 
         }
+
+
+
         this.mouthContour.closePath();
         this.mouthContour.strokePath();
     }

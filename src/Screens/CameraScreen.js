@@ -28,7 +28,7 @@ var webviewURL = 'http://10.12.113.137:5001/';
 // var webviewSource = require("../../android/app/src/main/assets/index.html") // 报错
 
 
-var previewRawOffset = { x:0, y:0 }
+var previewRawOffset = { x: 0, y: 0 }
 
 export default class CameraScreen extends Component {
   facePosCheck = null
@@ -51,6 +51,7 @@ export default class CameraScreen extends Component {
     this.onMessageFromWeb = this.onMessageFromWeb.bind(this);
 
     this.lastTime = +new Date;
+    this.state.faces = [fakedata[0]]
     setTimeout(() => {
       // this.refs.toast.show('Action!', DURATION.LENGTH_SHORT);
       // console.log('MLkit  is null ???', MLkit); // 需要卸载然后安装 不然总是 null
@@ -58,10 +59,6 @@ export default class CameraScreen extends Component {
       // this.callDetectFace();
       this.setState({
         'webviewBG': 'transparent'
-      })
-
-      this.setState({
-        faces: [fakedata[0]],
       })
 
 
@@ -162,9 +159,10 @@ export default class CameraScreen extends Component {
 
 
   facesDetected(detectData) {
-    console.log('facesDetected', JSON.stringify(detectData.faces))
+
     this.setState({
-      faces: detectData.faces,
+      // faces: detectData.faces,
+      // faces: [fakedata[0]],
     })
   };
 
@@ -190,63 +188,63 @@ export default class CameraScreen extends Component {
   }
 
   renderFace(faceData) {
-    console.log("render face")
-
-
     if (faceData && faceData.bounds) { // && faceData.bounds 是为了确定检测到脸
+
       let { previewOffset } = this.state
 
       // 实际上的脸坐标点 = preview 坐标点 + ML Kit 计算得到的坐标点
-      let offsetFaceData = addOffsetForFaceData(previewOffset,faceData)
+
+      let offsetFaceData = addOffsetForFaceData(previewOffset, faceData)
       this.calcPreviewOffset(offsetFaceData.bounds)
-      // console.log("faceData", faceData)
-      // console.log("offsetFaceData", offsetFaceData)
+
+
+
 
       postToWebview(this.webref, {
         faceData: offsetFaceData,
         messageType: MSG_TYPE_FACE,
       });
-      
+
       let { bounds } = offsetFaceData;
       let centerX = bounds.origin.x + bounds.size.width / 2
       let centerY = bounds.origin.y + bounds.size.height / 2
       let noOffsetX = centerX - offsetXPreviewDefault
       let noOffsetY = centerY - offsetYPreviewDefault
-      console.log('noOffset',  centerX, centerY, noOffsetX, noOffsetY)
       // 没有办法弄相对于屏幕的absolute
       // zIndex 无法遮盖。。。不懂。。。
 
-      // return (
-      //   <View>
-      //     <View
-      //       transform={[
-      //         { perspective: 600 },
-      //       ]}
-      //       style={[
-      //         styles.face,
-      //         {
-      //           ...bounds.size,
-      //           left: noOffsetX,
-      //           top: noOffsetY,
-      //           zIndex: 150
-      //         },
-      //       ]}
-      //     ></View>          
-      //     <View
-      //       style={{
-      //         position: "absolute",
-      //         height: 10,
-      //         width: 10,
-      //         left: noOffsetX,
-      //         top: noOffsetY,
-      //         backgroundColor: 'lime',
-      //         zIndex: 150
-      //       }}>
-      //     </View>             
-      //   </View>
-      // )
+      return (
+        <View>
+          <View
+            transform={[
+              { perspective: 600 },
+            ]}
+            style={[
+              styles.face,
+              {
+                ...bounds.size,
+                left: noOffsetX,
+                top: noOffsetY,
+                zIndex: 150
+              },
+            ]}
+          ></View>
+          <View
+            style={{
+              position: "absolute",
+              height: 10,
+              width: 10,
+              left: noOffsetX,
+              top: noOffsetY,
+              backgroundColor: 'lime',
+              zIndex: 150
+            }}>
+          </View>
+        </View>
+      )
 
-
+    } else {
+      return null
     }
   }
 
@@ -256,7 +254,6 @@ export default class CameraScreen extends Component {
   renderContourOfFace(faceData) {
 
     const renderContour = points => {
-      points.push({ x: 0, y: 0 })
 
       let elems = []
       for (let [idx, p] of points.entries()) {
@@ -371,8 +368,8 @@ export default class CameraScreen extends Component {
     )
   }
 
-  renderBound(){
-    
+  renderBound() {
+
   }
 
   componentWillUpdate() {
@@ -390,7 +387,7 @@ export default class CameraScreen extends Component {
           width: 10,
           backgroundColor: 'lime',
           zIndex: 150,
-         }]}></View>
+        }]}></View>
         <RNCamera
           ref={(cam) => {
             this.camera = cam;
@@ -421,21 +418,21 @@ export default class CameraScreen extends Component {
           }
         >
           {this.renderFaces()}
-          {this.renderAllContours()}
+          {/* {this.renderAllContours()} */}
         </RNCamera>
-          <View style={styles.webViewContainer}>
-            <WebView
-              // ref={this.webref}
-              ref={(r) => (this.webref = r)}
-              style={[styles.webview, { backgroundColor: this.state.webviewBG }]}
-              onMessage={this.onMessageFromWeb}
-              source={{
-                uri: webviewURL,
-              }}
-              onLoadEnd={this.onWebviewLoadEnd}
-              originWhitelist={['*']}
-            />
-          </View>
+        <View style={styles.webViewContainer}>
+          <WebView
+            // ref={this.webref}
+            ref={(r) => (this.webref = r)}
+            style={[styles.webview, { backgroundColor: this.state.webviewBG }]}
+            onMessage={this.onMessageFromWeb}
+            source={{
+              uri: webviewURL,
+            }}
+            onLoadEnd={this.onWebviewLoadEnd}
+            originWhitelist={['*']}
+          />
+        </View>
         <Toast ref="toast" position="center" />
       </View>
     );

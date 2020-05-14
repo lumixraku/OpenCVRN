@@ -20,7 +20,6 @@
   var COOK_LOOKBACK_ANIMI = 'lookback';
   var COOK_TOCOOK_ANIMI = 'cookAgain';
   var HIT_DIZZY = 'hitDizzy';
-  //# sourceMappingURL=constants.js.map
 
   /*! *****************************************************************************
   Copyright (c) Microsoft Corporation. All rights reserved.
@@ -68,6 +67,7 @@
       function Mouth(scene) {
           this.mouthRect = new Rectagle(0, 0, 0, 0);
           this.mouthContour = scene.add.graphics();
+          this.mouthCenter = scene.add.graphics();
           this.mouthStateText = scene.add.text(stageWidth - 100, 100, 'Hello World', { fontFamily: '"Roboto Condensed"' });
       }
       Mouth.prototype.setMouthContourPoints = function (upperTop, upperBottom, lowerTop, lowerBottom) {
@@ -87,17 +87,22 @@
           var yVals = mouthPoints.map(function (p) {
               return p.y;
           });
+          console.log('mouth vals', mouthPoints.length);
           var minX = Math.min.apply(Math, xVals);
           var maxX = Math.max.apply(Math, xVals);
           var minY = Math.min.apply(Math, yVals);
           var maxY = Math.max.apply(Math, yVals);
+          this.mouthCenter.clear();
+          var circle = new Phaser.Geom.Circle(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2, 5);
+          this.mouthCenter.fillCircleShape(circle);
+          console.log('center', mouthPoints, minX, minY, maxX, maxY, circle.x, circle.y);
           this.mouthRect.setPosition(minX, minY);
           this.mouthRect.setSize(maxX - minX, maxY - minY);
       };
       Mouth.prototype.drawContour = function () {
           var mouthPoints = this.mouthAllPoints;
           this.mouthContour.clear();
-          this.mouthContour.lineStyle(5, 0xFF00FF, 1.0);
+          this.mouthContour.lineStyle(5, 0xFFBBFF, 1.0);
           this.mouthContour.beginPath();
           var idx = 0;
           for (var _i = 0, mouthPoints_1 = mouthPoints; _i < mouthPoints_1.length; _i++) {
@@ -155,7 +160,6 @@
       };
       return Mouth;
   }());
-  //# sourceMappingURL=mouth.js.map
 
   var offsetXPreview = 170;
   var offsetYPreview = 250;
@@ -266,7 +270,6 @@
           });
       }, false);
   }
-  //# sourceMappingURL=test.js.map
 
   var Point$1 = Phaser.Geom.Point;
   var stageWidth$1 = document.body.clientWidth;
@@ -314,6 +317,9 @@
       SpinTable.prototype.getAngle = function () {
           return this.angleVal;
       };
+      SpinTable.prototype.getRotation = function () {
+          return this.rotationVal;
+      };
       /**
        * 计算第 i 个食物的在当前桌面上的角度
        * 桌子是顺时针旋转  但是食物的摆放顺序是逆时针
@@ -348,7 +354,6 @@
       };
       return SpinTable;
   }());
-  //# sourceMappingURL=spinTable.js.map
 
   var Point$2 = Phaser.Geom.Point;
   var Vector2 = Phaser.Math.Vector2;
@@ -527,7 +532,6 @@
       };
       return CamFaceCheck;
   }());
-  //# sourceMappingURL=facePosCheck.js.map
 
   var Sprite = Phaser.GameObjects.Sprite;
   // import { DOGLOOK, DOGCOOK, CHECKING_INTERVAL, COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI } from '../constants'
@@ -612,7 +616,6 @@
       };
       return Cook;
   }(Sprite));
-  //# sourceMappingURL=cook.js.map
 
   // import { DOGCOOK } from "../constants";
   var AssetsLoader = /** @class */ (function () {
@@ -656,7 +659,6 @@
       };
       return AssetsLoader;
   }());
-  //# sourceMappingURL=assetsLoader.js.map
 
   // import { COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI, HIT_DIZZY } from "../constants";
   var AnimateManager = /** @class */ (function () {
@@ -723,7 +725,6 @@
       };
       return AnimateManager;
   }());
-  //# sourceMappingURL=animate.js.map
 
   var Point$3 = Phaser.Geom.Point;
   var Rectagle$2 = Phaser.Geom.Rectangle;
@@ -842,18 +843,28 @@
                   //               |
                   //               +
                   // 由于phaser 的坐标不是连续的, 因此为了按照顺时针旋转一周得到 360 的角度, 需要做下面的处理
-                  var rawAngle = this.spinTable.getAngle();
-                  var mathAngle = rawAngle < 0 ? 360 + rawAngle : rawAngle;
-                  // 只在圆圈的 0° 这个位置(也就是坐标系 x )这个位置生成新的元素.
-                  // 根据目前的采样率 得不到 mathAngle 为 1 的情况, 最接近1 是 1.79°
-                  if (Math.abs(mathAngle - i * this.distanceAngle) < 2) {
+                  // let rawAngle = this.spinTable.getAngle()
+                  // let mathAngle = rawAngle < 0 ? 360 + rawAngle : rawAngle
+                  // // 只在圆圈的 0° 这个位置(也就是坐标系 x )这个位置生成新的元素.
+                  // // 根据目前的采样率 得不到 mathAngle 为 1 的情况, 最接近1 是 1.79°
+                  // if (Math.abs(mathAngle - i * this.distanceAngle) < 2) {
+                  //     let foodTextureKey = `food${i}`
+                  //     let food = this.add.image(0, 0, foodTextureKey) as Food
+                  //     food.name = `Food${i}`
+                  //     food.setScale(2)
+                  //     this.foodList[i] = food
+                  //     // console.log("angle add", rawAngle, mathAngle, food.name)
+                  //     // this.foodList.push(food)
+                  // }
+                  // 上面的办法虽然对于人类理解比较直观 但是phaser 操作起来却比较复杂 主要是 phaser 的坐标系划分很诡异
+                  var spinRad = this.spinTable.getRotation() % (2 * Math.PI);
+                  var foodRad = i * this.spinTable.distanceRad;
+                  if (Math.abs(spinRad - foodRad) < 0.02) {
                       var foodTextureKey = "food" + i;
                       var food = this.add.image(0, 0, foodTextureKey);
                       food.name = "Food" + i;
                       food.setScale(2);
                       this.foodList[i] = food;
-                      // console.log("angle add", rawAngle, mathAngle, food.name)
-                      // this.foodList.push(food)
                   }
               }
           }
@@ -987,9 +998,7 @@
               onComplete: function () {
                   food.destroy();
                   // if not get caught
-                  if (_this.cook.isCooking()) {
-                      _this.effScene.addCoin(_this.addScore);
-                  }
+                  if (_this.cook.isCooking()) ;
                   else {
                       if (_this.cook.isChecking())
                           _this.caughtAnimation();
@@ -1103,7 +1112,6 @@
       };
       return Demo;
   }(Phaser.Scene));
-  //# sourceMappingURL=game.js.map
 
   var drawRoundRect = function (scene, size, radius, color, borderWidth, borderColor) {
       var bg = scene.add.graphics();
@@ -1124,7 +1132,6 @@
       }
       return bg;
   };
-  //# sourceMappingURL=UIUtil.js.map
 
   var Point$4 = Phaser.Geom.Point;
   var Rectagle$3 = Phaser.Geom.Rectangle;
@@ -1153,6 +1160,10 @@
           // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
           this.welcome.visible = false;
           this.testView.visible = false;
+          // this.testGraphic = this.add.graphics()
+          // this.testGraphic.lineStyle(10, 0x00bb44)
+          // this.testGraphic.strokeLineShape( new Phaser.Geom.Line(200, 300, 250, 300))
+          // this.testGraphic.rotation = 2* Math.PI
       };
       UIScene.prototype.update = function (time, delta) {
       };
@@ -1470,7 +1481,6 @@
       };
       return UIScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=UIScene.js.map
 
   var Point$5 = Phaser.Geom.Point;
   var Rectagle$4 = Phaser.Geom.Rectangle;
@@ -1592,7 +1602,6 @@
       };
       return EffectScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=EffectScene.js.map
 
   var stageWidth$6 = document.body.clientWidth;
   var stageHeight$6 = document.body.clientHeight;
@@ -1628,7 +1637,6 @@
       };
       return BaseScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=BaseScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
@@ -1655,7 +1663,6 @@
   changeMouth();
   setPreview();
   testClickEvent(game);
-  //# sourceMappingURL=index.js.map
 
 }());
 //# sourceMappingURL=game.js.map

@@ -25,6 +25,8 @@ export default class EffectScene extends Phaser.Scene {
     public emojiFace: PhaserImage
     public dizzy: Sprite
 
+    public coinPlaying: boolean
+
 
     public scoreArea: Container
     public scoreText: PhaserText
