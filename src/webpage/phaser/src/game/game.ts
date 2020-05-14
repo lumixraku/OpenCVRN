@@ -170,8 +170,6 @@ export default class Demo extends Phaser.Scene {
                     }
                 }
             }
-
-
         }
     }
 
@@ -215,21 +213,34 @@ export default class Demo extends Phaser.Scene {
 
 
                 // 由于phaser 的坐标不是连续的, 因此为了按照顺时针旋转一周得到 360 的角度, 需要做下面的处理
-                let rawAngle = this.spinTable.getAngle()
-                let mathAngle = rawAngle < 0 ? 360 + rawAngle : rawAngle
-                // 只在圆圈的 0° 这个位置(也就是坐标系 x )这个位置生成新的元素.
-                // 根据目前的采样率 得不到 mathAngle 为 1 的情况, 最接近1 是 1.79°
-                if (Math.abs(mathAngle - i * this.distanceAngle) < 2) {
+                // let rawAngle = this.spinTable.getAngle()
+                // let mathAngle = rawAngle < 0 ? 360 + rawAngle : rawAngle
+                // // 只在圆圈的 0° 这个位置(也就是坐标系 x )这个位置生成新的元素.
+                // // 根据目前的采样率 得不到 mathAngle 为 1 的情况, 最接近1 是 1.79°
+                // if (Math.abs(mathAngle - i * this.distanceAngle) < 2) {
+                //     let foodTextureKey = `food${i}`
+                //     let food = this.add.image(0, 0, foodTextureKey) as Food
+
+                //     food.name = `Food${i}`
+                //     food.setScale(2)
+
+                //     this.foodList[i] = food
+
+                //     // console.log("angle add", rawAngle, mathAngle, food.name)
+                //     // this.foodList.push(food)
+                // }
+
+                // 上面的办法虽然对于人类理解比较直观 但是phaser 操作起来却比较复杂 主要是 phaser 的坐标系划分很诡异
+
+                let spinRad = this.spinTable.getRotation() % ( 2* Math.PI )
+                let foodRad = i * this.spinTable.distanceRad 
+                if ( Math.abs(spinRad - foodRad) < 0.02) {
                     let foodTextureKey = `food${i}`
                     let food = this.add.image(0, 0, foodTextureKey) as Food
 
                     food.name = `Food${i}`
                     food.setScale(2)
-
-                    this.foodList[i] = food
-
-                    // console.log("angle add", rawAngle, mathAngle, food.name)
-                    // this.foodList.push(food)
+                    this.foodList[i] = food                    
                 }
             }
         }
@@ -403,7 +414,7 @@ export default class Demo extends Phaser.Scene {
                 // if not get caught
                 if (this.cook.isCooking()) {
                     
-                    this.effScene.addCoin(this.addScore)
+                    // this.effScene.addCoin(this.addScore)
                 }else{
                     if (this.cook.isChecking())
                     this.caughtAnimation()

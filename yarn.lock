@@ -4265,12 +4265,7 @@ jest@^25.2.7:
     import-local "^3.0.2"
     jest-cli "^25.2.7"
 
-jetifier@^1.6.2:
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/jetifier/-/jetifier-1.6.5.tgz#ea87324a4230bef20a9651178ecab978ee54a8cb"
-  integrity sha512-T7yzBSu9PR+DqjYt+I0KVO1XTb1QhAfHnXV5Nd3xpbXM6Xg4e3vP60Q4qkNU8Fh6PHC2PivPUNN3rY7G2MxcDQ==
-
-jetifier@^1.6.5:
+jetifier@^1.6.2, jetifier@^1.6.5:
   version "1.6.5"
   resolved "https://registry.npm.taobao.org/jetifier/download/jetifier-1.6.5.tgz#ea87324a4230bef20a9651178ecab978ee54a8cb"
   integrity sha1-6ocySkIwvvIKllEXjsq5eO5UqMs=
@@ -5658,13 +5653,12 @@ react-is@^16.12.0, react-is@^16.8.1, react-is@^16.8.4, react-is@^16.8.6:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
-"react-native-camera@file:../react-native-camera":
-  version "3.23.1"
+react-native-camera@~/repos/RN/react-native-camera:
+  version "3.26.0"
+  resolved "https://registry.yarnpkg.com/react-native-camera/-/react-native-camera-3.26.0.tgz#80f37124c524d76ae79f55f3975ed73b6515aa49"
+  integrity sha512-W/h89LN+jujlzc89nWpvukbfnbFO+Fskf6PR23pP6zminpJDIArHabWLd1mQoJ3p6r+gUJ8I4bgsxUmSMgLAgA==
   dependencies:
     prop-types "^15.6.2"
-
-"react-native-cardv@file:../react-native-cardv":
-  version "1.0.0"
 
 react-native-easy-toast@1.2.0:
   version "1.2.0"

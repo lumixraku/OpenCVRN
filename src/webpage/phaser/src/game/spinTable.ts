@@ -20,8 +20,8 @@ const angle2Rad = (angle: number) => {
 
 export default class SpinTable {
     public spinTable: Sprite;
-    public angleVal: number = 0;
-    public rotationVal:number = 0;
+    private angleVal: number = 0;
+    private rotationVal:number = 0;
     
     public circle: Circle; //计算位置时用 并不是一个可见的对象
     public spSpinSpeed: number = 1;
@@ -30,9 +30,9 @@ export default class SpinTable {
     public circleCenter: Point = new Point(stageWidth / 2, stageHeight + this.circleRadius / 2.3);    
 
 
-    private distanceAngle: number = 60  //食物和食物之间的间隔(角度)
-    private tableCapacity: number = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
-    private distanceRad: number = 2 * Math.PI / this.tableCapacity
+    public distanceAngle: number = 60  //食物和食物之间的间隔(角度)
+    public tableCapacity: number = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
+    public distanceRad: number = 2 * Math.PI / this.tableCapacity
 
 
     constructor(pos: Point, radius: number, spinSpeed: number) {
@@ -73,6 +73,10 @@ export default class SpinTable {
 
     getAngle(): number {
         return this.angleVal
+    }
+
+    getRotation(): number {
+        return this.rotationVal
     }
 
 
