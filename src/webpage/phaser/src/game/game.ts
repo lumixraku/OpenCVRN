@@ -149,7 +149,6 @@ export default class Demo extends Phaser.Scene {
     update60Frame() {
         let elapsed = this.timer.getElapsedSeconds()
         this.shouldCookLookBack(elapsed)
-        // console.log(this.game.loop.actualFps)
         this.fpsText.text = this.game.loop.actualFps + ''
     }
     
@@ -248,12 +247,16 @@ export default class Demo extends Phaser.Scene {
             // let angle = rawAngle + this.distanceAngle * (this.tableCapacity  - i)
             // 另外注意一下这里的 angle 按照正始终顺序旋转 在第一象限是 0 ~ -90  第二象限是 -90 ~ -180
             // 第四象限是 0 ~ 90  第三象限是 90 ~ 180
-            let foodAngle = this.spinTable.calcFoodIAngle(i) //当前食物在桌上的角度
-            let point = this.spinTable.calcAngleToPoint(foodAngle)
 
-            // Phaser.Geom.Circle.CircumferencePoint(this.circle, angle2Rad(angle) , point);
 
-            food.x = point.x
+            // let foodAngle = this.spinTable.calcFoodIAngle(i) //当前食物在桌上的角度
+            // let point = this.spinTable.calcAngleToPoint(foodAngle)
+
+            let foodRad = this.spinTable.calcFoodIRad(i)
+            let point = this.spinTable.caleRadToPoint(foodRad)
+
+
+            food.x = point.x            
             food.y = point.y
         }
     }
