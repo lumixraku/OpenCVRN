@@ -100,7 +100,6 @@ export default class Mouth {
 
         let maxYOfLowerLipTop = Math.max(...lowerTipTopY)
         let minYOfUpperLipBottom = Math.min(...upperLipBottomY)
-        console.log("----------",lowerTipTopY, maxYOfLowerLipTop)
 
         // return false
         let isClose = false

@@ -1,7 +1,7 @@
 import { BASE_SCENE, GAME_SCENE, EF_SCENE, UI_SCENE } from "./constants";
 import { Scene } from "phaser";
-import UIScene from "./UI/UIManager";
-import EffectScene from "./UI/EffectManager";
+import UIScene from "./UI/UIScene";
+import EffectScene from "./UI/EffectScene";
 
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;

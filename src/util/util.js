@@ -45,7 +45,7 @@ const postToWebview = (webview, data) => {
 }
 
 
-const addOffsetForFaceData = (target) => {
+const addOffsetForFaceData = (previewOffset, target) => {
 	const checkedType = (target) => {
 		return Object.prototype.toString.call(target).slice(8, -1)
 	}
@@ -71,7 +71,7 @@ const addOffsetForFaceData = (target) => {
 		if (checkedType(value) === 'Object' ||
 			checkedType(value) === 'Array') { //对象/数组里嵌套了对象/数组
 			//继续遍历获取到value值
-			result[key] = addOffsetForFaceData(value)
+			result[key] = addOffsetForFaceData(previewOffset, value)
 		} else { //获取到value值是基本的数据类型或者是函数。
 			// 一些诡异的点 检测到的(0, 0) 这样的情况
 			if (value === 0) {
@@ -79,10 +79,10 @@ const addOffsetForFaceData = (target) => {
 			}
 
 			if (key == "x") {
-				result[key] = offsetXPreviewDefault + (value)
+				result[key] = offsetXPreviewDefault + previewOffset.x + (value)
 
 			} else if (key == "y") {
-				result[key] = offsetYPreviewDefault + (value)
+				result[key] = offsetYPreviewDefault + previewOffset.y + (value)
 
 			} else {
 				result[key] = value;

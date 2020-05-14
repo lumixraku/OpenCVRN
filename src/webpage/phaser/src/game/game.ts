@@ -24,8 +24,8 @@ import CamFaceCheck, { FaceInCircle } from './facePosCheck';
 import Cook from './cook';
 import { UIPlugin } from 'UI';
 import { Scene } from 'phaser';
-import UIScene from '@root/UI/UIManager';
-import EffectScene from '@root/UI/EffectManager';
+import UIScene from '@root/UI/UIScene';
+import EffectScene from '@root/UI/EffectScene';
 import AssetsLoader from './assetsLoader';
 import AnimateManager from './animate';
 
@@ -64,6 +64,7 @@ export default class Demo extends Phaser.Scene {
     //text
     public mouthStateText: PhaserText;
     private toastText: PhaserText
+    private fpsText: PhaserText;
     // private scoreText: PhaserText
     private testText: PhaserText
     private hasCaughtToast: boolean
@@ -148,6 +149,8 @@ export default class Demo extends Phaser.Scene {
     update60Frame() {
         let elapsed = this.timer.getElapsedSeconds()
         this.shouldCookLookBack(elapsed)
+        // console.log(this.game.loop.actualFps)
+        this.fpsText.text = this.game.loop.actualFps + ''
     }
     
     shouldCookLookBack(elapsed: number) {
@@ -473,6 +476,10 @@ export default class Demo extends Phaser.Scene {
     }
 
     addText() {
+        this.fpsText = this.add.text(320, 120,'////////', { 
+            fontFamily: '"Roboto Condensed"', 
+            color:'#ffffff' 
+        })
         // this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
         // this.testText = this.add.text(170, 170, 'Hello World', { fontFamily: '"Roboto Condensed"' });
         
@@ -499,7 +506,8 @@ export default class Demo extends Phaser.Scene {
     }
 
     addCook() {
-        this.cook = new Cook(this, 100, 400)
+        this.cook = new Cook(this, 120, 390)
+        this.cook.setScale(0.7)
     }
 
     showScoreToast(text: string, delay:number, cb: Function) {

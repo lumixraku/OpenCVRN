@@ -41,6 +41,10 @@ https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ui-overview/
 https://codepen.io/rexrainbow/pen/MPZWZG
 https://github.com/rexrainbow/phaser3-rex-notes
 
+## some tips to understand Phaser
+- 创建对象的方式
+- 利用scene 来实现层级
+- Phaser.Sprite 中可以 play 动画  但是 Phaser.Image 不行
 
 
 ## Trouble Shooting
@@ -80,3 +84,6 @@ Even peer dependencies installed still not work.
 
 https://stackoverflow.com/questions/46636318/dts-gen-fails-to-find-globally-installed-modules/46640889#46640889
 The post suggests not installing global but local instead.
+
+### Tweens
+https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ease-function/

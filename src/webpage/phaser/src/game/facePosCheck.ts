@@ -247,7 +247,7 @@ export default class CamFaceCheck {
 
         this.camPreviewArea.x = originCamArea.x + offset.x
         this.camPreviewArea.y = originCamArea.y + offset.y
-        this.drawPreviewBounds(this.camPreviewArea)
+        // this.drawPreviewBounds(this.camPreviewArea)
 
     }
 }

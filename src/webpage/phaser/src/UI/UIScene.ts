@@ -7,11 +7,22 @@ import Rectagle = Phaser.Geom.Rectangle;
 import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
 import Container = Phaser.GameObjects.Container
- 
+
 import { UI_SCENE } from "@root/constants";
 import { World } from "matter";
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
+
+const TopLeftToCenter = (width: number, height: number, topLeftPoint: Point): Point => {
+    let halfW = width/2
+    let halfH = height/2
+    return new Point( 
+        topLeftPoint.x - halfW,
+        topLeftPoint.y - halfH
+    )
+
+}
+
 
 
 export default class UIScene extends Phaser.Scene {
@@ -44,7 +55,7 @@ export default class UIScene extends Phaser.Scene {
         this.welcome = this.createWelcomeDialog(this, 300, 500)
         this.testView = this.createDemoDialog(this, 0, 0)
         // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
-        
+
 
         this.welcome.visible = false
         this.testView.visible = false
@@ -62,11 +73,11 @@ export default class UIScene extends Phaser.Scene {
 
         let makeContentLabel = (content: string) => {
 
-            let x = width/2
-            let y = height/2
+            let x = width / 2
+            let y = height / 2
             let contentLabel = scene.rexUI.add.label({
-                x:0,
-                y:0,
+                x: 0,
+                y: 0,
                 width: 40, // Minimum width of round-rectangle
                 height: 340, // Minimum height of round-rectangle            
                 background: scene.rexUI.add.roundRectangle(40, 40, 100, 240, 0, 0x00ccbb),
@@ -82,7 +93,7 @@ export default class UIScene extends Phaser.Scene {
                     bottom: 10
                 }
             }).layout()
-            
+
 
             return contentLabel
         }
@@ -102,19 +113,19 @@ export default class UIScene extends Phaser.Scene {
             return sizer
         }
 
-        let makeScrollSizer = (content: string):UI.ScrollablePanel => {
+        let makeScrollSizer = (content: string): UI.ScrollablePanel => {
             const COLOR_PRIMARY = 0x4e342e;
             const COLOR_LIGHT = 0x7b5e57;
             const COLOR_DARK = 0x260e04;
-            
+
             let scrollPanel = scene.rexUI.add.scrollablePanel({
-                x: width/2,
-                y: height/2,
+                x: width / 2,
+                y: height / 2,
                 width: 240, // Minimum width of round-rectangle ???
                 height: 340, // Minimum height of round-rectangle ???      
-    
+
                 scrollMode: 0,
-                background: this.rexUI.add.roundRectangle(0, 0, 2, 2, 10, 0xcccccc),    
+                background: this.rexUI.add.roundRectangle(0, 0, 2, 2, 10, 0xcccccc),
                 panel: {
                     // child: makeContentLabel(content),
                     child: makeFixWidthPanel(240, content),
@@ -122,50 +133,50 @@ export default class UIScene extends Phaser.Scene {
                         padding: 1
                     },
                 },
-    
+
                 // slider: {
                 //     track: this.rexUI.add.roundRectangle(0, 0, 20, 10, 10, COLOR_DARK),
                 //     thumb: this.rexUI.add.roundRectangle(0, 0, 0, 0, 13, COLOR_LIGHT),
                 // },
-    
+
                 space: {
                     left: 10,
                     right: 10,
                     top: 10,
                     bottom: 10,
-    
+
                     panel: 0,
                 }
-            }).layout()    
-            
-            let insertTextToPanel = (panel: UI.ScrollablePanel, content:string) => {
-                    var sizer = panel.getElement('panel');
-                    var scene = panel.scene;
-                
-                    sizer.clear(true);
-                    var lines = content.split('\n');
-                    for (var li = 0, lcnt = lines.length; li < lcnt; li++) {
-                        var words = lines[li].split(' ');
-                        for (var wi = 0, wcnt = words.length; wi < wcnt; wi++) {
-                            sizer.add(
-                                scene.add.text(0, 0, words[wi], {
-                                    fontSize: 18
-                                })
-                                    // .setInteractive()
-                                    // .on('pointerdown', function () {
-                                    //     this.scene.print.text = this.text;
-                                    //     this.setTint(Phaser.Math.Between(0, 0xffffff))
-                                    // })
-                            );
-                        }
-                        if (li < (lcnt - 1)) {
-                            sizer.addNewLine();
-                        }
+            }).layout()
+
+            let insertTextToPanel = (panel: UI.ScrollablePanel, content: string) => {
+                var sizer = panel.getElement('panel');
+                var scene = panel.scene;
+
+                sizer.clear(true);
+                var lines = content.split('\n');
+                for (var li = 0, lcnt = lines.length; li < lcnt; li++) {
+                    var words = lines[li].split(' ');
+                    for (var wi = 0, wcnt = words.length; wi < wcnt; wi++) {
+                        sizer.add(
+                            scene.add.text(0, 0, words[wi], {
+                                fontSize: 18
+                            })
+                            // .setInteractive()
+                            // .on('pointerdown', function () {
+                            //     this.scene.print.text = this.text;
+                            //     this.setTint(Phaser.Math.Between(0, 0xffffff))
+                            // })
+                        );
                     }
-                
-                
-                    panel.layout();
-                    return panel;
+                    if (li < (lcnt - 1)) {
+                        sizer.addNewLine();
+                    }
+                }
+
+
+                panel.layout();
+                return panel;
 
             }
             insertTextToPanel(scrollPanel, content)
@@ -292,19 +303,27 @@ export default class UIScene extends Phaser.Scene {
 
     }
 
-    createCaughtText(x:number, y:number, cb: Function ):Container  {
+    createCaughtText(x: number, y: number, cb: Function): Container {
         let containerWidth = 400
         let containerHeight = 100
-        let containerPos = new Point(stageWidth/2,  stageHeight/2 * 1.6)
-        let container = this.add.container(containerPos.x, stageHeight)
-                
-        let toastText = this.add.text(0, 0, 'You get Caught!!', { fontFamily: '"Arial"' })
+        let containerPos = new Point(stageWidth / 2, stageHeight / 2 * 1.6)
+        let container = this.add.container(containerPos.x, containerPos.y)
+
+
+        // (250,  50) 这个点是相对于容器左上角而言的
+        let toastPos = TopLeftToCenter(400, 100, new Point(250,  50) )
+        let toastText = this.add.text(toastPos.x, toastPos.y ,
+            'You get Caught!!', 
+            { 
+                fontFamily: '"Arial"' ,
+                fontSize: '20px'                
+            }
+        )
         // this.hasCaughtToast = true
         // toastText.x = stageWidth / 2
         // toastText.y = stageHeight / 2
         toastText.setFontSize(42)
         toastText.setColor('red')
-        // toastText.setScale(0)
         toastText.setOrigin(0.5)
 
         // let bg = this.rexUI.add.roundRectangle(0, 0, 100, 240, 0, 0x00ccbb)
@@ -313,46 +332,57 @@ export default class UIScene extends Phaser.Scene {
         // 添加元素的时候也是将子元素的origin 和 父容器的origin 对齐
         // graphic 的 origin 是左上角
         let bg = this.drawRoundRect(
-            new Rectagle(-containerWidth/2, -containerHeight/2, containerWidth, containerHeight), 
-            20, 
+            new Rectagle(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight),
+            20,
             0x99aaee,
             5,
-            0xaabbff,            
+            0xaabbff,
         )
         
+        let AlternativeEmoji = ['sad', 'cry', 'sour']
+        let hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji)
+
+        let emojiPos = TopLeftToCenter(400, 100, new Point(50, 50))
+    
+        let emojiFace = this.add.image(emojiPos.x, emojiPos.y, hitEmoji)
+        emojiFace.setScale(0.2)
+
         
-        container.add([bg, toastText])
+        container.add([bg, emojiFace, toastText])
+        container.setScale(0)
 
         this.tweens.add({
             targets: container,
             scale: 1,
-            duration: 232,
+            duration: 132,
             x: containerPos.x,
-            y: containerPos.y,            
-            ease: 'Power3',
+            y: containerPos.y,
+            ease: ' Elastic.In',
             onComplete: () => {
-                setTimeout(()=> {
+                setTimeout(() => {
                     this.tweens.add({
                         targets: container,
-                        y: stageHeight * 1.2,
-                        alpha:0,
-                        duration: 232,
-                        ease: 'Power3',                    
+                        // y: stageHeight * 1.2,
+                        x: containerPos.x,
+                        y: containerPos.y,                        
+                        scale: 0,
+                        duration: 132,
+                        ease: ' Elastic.Out',
                         onComplete: () => {
                             container.destroy()
                         }
                     })
-                }, 432)
+                }, 532)
             }
         })
-        return container        
+        return container
     }
 
     createGetCaughtDialog(x: number, y: number): UI.Dialog {
         let scene = this
         scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63)
 
-        // 你被抓住了 计划从左往右显示
+        // 你被抓住了 计划从左移动到右 这样的形式进入屏幕 显示
         // 然后发现做不到  Dialog 一定会在屏幕区域内显示
         let popup = scene.rexUI.add.dialog({
             x: 0, // 所以一开始在左边放起来
@@ -360,17 +390,17 @@ export default class UIScene extends Phaser.Scene {
 
             background: scene.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0xf57f17),
             content: scene.rexUI.add.label({
-                    background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0xbc5100),
-                    text: scene.add.text(0, 0, '\nYou get Caught!!\n', {
-                        fontSize: '30px'
-                    }),
-                    space: {
-                        left: 15,
-                        right: 15,
-                        top: 10,
-                        bottom: 10
-                    }
+                background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0xbc5100),
+                text: scene.add.text(0, 0, '\nYou get Caught!!\n', {
+                    fontSize: '30px'
                 }),
+                space: {
+                    left: 15,
+                    right: 15,
+                    top: 10,
+                    bottom: 10
+                }
+            }),
             // title: scene.rexUI.add.label({
             //     background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0xbc5100),
             //     text: scene.add.text(0, 0, 'Pick a color', {
@@ -407,8 +437,8 @@ export default class UIScene extends Phaser.Scene {
         })
             .layout()
             .pushIntoBounds()
-            //.drawBounds(this.add.graphics(), 0xff0000)
-            // .popUp(500);
+        //.drawBounds(this.add.graphics(), 0xff0000)
+        // .popUp(500);
 
         // this.tweens.add({
         //     targets: popup,
@@ -423,22 +453,22 @@ export default class UIScene extends Phaser.Scene {
         // })
 
         return popup
-        
+
     }
 
-    createButton(scene: Scene, text:string, color: any, space?: any) {
+    createButton(scene: Scene, text: string, color: any, space?: any) {
         return scene.rexUI.add.label({
             x: 0,
             y: 100,
             width: 40, // Minimum width of round-rectangle
             height: 40, // Minimum height of round-rectangle
-          
+
             background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0x5e92f3),
 
             text: scene.add.text(0, 0, text, {
                 fontSize: '24px'
             }),
-    
+
             space: space || {
                 left: 10,
                 right: 10,
@@ -448,9 +478,9 @@ export default class UIScene extends Phaser.Scene {
         });
     }
 
-    drawRoundRect(size: Rectagle, radius:number,  color: any, borderWidth?:number, borderColor?: any) {
+    drawRoundRect(size: Rectagle, radius: number, color: any, borderWidth?: number, borderColor?: any) {
 
-        
+
         let bg = this.add.graphics()
         bg.clear()
         bg.beginPath()
@@ -466,60 +496,60 @@ export default class UIScene extends Phaser.Scene {
         if (borderWidth) {
             let x2 = x + borderWidth
             let y2 = y + borderWidth
-            bg.fillStyle( borderColor )
-            bg.fillRoundedRect(x2, y2, width- 2* borderWidth, height - 2 * borderWidth, radius - borderWidth)
-        }        
-        
+            bg.fillStyle(borderColor)
+            bg.fillRoundedRect(x2, y2, width - 2 * borderWidth, height - 2 * borderWidth, radius - borderWidth)
+        }
+
 
         return bg
 
     }
 
-    createScoreArea():Container {
-        let scoreAreaCenter = new Point(stageWidth/2, 50)
+    createScoreArea(): Container {
+        let scoreAreaCenter = new Point(stageWidth / 2, 50)
         let graphicsTopLeft = new Point(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y)
         this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y)
-        
+
         let bg = this.add.graphics()
         bg.beginPath()
-        bg.fillStyle( 0xFEDE52 ) //yellow
+        bg.fillStyle(0xFEDE52) //yellow
         bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth, 100)
         bg.closePath()
 
 
         let scoreBoxWidth = 300
         let scoreBoxHeight = 66
-        let scoreBoxRadius = scoreBoxHeight/2
+        let scoreBoxRadius = scoreBoxHeight / 2
         let scoreBoxBorder = 10
-        let scoreBoxRectagle = new Rectagle( 
-            (scoreAreaCenter.x - scoreBoxWidth/2)  - scoreAreaCenter.x, 
-            (scoreAreaCenter.y - scoreBoxHeight/2) - scoreAreaCenter.y,
-            scoreBoxWidth, 
+        let scoreBoxRectagle = new Rectagle(
+            (scoreAreaCenter.x - scoreBoxWidth / 2) - scoreAreaCenter.x,
+            (scoreAreaCenter.y - scoreBoxHeight / 2) - scoreAreaCenter.y,
+            scoreBoxWidth,
             scoreBoxHeight
         )
-        let scoreBox = this.drawRoundRect(scoreBoxRectagle, scoreBoxRadius, 0xFc6158,  scoreBoxBorder, 0xf9ebe9  )   
-        
-        let scoreTitlePos = new Point(scoreAreaCenter.x - 50, scoreAreaCenter.y )
+        let scoreBox = this.drawRoundRect(scoreBoxRectagle, scoreBoxRadius, 0xFc6158, scoreBoxBorder, 0xf9ebe9)
+
+        let scoreTitlePos = new Point(scoreAreaCenter.x - 50, scoreAreaCenter.y)
         let scoreTitle = this.add.text(
-                scoreTitlePos.x  - scoreAreaCenter.x, 
-                scoreTitlePos.y  - scoreAreaCenter.y, 
-                'score:' ,
-                { fontFamily: 'Arial', fontSize: 22, color: '#cca398' }   
-            )        
+            scoreTitlePos.x - scoreAreaCenter.x,
+            scoreTitlePos.y - scoreAreaCenter.y,
+            'score:',
+            { fontFamily: 'Arial', fontSize: 22, color: '#cca398' }
+        )
         scoreTitle.setOrigin(0.5)
 
-        let scorePos = new Point(scoreAreaCenter.x + 0 , scoreAreaCenter.y )
+        let scorePos = new Point(scoreAreaCenter.x + 0, scoreAreaCenter.y)
         let scoreText = this.scoreText = this.add.text(
-            scorePos.x  - scoreAreaCenter.x, 
-            scorePos.y  - scoreAreaCenter.y, 
+            scorePos.x - scoreAreaCenter.x,
+            scorePos.y - scoreAreaCenter.y,
             '0',
-            { fontFamily: 'Arial', fontSize: 22, color: '#cca398' }   
+            { fontFamily: 'Arial', fontSize: 22, color: '#cca398' }
         )
         scoreText.setOrigin(0.5)
 
 
-        this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText ])
-        
+        this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText])
+
 
         return this.scoreArea
     }

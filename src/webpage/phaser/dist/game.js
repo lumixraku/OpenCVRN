@@ -19,6 +19,7 @@
   // animation
   var COOK_LOOKBACK_ANIMI = 'lookback';
   var COOK_TOCOOK_ANIMI = 'cookAgain';
+  var HIT_DIZZY = 'hitDizzy';
   //# sourceMappingURL=constants.js.map
 
   /*! *****************************************************************************
@@ -134,7 +135,6 @@
           });
           var maxYOfLowerLipTop = Math.max.apply(Math, lowerTipTopY);
           var minYOfUpperLipBottom = Math.min.apply(Math, upperLipBottomY);
-          console.log("----------", lowerTipTopY, maxYOfLowerLipTop);
           // return false
           var isClose = false;
           // if (this.mouthRect.height < 30 && this.mouthRect.height / this.mouthRect.width < 0.5) {
@@ -500,7 +500,7 @@
           var offset = new Point$2(faceCenterPos.x - centerX, faceCenterPos.y - centerY);
           this.camPreviewArea.x = originCamArea.x + offset.x;
           this.camPreviewArea.y = originCamArea.y + offset.y;
-          this.drawPreviewBounds(this.camPreviewArea);
+          // this.drawPreviewBounds(this.camPreviewArea)
       };
       return CamFaceCheck;
   }());
@@ -641,6 +641,7 @@
       AnimateManager.prototype.registerAnimation = function () {
           this.cookLookback();
           this.cookAgain();
+          this.hitDizzy();
       };
       AnimateManager.prototype.cookLookback = function () {
           var scene = this.scene;
@@ -675,11 +676,23 @@
               }
               return arr;
           };
-          // weired !!!
+          // weired !!! 动画结束的调用方式很奇怪
           this.doge = scene.anims.create({
               key: COOK_TOCOOK_ANIMI,
               frames: makeFrames(),
               frameRate: 1 / 0.04,
+          });
+      };
+      AnimateManager.prototype.hitDizzy = function () {
+          var scene = this.scene;
+          this.doge = scene.anims.create({
+              key: HIT_DIZZY,
+              frames: [
+                  { key: 'dizzy1' },
+                  { key: 'dizzy2' }
+              ],
+              frameRate: 1 / 0.4,
+              repeat: -1 // 不断重复
           });
       };
       return AnimateManager;
@@ -750,6 +763,8 @@
       Demo.prototype.update60Frame = function () {
           var elapsed = this.timer.getElapsedSeconds();
           this.shouldCookLookBack(elapsed);
+          // console.log(this.game.loop.actualFps)
+          this.fpsText.text = this.game.loop.actualFps + '';
       };
       Demo.prototype.shouldCookLookBack = function (elapsed) {
           if (this.cook) {
@@ -1004,6 +1019,10 @@
           this.camFaceCheck = new CamFaceCheck(this);
       };
       Demo.prototype.addText = function () {
+          this.fpsText = this.add.text(320, 120, '////////', {
+              fontFamily: '"Roboto Condensed"',
+              color: '#ffffff'
+          });
           // this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
           // this.testText = this.add.text(170, 170, 'Hello World', { fontFamily: '"Roboto Condensed"' });
           // this.scoreText = this.add.text(390, 50, '0', { 
@@ -1023,7 +1042,8 @@
           }
       };
       Demo.prototype.addCook = function () {
-          this.cook = new Cook(this, 100, 400);
+          this.cook = new Cook(this, 120, 390);
+          this.cook.setScale(0.7);
       };
       Demo.prototype.showScoreToast = function (text, delay, cb) {
           var _this = this;
@@ -1057,12 +1077,16 @@
       };
       return Demo;
   }(Phaser.Scene));
-  //# sourceMappingURL=game.js.map
 
   var Point$4 = Phaser.Geom.Point;
   var Rectagle$3 = Phaser.Geom.Rectangle;
   var stageWidth$4 = document.body.clientWidth;
   var stageHeight$4 = document.body.clientHeight;
+  var TopLeftToCenter = function (width, height, topLeftPoint) {
+      var halfW = width / 2;
+      var halfH = height / 2;
+      return new Point$4(topLeftPoint.x - halfW, topLeftPoint.y - halfH);
+  };
   var UIScene = /** @class */ (function (_super) {
       __extends(UIScene, _super);
       function UIScene() {
@@ -1260,14 +1284,18 @@
           var containerWidth = 400;
           var containerHeight = 100;
           var containerPos = new Point$4(stageWidth$4 / 2, stageHeight$4 / 2 * 1.6);
-          var container = this.add.container(containerPos.x, stageHeight$4);
-          var toastText = this.add.text(0, 0, 'You get Caught!!', { fontFamily: '"Arial"' });
+          var container = this.add.container(containerPos.x, containerPos.y);
+          // (250,  50) 这个点是相对于容器左上角而言的
+          var toastPos = TopLeftToCenter(400, 100, new Point$4(250, 50));
+          var toastText = this.add.text(toastPos.x, toastPos.y, 'You get Caught!!', {
+              fontFamily: '"Arial"',
+              fontSize: '20px'
+          });
           // this.hasCaughtToast = true
           // toastText.x = stageWidth / 2
           // toastText.y = stageHeight / 2
           toastText.setFontSize(42);
           toastText.setColor('red');
-          // toastText.setScale(0)
           toastText.setOrigin(0.5);
           // let bg = this.rexUI.add.roundRectangle(0, 0, 100, 240, 0, 0x00ccbb)
           // 使用graphics的时候都是从左上角开始画  
@@ -1275,27 +1303,35 @@
           // 添加元素的时候也是将子元素的origin 和 父容器的origin 对齐
           // graphic 的 origin 是左上角
           var bg = this.drawRoundRect(new Rectagle$3(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, 0x99aaee, 5, 0xaabbff);
-          container.add([bg, toastText]);
+          var AlternativeEmoji = ['sad', 'cry', 'sour'];
+          var hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji);
+          var emojiPos = TopLeftToCenter(400, 100, new Point$4(50, 50));
+          var emojiFace = this.add.image(emojiPos.x, emojiPos.y, hitEmoji);
+          emojiFace.setScale(0.2);
+          container.add([bg, emojiFace, toastText]);
+          container.setScale(0);
           this.tweens.add({
               targets: container,
               scale: 1,
-              duration: 232,
+              duration: 132,
               x: containerPos.x,
               y: containerPos.y,
-              ease: 'Power3',
+              ease: ' Elastic.In',
               onComplete: function () {
                   setTimeout(function () {
                       _this.tweens.add({
                           targets: container,
-                          y: stageHeight$4 * 1.2,
-                          alpha: 0,
-                          duration: 232,
-                          ease: 'Power3',
+                          // y: stageHeight * 1.2,
+                          x: containerPos.x,
+                          y: containerPos.y,
+                          scale: 0,
+                          duration: 132,
+                          ease: ' Elastic.Out',
                           onComplete: function () {
                               container.destroy();
                           }
                       });
-                  }, 432);
+                  }, 532);
               }
           });
           return container;
@@ -1303,7 +1339,7 @@
       UIScene.prototype.createGetCaughtDialog = function (x, y) {
           var scene = this;
           scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63);
-          // 你被抓住了 计划从左往右显示
+          // 你被抓住了 计划从左移动到右 这样的形式进入屏幕 显示
           // 然后发现做不到  Dialog 一定会在屏幕区域内显示
           var popup = scene.rexUI.add.dialog({
               x: 0,
@@ -1430,8 +1466,9 @@
       };
       return UIScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=UIManager.js.map
+  //# sourceMappingURL=UIScene.js.map
 
+  var Point$5 = Phaser.Geom.Point;
   var stageWidth$5 = document.body.clientWidth;
   var stageHeight$5 = document.body.clientHeight;
   var EffectScene = /** @class */ (function (_super) {
@@ -1451,6 +1488,8 @@
           // });
           this.load.image('coin', 'assets/coin.png');
           this.load.image('hammer', 'assets/hammer.png');
+          this.load.image('dizzy1', 'assets/dizzy1.png');
+          this.load.image('dizzy2', 'assets/dizzy2.png');
       };
       EffectScene.prototype.create = function () {
       };
@@ -1492,13 +1531,16 @@
               return;
           }
           this.animationPlaying.hammer = true;
+          var hammerPos = new Point$5(258, 327);
+          var dizzyPos = new Point$5(284, 389);
           var AlternativeEmoji = ['sad', 'cry', 'sour'];
           var hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji);
-          this.hammer = this.add.image(258, 327, 'hammer');
-          this.emojiFace = this.add.image(285, 520, hitEmoji);
-          this.emojiFace.setScale(0.3);
+          this.hammer = this.add.image(hammerPos.x, hammerPos.y, 'hammer');
+          // this.emojiFace = this.add.image(285,520, hitEmoji)
+          // this.emojiFace.setScale(0.3)
           this.hammer.setScale(0.3);
           this.hammer.rotation = 1;
+          this.addDizzy(dizzyPos).play(HIT_DIZZY);
           this.tweens.add({
               targets: this.hammer,
               rotation: 1.5,
@@ -1508,14 +1550,19 @@
               ease: 'Power3',
               onComplete: function () {
                   _this.hammer.destroy();
-                  _this.emojiFace.destroy();
+                  _this.dizzy.destroy();
+                  // this.emojiFace.destroy()
                   _this.animationPlaying.hammer = false;
               },
           });
       };
+      EffectScene.prototype.addDizzy = function (dizzyPos) {
+          this.dizzy = this.add.sprite(dizzyPos.x, dizzyPos.y, 'dizzy1');
+          return this.dizzy;
+      };
       return EffectScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=EffectManager.js.map
+  //# sourceMappingURL=EffectScene.js.map
 
   var stageWidth$6 = document.body.clientWidth;
   var stageHeight$6 = document.body.clientHeight;
@@ -1551,7 +1598,6 @@
       };
       return BaseScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=BaseScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
