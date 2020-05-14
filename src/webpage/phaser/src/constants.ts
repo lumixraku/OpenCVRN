@@ -22,7 +22,7 @@ const FIRST_CHECK_ELAPSE = 2 // 第一次检查的时  游戏已经进行的时�
 // animation
 const COOK_LOOKBACK_ANIMI = 'lookback'
 const COOK_TOCOOK_ANIMI = 'cookAgain'
-
+const HIT_DIZZY = 'hitDizzy'
 
 
 export {
@@ -42,7 +42,8 @@ export {
   // animation
   COOK_LOOKBACK_ANIMI,
   COOK_TOCOOK_ANIMI,
-
+  HIT_DIZZY,
+  
   // scene
   BASE_SCENE,
   GAME_SCENE,

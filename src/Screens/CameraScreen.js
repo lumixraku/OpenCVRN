@@ -22,7 +22,7 @@ import { fakedata } from './fakedata'
 
 import _ from 'underscore'
 
-var webviewURL = 'http://10.12.167.81:5001/';
+var webviewURL = 'http://10.12.113.137:5001/';
 // var webviewURL = 'http://47.92.222.162:3001/
 // var webviewLocal = 'file:///android_asset/index.html' // blob 请求无法识别
 // var webviewSource = require("../../android/app/src/main/assets/index.html") // 报错
@@ -191,8 +191,13 @@ export default class CameraScreen extends Component {
 
   renderFace(faceData) {
     console.log("render face")
+
+
     if (faceData && faceData.bounds) { // && faceData.bounds 是为了确定检测到脸
-      let offsetFaceData = addOffsetForFaceData(faceData)
+      let { previewOffset } = this.state
+
+      // 实际上的脸坐标点 = preview 坐标点 + ML Kit 计算得到的坐标点
+      let offsetFaceData = addOffsetForFaceData(previewOffset,faceData)
       this.calcPreviewOffset(offsetFaceData.bounds)
       // console.log("faceData", faceData)
       // console.log("offsetFaceData", offsetFaceData)
@@ -211,35 +216,35 @@ export default class CameraScreen extends Component {
       // 没有办法弄相对于屏幕的absolute
       // zIndex 无法遮盖。。。不懂。。。
 
-      return (
-        <View>
-          <View
-            transform={[
-              { perspective: 600 },
-            ]}
-            style={[
-              styles.face,
-              {
-                ...bounds.size,
-                left: noOffsetX,
-                top: noOffsetY,
-                zIndex: 150
-              },
-            ]}
-          ></View>          
-          <View
-            style={{
-              position: "absolute",
-              height: 10,
-              width: 10,
-              left: noOffsetX,
-              top: noOffsetY,
-              backgroundColor: 'lime',
-              zIndex: 150
-            }}>
-          </View>             
-        </View>
-      )
+      // return (
+      //   <View>
+      //     <View
+      //       transform={[
+      //         { perspective: 600 },
+      //       ]}
+      //       style={[
+      //         styles.face,
+      //         {
+      //           ...bounds.size,
+      //           left: noOffsetX,
+      //           top: noOffsetY,
+      //           zIndex: 150
+      //         },
+      //       ]}
+      //     ></View>          
+      //     <View
+      //       style={{
+      //         position: "absolute",
+      //         height: 10,
+      //         width: 10,
+      //         left: noOffsetX,
+      //         top: noOffsetY,
+      //         backgroundColor: 'lime',
+      //         zIndex: 150
+      //       }}>
+      //     </View>             
+      //   </View>
+      // )
 
 
     }
@@ -392,8 +397,10 @@ export default class CameraScreen extends Component {
           }}
           // style={styles.preview}
           style={[styles.preview, {
-            top: offsetYPreviewDefault + previewOffset.y,
-            left: offsetXPreviewDefault + previewOffset.x,
+            // top: offsetYPreviewDefault + previewOffset.y,
+            // left: offsetXPreviewDefault + previewOffset.x,
+            top: offsetYPreviewDefault,
+            left: offsetXPreviewDefault,
             width: previewWidthDefault,
             height: previewHeightDefault,
           }]}

@@ -84,8 +84,8 @@ export default class FacePosCheck {
 
 
     return {
-      x: adjustX,
-      y: adjustY
+      x: adjustX/2,
+      y: adjustY/2
     }
   }
 }

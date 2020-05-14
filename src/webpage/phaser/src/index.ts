@@ -12,8 +12,8 @@ const stageHeight = document.body.clientHeight;
 
 
 import GameScene from '@game/game'
-import UIScene from '@root/UI/UIManager'
-import EFScene from '@root/UI/EffectManager'
+import UIScene from '@root/UI/UIScene'
+import EFScene from '@root/UI/EffectScene'
 import BaseScene from './BaseScene';
 
 
