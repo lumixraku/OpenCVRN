@@ -18,6 +18,7 @@ import styles from '../Styles/Screens/CameraStyle';
 import { postToWebview, addOffsetForFaceData } from '../util/util';
 import FacePosCheck from '../util/Calculate'
 import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, MSG_TYPE_FACE_TARGET_POS } from '../constant';
+import { fakedata } from './fakedata'
 
 import _ from 'underscore'
 
@@ -58,6 +59,11 @@ export default class CameraScreen extends Component {
       this.setState({
         'webviewBG': 'transparent'
       })
+
+      this.setState({
+        faces: [fakedata[0]],
+      })
+
 
     }, 2000);
 
@@ -156,14 +162,14 @@ export default class CameraScreen extends Component {
 
 
   facesDetected(detectData) {
-    // console.log('facesDetected', JSON.stringify(detectData.faces))
+    console.log('facesDetected', JSON.stringify(detectData.faces))
     this.setState({
       faces: detectData.faces,
     })
   };
 
 
-
+  // call by renderFace
   calcPreviewOffset(faceBounds) {
     let { targetFaceBounds } = this.state
     // 表示还未设定过值
@@ -184,6 +190,7 @@ export default class CameraScreen extends Component {
   }
 
   renderFace(faceData) {
+    console.log("render face")
     if (faceData && faceData.bounds) { // && faceData.bounds 是为了确定检测到脸
       let offsetFaceData = addOffsetForFaceData(faceData)
       this.calcPreviewOffset(offsetFaceData.bounds)
@@ -371,14 +378,21 @@ export default class CameraScreen extends Component {
     let { previewOffset } = this.state
     return (
       <View style={styles.container}>
-        <View style={styles.box1}></View>
+        <View style={[styles.box1, {
+          left: 279,
+          top: 460,
+          height: 10,
+          width: 10,
+          backgroundColor: 'lime',
+          zIndex: 150,
+         }]}></View>
         <RNCamera
           ref={(cam) => {
             this.camera = cam;
           }}
           // style={styles.preview}
           style={[styles.preview, {
-            top: offsetYPreviewDefault, // + previewOffset.y,
+            top: offsetYPreviewDefault + previewOffset.y,
             left: offsetXPreviewDefault + previewOffset.x,
             width: previewWidthDefault,
             height: previewHeightDefault,
@@ -401,7 +415,6 @@ export default class CameraScreen extends Component {
         >
           {this.renderFaces()}
           {this.renderAllContours()}
-          {this.renderBounds()}
         </RNCamera>
           <View style={styles.webViewContainer}>
             <WebView
