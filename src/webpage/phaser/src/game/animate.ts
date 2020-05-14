@@ -9,6 +9,7 @@ import Animation = Phaser.Animations.Animation;
 import AnimationFrameType = Phaser.Types.Animations.AnimationFrame;
 import { Scene } from "phaser"
 import { COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI, HIT_DIZZY } from "@root/constants";
+// import { COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI, HIT_DIZZY } from "../constants";
 
 export default class AnimateManager {
     doge: Animation | false

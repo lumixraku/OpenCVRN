@@ -3,8 +3,8 @@ import Image = Phaser.GameObjects.Image;
 import Sprite = Phaser.GameObjects.Sprite;
 import Circle = Phaser.Geom.Circle;
 import Point = Phaser.Geom.Point;
-
 import { DOGLOOK, DOGCOOK, CHECKING_INTERVAL, COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI } from '@root/constants'
+// import { DOGLOOK, DOGCOOK, CHECKING_INTERVAL, COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI } from '../constants'
 
 
 // Phaser.Sprite 中可以 play 动画

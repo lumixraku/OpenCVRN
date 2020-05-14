@@ -5,10 +5,10 @@ import Point = Phaser.Geom.Point;
 import Rectagle = Phaser.Geom.Rectangle;
 import VConsole from "vconsole";
 import { FaceData, Bounds } from "./faceData";
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE } from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE } from './constants';
 
-// 使用 namespace 定义的类型可以直接用
-import Coco = MyName.Coco
+// 使用 namespace 定义的类型可以直接用 (vscode可以直接识别)
+// import Coco = MyName.Coco
 
 // 使用 module 定义的一定要 import 才能用
 import { PIPI } from "./types/myModule";

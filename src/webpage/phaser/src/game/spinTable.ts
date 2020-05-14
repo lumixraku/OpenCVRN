@@ -11,6 +11,7 @@ import { Scene } from "phaser";
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientHeight;
 import { isPC } from '@root/test'
+// import { isPC } from '../test'
 
 
 const angle2Rad = (angle: number) => {
@@ -18,7 +19,10 @@ const angle2Rad = (angle: number) => {
 }
 
 export default class SpinTable {
-    public spSpin: Sprite;
+    public spinTable: Sprite;
+    public angle: number = 0;
+    public rotation:number = 0;
+    
     public circle: Circle; //计算位置时用 并不是一个可见的对象
     public spSpinSpeed: number = 1;
 
@@ -37,17 +41,17 @@ export default class SpinTable {
     }
 
     addToContainer(scene: Scene){
-        this.spSpin = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'table');
+        this.spinTable = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'table');
         if (isPC) {
-            this.spSpin.alpha = 0.5
+            this.spinTable.alpha = 0.5
 
         }
         
 
-        let bds: Rectagle = this.spSpin.getBounds()
+        let bds: Rectagle = this.spinTable.getBounds()
         let width = bds.width
 
-        this.spSpin.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2))
+        this.spinTable.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2))
 
         this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);        
     }
@@ -61,11 +65,12 @@ export default class SpinTable {
         // 角度从x轴正方向开始算  顺时针旋转
         // rotate 是使用的弧度
         // angle 是角度
-        this.spSpin.angle += this.spSpinSpeed;
+        this.angle += this.spSpinSpeed
+        // this.spinTable.angle = this.angle
     }
 
     getAngle(): number {
-        return this.spSpin.angle
+        return this.angle
     }
 
     // 计算第 i 个食物的在当前桌面上的角度
