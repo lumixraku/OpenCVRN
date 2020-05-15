@@ -41,7 +41,7 @@ export default class Demo extends Phaser.Scene {
     public spinTable: SpinTable
     public spSpinSpeed: number = 1;
     public circleRadius: number = stageWidth * 1.5
-    public tablePos: Point = new Point(stageWidth / 2 + this.circleRadius/2.2, stageHeight + this.circleRadius / 2);
+    public tablePos: Point = new Point(stageWidth / 2 + this.circleRadius / 2.2, stageHeight + this.circleRadius / 2);
 
     public distanceAngle: number = 60  //食物和食物之间的间隔(角度)
     public tableCapacity: number = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
@@ -68,8 +68,8 @@ export default class Demo extends Phaser.Scene {
     // private scoreText: PhaserText
     private testText: PhaserText
     private hasCaughtToast: boolean
-    
-    
+
+
 
     // preview 取景器
     private previewArea: Rectagle = new Rectagle(0, 0, 0, 0)
@@ -94,14 +94,14 @@ export default class Demo extends Phaser.Scene {
     // preload 中的资源都加载完毕之后 才会调用 create
     create() {
 
-        
+
         this.timer = this.time.addEvent({
             // delay: 500,                // ms
             // callback: callback,
             //args: [],
             // callbackScope: thisArg,
             loop: true
-        });        
+        });
 
 
         this.bg = this.add.graphics()
@@ -117,12 +117,12 @@ export default class Demo extends Phaser.Scene {
 
 
         this.addText();
-        
-        this.uiScene =  this.scene.get(UI_SCENE) as UIScene
-        this.effScene = this.scene.get(EF_SCENE) as EffectScene
-        
 
-        this.animateManager = new AnimateManager(this)        
+        this.uiScene = this.scene.get(UI_SCENE) as UIScene
+        this.effScene = this.scene.get(EF_SCENE) as EffectScene
+
+
+        this.animateManager = new AnimateManager(this)
         this.animateManager.registerAnimation()
 
         this.addScore = this.addScore.bind(this)
@@ -151,21 +151,21 @@ export default class Demo extends Phaser.Scene {
         this.shouldCookLookBack(elapsed)
         this.fpsText.text = this.game.loop.actualFps + ''
     }
-    
+
     shouldCookLookBack(elapsed: number) {
         if (this.cook) {
-            let shouldLookBack =  Math.random()
+            let shouldLookBack = Math.random()
             let isCooking = this.cook.isCooking()
             if (isCooking) {
 
-                if (this.cook.checkTimeCount== 0 ) {
-                    if (elapsed > FIRST_CHECK_ELAPSE ) {
+                if (this.cook.checkTimeCount == 0) {
+                    if (elapsed > FIRST_CHECK_ELAPSE) {
                         this.cook.lookBack()
                     }
                 } else {
-    
+
                     let isJustChecked = this.cook.ifJustChecked(elapsed)
-                    if (!isJustChecked  && shouldLookBack < 0.9) {
+                    if (!isJustChecked && shouldLookBack < 0.9) {
                         this.cook.lookBack()
                     }
                 }
@@ -178,7 +178,7 @@ export default class Demo extends Phaser.Scene {
         // 右手顺时针
         // this.spSpin.angle += this.spSpinSpeed;
         this.spinTable.rotateTableSlightly()
-        
+
     }
 
     addCounter = 0
@@ -232,15 +232,15 @@ export default class Demo extends Phaser.Scene {
 
                 // 上面的办法虽然对于人类理解比较直观 但是phaser 操作起来却比较复杂 主要是 phaser 的坐标系划分很诡异
 
-                let spinRad = this.spinTable.getRotation() % ( 2* Math.PI )
-                let foodRad = i * this.spinTable.distanceRad 
-                if ( Math.abs(spinRad - foodRad) < 0.02) {
+                let spinRad = this.spinTable.getRotation() % (2 * Math.PI)
+                let foodRad = i * this.spinTable.distanceRad
+                if (Math.abs(spinRad - foodRad) < 0.02) {
                     let foodTextureKey = `food${i}`
                     let food = this.add.image(0, 0, foodTextureKey) as Food
 
                     food.name = `Food${i}`
                     food.setScale(2)
-                    this.foodList[i] = food                    
+                    this.foodList[i] = food
                 }
             }
         }
@@ -267,7 +267,7 @@ export default class Demo extends Phaser.Scene {
             let point = this.spinTable.caleRadToPoint(foodRad)
 
 
-            food.x = point.x            
+            food.x = point.x
             food.y = point.y
         }
     }
@@ -308,7 +308,7 @@ export default class Demo extends Phaser.Scene {
             let msg = {
                 messageType: MSG_TYPE_WEBVIEW_READY,
                 event: "bindMessage",
-                time: +new Date 
+                time: +new Date
             }
             window["ReactNativeWebView"].postMessage(JSON.stringify(msg));
         }
@@ -320,9 +320,9 @@ export default class Demo extends Phaser.Scene {
             let previewArea = event.data.previewArea
             this.previewArea = previewArea
             this.camFaceCheck.setCameraArea(previewArea)
-        }else {
+        } else {
             console.log("camFaceCheck not defined!!!")
-            setTimeout( ()=> {
+            setTimeout(() => {
                 this.setCameraArea(event)
             }, 100)
         }
@@ -379,21 +379,21 @@ export default class Demo extends Phaser.Scene {
             if (
                 (offsetXPreview < food.x && food.x < offsetXPreview + previewWidth)
                 &&
-                (offsetYPreview < food.y && food.y < offsetYPreview + previewHeight * 1.2 )
+                (offsetYPreview < food.y && food.y < offsetYPreview + previewHeight * 1.2)
                 &&
                 !food.eating
             ) {
                 // this.foodList.splice(i--, 1)
                 this.foodList[i] = null
                 this.eatingAnimation(food, destPos)
-                
+
 
 
                 break
             }
 
             // 来到了取景器右边 // 表示miss
-            if (food.x > offsetXPreview + previewWidth && food.y < offsetYPreview + previewHeight * 1.2 ) {
+            if (food.x > offsetXPreview + previewWidth && food.y < offsetYPreview + previewHeight * 1.2) {
                 console.log('miss')
             }
         }
@@ -413,26 +413,25 @@ export default class Demo extends Phaser.Scene {
 
                 // if not get caught
                 if (this.cook.isCooking()) {
-                    
-                    // this.effScene.addCoin(this.addScore)
-                }else{
+                    this.effScene.addCoin(this.addScore)
+                } else {
                     if (this.cook.isChecking())
-                    this.caughtAnimation()
+                        this.caughtAnimation()
 
                 }
-                
+
             }
         })
-        
+
     }
 
     caughtAnimation() {
         this.effScene.addHammer()
-        this.uiScene.createCaughtText(stageWidth/2, stageHeight/2, ()=> {})
+        this.uiScene.createCaughtText(stageWidth / 2, stageHeight / 2, () => { })
 
     }
 
-    missAnimation(){
+    missAnimation() {
 
     }
 
@@ -475,7 +474,7 @@ export default class Demo extends Phaser.Scene {
         this.bgImg.y = stageHeight / 2
         this.bgImg.setScale(stageWidth / bd.width, stageHeight / bd.height)
         // if (isPC) {
-            this.bgImg.alpha = 0.5; 
+        this.bgImg.alpha = 0.5;
         // }
 
     }
@@ -490,27 +489,27 @@ export default class Demo extends Phaser.Scene {
     }
 
     addText() {
-        this.fpsText = this.add.text(320, 120,'////////', { 
-            fontFamily: '"Roboto Condensed"', 
-            color:'#ffffff' 
+        this.fpsText = this.add.text(320, 120, '////////', {
+            fontFamily: '"Roboto Condensed"',
+            color: '#ffffff'
         })
         // this.mouthStateText = this.add.text(stageWidth - 100, 0, 'Hello World', { fontFamily: '"Roboto Condensed"' });
         // this.testText = this.add.text(170, 170, 'Hello World', { fontFamily: '"Roboto Condensed"' });
-        
+
         // this.scoreText = this.add.text(390, 50, '0', { 
         //     fontFamily: '"Roboto Condensed"',
         //     color: 'red'
         // })
-        
+
 
     }
 
-    refreshFaceBounds(bounds: Bounds, facePoints: Point[]) {   
+    refreshFaceBounds(bounds: Bounds, facePoints: Point[]) {
         if (!this.camFaceCheck) {
             return
         }
 
-        this.camFaceCheck.refreshFacePosition(bounds, facePoints)  
+        this.camFaceCheck.refreshFacePosition(bounds, facePoints)
         this.camFaceCheck.updatePreviewPosByTarget()
 
         let rs: FaceInCircle = this.camFaceCheck.checkFacePosition(bounds)
@@ -524,19 +523,19 @@ export default class Demo extends Phaser.Scene {
         this.cook.setScale(0.7)
     }
 
-    showScoreToast(text: string, delay:number, cb: Function) {
+    showScoreToast(text: string, delay: number, cb: Function) {
         let toastText = this.add.text(0, 0, '', { fontFamily: '"Roboto Condensed"' })
 
-        toastText.x = stageWidth/2
+        toastText.x = stageWidth / 2
         toastText.y = stageWidth / 2
         toastText.text = text
         toastText.setFontSize(32)
         toastText.setColor('red')
 
         let dest = {
-            x: 390, y:50
+            x: 390, y: 50
         }
-        setTimeout( ()=> {
+        setTimeout(() => {
             this.tweens.add({
                 targets: toastText,
                 x: dest.x,
@@ -548,9 +547,9 @@ export default class Demo extends Phaser.Scene {
                     cb()
                     toastText.destroy()
                 }
-            })   
+            })
         }, delay)
-    
+
     }
 
     addScore(sc: number) {

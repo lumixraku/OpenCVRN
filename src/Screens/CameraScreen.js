@@ -22,7 +22,7 @@ import { fakedata } from './fakedata'
 
 import _ from 'underscore'
 
-var webviewURL = 'http://10.12.113.137:5001/';
+var webviewURL = 'http://10.12.167.198:5001/';
 // var webviewURL = 'http://47.92.222.162:3001/
 // var webviewLocal = 'file:///android_asset/index.html' // blob 请求无法识别
 // var webviewSource = require("../../android/app/src/main/assets/index.html") // 报错
@@ -159,9 +159,9 @@ export default class CameraScreen extends Component {
 
 
   facesDetected(detectData) {
-
+    console.log("facesDetected", detectData.faces)
     this.setState({
-      // faces: detectData.faces,
+      faces: detectData.faces,
       // faces: [fakedata[0]],
     })
   };
@@ -276,25 +276,31 @@ export default class CameraScreen extends Component {
       return elems
     }
 
-    return (
-      <View
-        key={faceData.faceID}
-        style={{
-          borderWidth: 1,
-          borderRadius: 1,
-          borderColor: 'green',
-          width: previewWidthDefault,
-          height: previewHeightDefault,
-        }}
-        className="contourPoints"
-      >
-        {renderContour(faceData.upperLipTop)}
-        {renderContour(faceData.upperLipBottom)}
-        {renderContour(faceData.lowerLipTop)}
-        {renderContour(faceData.lowerLipBottom)}
-        {renderContour(faceData.face)}
-      </View>
-    )
+    console.log('contours', faceData)
+    if (faceData.bounds && faceData.upperLipBottom ) {
+      return (
+        <View
+          key={faceData.faceID}
+          style={{
+            borderWidth: 1,
+            borderRadius: 1,
+            borderColor: 'green',
+            width: previewWidthDefault,
+            height: previewHeightDefault,
+          }}
+          className="contourPoints"
+        >
+          {renderContour(faceData.upperLipTop)}
+          {renderContour(faceData.upperLipBottom)}
+          {renderContour(faceData.lowerLipTop)}
+          {renderContour(faceData.lowerLipBottom)}
+          {renderContour(faceData.face)}
+        </View>
+      )
+    } else {
+      return null
+    }
+
   }
 
   renderLandmarksOfFace(face) {
@@ -418,7 +424,7 @@ export default class CameraScreen extends Component {
           }
         >
           {this.renderFaces()}
-          {/* {this.renderAllContours()} */}
+          {this.renderAllContours()}
         </RNCamera>
         <View style={styles.webViewContainer}>
           <WebView

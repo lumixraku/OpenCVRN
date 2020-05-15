@@ -20,6 +20,7 @@
   var COOK_LOOKBACK_ANIMI = 'lookback';
   var COOK_TOCOOK_ANIMI = 'cookAgain';
   var HIT_DIZZY = 'hitDizzy';
+  //# sourceMappingURL=constants.js.map
 
   /*! *****************************************************************************
   Copyright (c) Microsoft Corporation. All rights reserved.
@@ -71,6 +72,10 @@
           this.mouthStateText = scene.add.text(stageWidth - 100, 100, 'Hello World', { fontFamily: '"Roboto Condensed"' });
       }
       Mouth.prototype.setMouthContourPoints = function (upperTop, upperBottom, lowerTop, lowerBottom) {
+          if (upperTop === void 0) { upperTop = []; }
+          if (upperBottom === void 0) { upperBottom = []; }
+          if (lowerTop === void 0) { lowerTop = []; }
+          if (lowerBottom === void 0) { lowerBottom = []; }
           this.upperTopPoints = upperTop;
           this.upperBottomPoints = upperBottom;
           this.lowerTopPoints = lowerTop;
@@ -160,6 +165,7 @@
       };
       return Mouth;
   }());
+  //# sourceMappingURL=mouth.js.map
 
   var offsetXPreview = 170;
   var offsetYPreview = 250;
@@ -270,6 +276,7 @@
           });
       }, false);
   }
+  //# sourceMappingURL=test.js.map
 
   var Point$1 = Phaser.Geom.Point;
   var stageWidth$1 = document.body.clientWidth;
@@ -354,6 +361,7 @@
       };
       return SpinTable;
   }());
+  //# sourceMappingURL=spinTable.js.map
 
   var Point$2 = Phaser.Geom.Point;
   var Vector2 = Phaser.Math.Vector2;
@@ -532,6 +540,7 @@
       };
       return CamFaceCheck;
   }());
+  //# sourceMappingURL=facePosCheck.js.map
 
   var Sprite = Phaser.GameObjects.Sprite;
   // import { DOGLOOK, DOGCOOK, CHECKING_INTERVAL, COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI } from '../constants'
@@ -616,6 +625,7 @@
       };
       return Cook;
   }(Sprite));
+  //# sourceMappingURL=cook.js.map
 
   // import { DOGCOOK } from "../constants";
   var AssetsLoader = /** @class */ (function () {
@@ -659,6 +669,7 @@
       };
       return AssetsLoader;
   }());
+  //# sourceMappingURL=assetsLoader.js.map
 
   // import { COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI, HIT_DIZZY } from "../constants";
   var AnimateManager = /** @class */ (function () {
@@ -725,6 +736,7 @@
       };
       return AnimateManager;
   }());
+  //# sourceMappingURL=animate.js.map
 
   var Point$3 = Phaser.Geom.Point;
   var Rectagle$2 = Phaser.Geom.Rectangle;
@@ -998,7 +1010,9 @@
               onComplete: function () {
                   food.destroy();
                   // if not get caught
-                  if (_this.cook.isCooking()) ;
+                  if (_this.cook.isCooking()) {
+                      _this.effScene.addCoin(_this.addScore);
+                  }
                   else {
                       if (_this.cook.isChecking())
                           _this.caughtAnimation();
@@ -1132,6 +1146,7 @@
       }
       return bg;
   };
+  //# sourceMappingURL=UIUtil.js.map
 
   var Point$4 = Phaser.Geom.Point;
   var Rectagle$3 = Phaser.Geom.Rectangle;
@@ -1481,6 +1496,7 @@
       };
       return UIScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=UIScene.js.map
 
   var Point$5 = Phaser.Geom.Point;
   var Rectagle$4 = Phaser.Geom.Rectangle;
@@ -1602,6 +1618,7 @@
       };
       return EffectScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=EffectScene.js.map
 
   var stageWidth$6 = document.body.clientWidth;
   var stageHeight$6 = document.body.clientHeight;
@@ -1637,6 +1654,7 @@
       };
       return BaseScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=BaseScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
