@@ -9,7 +9,7 @@ import PhaserText = Phaser.GameObjects.Text;
 
 
 const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientHeight;
+const stageHeight = document.body.clientWidth / 9 * 16;
 // 在 RN 中得到的宽和高 是411 * 823
 // 在 webview 得到的宽高是 412 * 804  // 因为我的APP 并没有打开全屏
 import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE } from '@root/constants';
@@ -126,6 +126,10 @@ export default class Demo extends Phaser.Scene {
         this.animateManager.registerAnimation()
 
         this.addScore = this.addScore.bind(this)
+
+
+        // Main Scene
+        this.cameras.main.fadeIn(250);
     }
 
 
@@ -426,7 +430,7 @@ export default class Demo extends Phaser.Scene {
     }
 
     caughtAnimation() {
-        this.effScene.addHammer()
+        this.effScene.addHammer(this)
         this.uiScene.createCaughtText(stageWidth / 2, stageHeight / 2, () => { })
 
     }
@@ -500,7 +504,6 @@ export default class Demo extends Phaser.Scene {
         //     fontFamily: '"Roboto Condensed"',
         //     color: 'red'
         // })
-
 
     }
 

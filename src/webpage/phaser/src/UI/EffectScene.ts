@@ -12,7 +12,7 @@ import { drawRoundRect } from "./UIUtil";
 
 
 const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientHeight;
+const stageHeight = document.body.clientWidth / 9 * 16;
 
 interface AnimationPlaying {
     hammer: boolean
@@ -91,7 +91,7 @@ export default class EffectScene extends Phaser.Scene {
         })
     }
 
-    addHammer() {
+    addHammer(gameScene: Scene) {
         if (this.animationPlaying.hammer) {
             return 
         }
@@ -114,11 +114,16 @@ export default class EffectScene extends Phaser.Scene {
         this.addDizzy(dizzyPos).play(HIT_DIZZY)
 
 
+        let animationDuration = 232
+        let holdDuration = 332
+        setTimeout( ()=> {
+            gameScene.cameras.main.shake(100, 0.01, true);            
+        }, 332 )
         this.tweens.add({
             targets: this.hammer,
             rotation: 1.5,
-            duration: 232,
-            hold: 332,
+            duration: animationDuration,
+            hold: holdDuration,
             yoyo: true,
             ease: 'Power3',
             onComplete: () => {
@@ -138,7 +143,8 @@ export default class EffectScene extends Phaser.Scene {
 
     }
 
-
+    // 原本这个是放在 UIScene 中的  但是因为addCoin 动画要表现在这里
+    // 如果放在 UIScene (UIScene 在层级上最高) Coin会被UIScene 遮住
     createScoreArea(): Container {
         let scoreAreaCenter = new Point(stageWidth / 2, 50)
         let graphicsTopLeft = new Point(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y)

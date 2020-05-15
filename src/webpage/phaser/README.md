@@ -45,6 +45,7 @@ https://github.com/rexrainbow/phaser3-rex-notes
 - 创建对象的方式
 - 利用scene 来实现层级
 - Phaser.Sprite 中可以 play 动画  但是 Phaser.Image 不行
+- Phaser 可以通过操作 frame 来切换 image 实际显示的内容
 
 
 ## Trouble Shooting

@@ -4,7 +4,7 @@ import UIScene from "./UI/UIScene";
 import EffectScene from "./UI/EffectScene";
 
 const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientHeight;
+const stageHeight = document.body.clientWidth / 9 * 16;
 
 export default class BaseScene extends Phaser.Scene {
 
@@ -25,6 +25,9 @@ export default class BaseScene extends Phaser.Scene {
             url: '/rexuiplugin.min.js',
             sceneKey: 'rexUI'
         });
+
+
+        
     }
     create() {
         this.scene.launch(GAME_SCENE)
