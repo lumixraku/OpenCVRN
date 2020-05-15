@@ -7,12 +7,14 @@ import Rectagle = Phaser.Geom.Rectangle;
 import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
 import Container = Phaser.GameObjects.Container
+import InputButton = Phaser.Input.Gamepad.Button
+
 
 import { UI_SCENE } from "../constants";
 import { World } from "matter";
 import { drawRoundRect } from "./UIUtil";
 const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientHeight;
+const stageHeight = document.body.clientWidth / 9 * 16;
 
 const TopLeftToCenter = (width: number, height: number, topLeftPoint: Point): Point => {
     let halfW = width/2
@@ -23,19 +25,13 @@ const TopLeftToCenter = (width: number, height: number, topLeftPoint: Point): Po
     )
 }
 
-
-
 export default class UIScene extends Phaser.Scene {
-
 
     public testView: UI.Dialog
     public welcome: UI.Dialog
     public getCaught: UI.Dialog
     public getCaughtText: PhaserText
-
     public testGraphic: Graphics
-
-
     public scoreArea: Container
     public scoreText: PhaserText
 
@@ -54,17 +50,18 @@ export default class UIScene extends Phaser.Scene {
 
     create() {
         this.welcome = this.createWelcomeDialog(this, 300, 500)
-        this.testView = this.createDemoDialog(this, 0, 0)
-        // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
-
-
         this.welcome.visible = false
-        this.testView.visible = false
+        // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
+        
+        
+        // this.testView = this.createDemoDialog(this, 0, 0)
+        // this.testView.visible = false
 
         // this.testGraphic = this.add.graphics()
         // this.testGraphic.lineStyle(10, 0x00bb44)
         // this.testGraphic.strokeLineShape( new Phaser.Geom.Line(200, 300, 250, 300))
         // this.testGraphic.rotation = 2* Math.PI
+
 
     }
 

@@ -9,7 +9,7 @@ import { Scene } from "phaser";
 
 
 const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientHeight;
+const stageHeight = document.body.clientWidth / 9 * 16;
 import { isPC } from '@root/test'
 // import { isPC } from '../test'
 

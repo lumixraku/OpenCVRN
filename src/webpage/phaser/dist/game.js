@@ -62,7 +62,7 @@
   var Point = Phaser.Geom.Point;
   var Rectagle = Phaser.Geom.Rectangle;
   var stageWidth = document.body.clientWidth;
-  var stageHeight = document.body.clientHeight;
+  var stageHeight = document.body.clientWidth / 9 * 16;
   var Mouth = /** @class */ (function () {
       // private mouthColor: Graphics;
       function Mouth(scene) {
@@ -280,7 +280,7 @@
 
   var Point$1 = Phaser.Geom.Point;
   var stageWidth$1 = document.body.clientWidth;
-  var stageHeight$1 = document.body.clientHeight;
+  var stageHeight$1 = document.body.clientWidth / 9 * 16;
   // import { isPC } from '../test'
   var angle2Rad = function (angle) {
       return (Math.PI / 180) * angle;
@@ -367,7 +367,7 @@
   var Vector2 = Phaser.Math.Vector2;
   var Rectagle$1 = Phaser.Geom.Rectangle;
   var stageWidth$2 = document.body.clientWidth;
-  var stageHeight$2 = document.body.clientHeight;
+  var stageHeight$2 = document.body.clientWidth / 9 * 16;
   var CamFaceCheck = /** @class */ (function () {
       function CamFaceCheck(scene) {
           this.scene = scene;
@@ -741,7 +741,7 @@
   var Point$3 = Phaser.Geom.Point;
   var Rectagle$2 = Phaser.Geom.Rectangle;
   var stageWidth$3 = document.body.clientWidth;
-  var stageHeight$3 = document.body.clientHeight;
+  var stageHeight$3 = document.body.clientWidth / 9 * 16;
   var Demo = /** @class */ (function (_super) {
       __extends(Demo, _super);
       function Demo() {
@@ -787,6 +787,8 @@
           this.animateManager = new AnimateManager(this);
           this.animateManager.registerAnimation();
           this.addScore = this.addScore.bind(this);
+          // Main Scene
+          this.cameras.main.fadeIn(250);
       };
       Demo.prototype.update = function (time, delta) {
           this.rotateTable();
@@ -1021,7 +1023,7 @@
           });
       };
       Demo.prototype.caughtAnimation = function () {
-          this.effScene.addHammer();
+          this.effScene.addHammer(this);
           this.uiScene.createCaughtText(stageWidth$3 / 2, stageHeight$3 / 2, function () { });
       };
       Demo.prototype.missAnimation = function () {
@@ -1151,7 +1153,7 @@
   var Point$4 = Phaser.Geom.Point;
   var Rectagle$3 = Phaser.Geom.Rectangle;
   var stageWidth$4 = document.body.clientWidth;
-  var stageHeight$4 = document.body.clientHeight;
+  var stageHeight$4 = document.body.clientWidth / 9 * 16;
   var TopLeftToCenter = function (width, height, topLeftPoint) {
       var halfW = width / 2;
       var halfH = height / 2;
@@ -1171,10 +1173,10 @@
       };
       UIScene.prototype.create = function () {
           this.welcome = this.createWelcomeDialog(this, 300, 500);
-          this.testView = this.createDemoDialog(this, 0, 0);
-          // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
           this.welcome.visible = false;
-          this.testView.visible = false;
+          // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
+          // this.testView = this.createDemoDialog(this, 0, 0)
+          // this.testView.visible = false
           // this.testGraphic = this.add.graphics()
           // this.testGraphic.lineStyle(10, 0x00bb44)
           // this.testGraphic.strokeLineShape( new Phaser.Geom.Line(200, 300, 250, 300))
@@ -1501,7 +1503,7 @@
   var Point$5 = Phaser.Geom.Point;
   var Rectagle$4 = Phaser.Geom.Rectangle;
   var stageWidth$5 = document.body.clientWidth;
-  var stageHeight$5 = document.body.clientHeight;
+  var stageHeight$5 = document.body.clientWidth / 9 * 16;
   var EffectScene = /** @class */ (function (_super) {
       __extends(EffectScene, _super);
       function EffectScene() {
@@ -1557,7 +1559,7 @@
               }
           });
       };
-      EffectScene.prototype.addHammer = function () {
+      EffectScene.prototype.addHammer = function (gameScene) {
           var _this = this;
           if (this.animationPlaying.hammer) {
               return;
@@ -1573,11 +1575,16 @@
           this.hammer.setScale(0.3);
           this.hammer.rotation = 1;
           this.addDizzy(dizzyPos).play(HIT_DIZZY);
+          var animationDuration = 232;
+          var holdDuration = 332;
+          setTimeout(function () {
+              gameScene.cameras.main.shake(100, 0.01, true);
+          }, 332);
           this.tweens.add({
               targets: this.hammer,
               rotation: 1.5,
-              duration: 232,
-              hold: 332,
+              duration: animationDuration,
+              hold: holdDuration,
               yoyo: true,
               ease: 'Power3',
               onComplete: function () {
@@ -1592,6 +1599,8 @@
           this.dizzy = this.add.sprite(dizzyPos.x, dizzyPos.y, 'dizzy1');
           return this.dizzy;
       };
+      // 原本这个是放在 UIScene 中的  但是因为addCoin 动画要表现在这里
+      // 如果放在 UIScene (UIScene 在层级上最高) Coin会被UIScene 遮住
       EffectScene.prototype.createScoreArea = function () {
           var scoreAreaCenter = new Point$5(stageWidth$5 / 2, 50);
           var graphicsTopLeft = new Point$5(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y);
@@ -1621,7 +1630,7 @@
   //# sourceMappingURL=EffectScene.js.map
 
   var stageWidth$6 = document.body.clientWidth;
-  var stageHeight$6 = document.body.clientHeight;
+  var stageHeight$6 = document.body.clientWidth / 9 * 16;
   var BaseScene = /** @class */ (function (_super) {
       __extends(BaseScene, _super);
       function BaseScene() {
@@ -1659,11 +1668,16 @@
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
   // import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
+  var canvasELlem = document.querySelector('#gameCanvas');
   var stageWidth$7 = document.body.clientWidth;
-  var stageHeight$7 = document.body.clientHeight;
+  var stageHeight$7 = document.body.clientWidth / 9 * 16;
+  var documentWidth = document.body.clientWidth;
+  var documentHeight = document.body.clientHeight;
+  canvasELlem.style.top = (documentHeight - stageHeight$7) / 2 + "px";
   var config = {
-      type: Phaser.AUTO,
-      parent: 'phaser-example',
+      canvas: canvasELlem,
+      type: Phaser.WEBGL,
+      // parent: 'phaser-example',
       width: stageWidth$7,
       height: stageHeight$7,
       scene: [BaseScene, Demo, EffectScene, UIScene],
@@ -1681,6 +1695,7 @@
   changeMouth();
   setPreview();
   testClickEvent(game);
+  //# sourceMappingURL=index.js.map
 
 }());
 //# sourceMappingURL=game.js.map
