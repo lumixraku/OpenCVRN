@@ -29,7 +29,7 @@ export default class Mouth {
         this.mouthStateText = scene.add.text(stageWidth - 100, 100, 'Hello World', { fontFamily: '"Roboto Condensed"' });
     }
 
-    setMouthContourPoints(upperTop: Point[], upperBottom: Point[], lowerTop: Point[], lowerBottom: Point[]){
+    setMouthContourPoints(upperTop: Point[] = [], upperBottom: Point[] = [], lowerTop: Point[] = [], lowerBottom: Point[] = []){
         this.upperTopPoints = upperTop;
         this.upperBottomPoints = upperBottom;
         this.lowerTopPoints = lowerTop;
