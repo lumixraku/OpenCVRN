@@ -125,3 +125,7 @@ https://gamedevacademy.org/creating-a-preloading-screen-in-phaser-3/?a=13
 https://www.html5gamedevs.com/topic/37708-setting-up-a-game-for-multiple-scenes-using-preload-create-and-update/
 
 https://labs.phaser.io/edit.html?src=src%5Cscenes%5Cchange%20scene%20from%20create%20es6.js
+
+### Some Fonts
+https://www.cufonfonts.com/fonts/list/language/english/2
+https://www.1001fonts.com/comic+google-web-fonts.html?page=2&items=10

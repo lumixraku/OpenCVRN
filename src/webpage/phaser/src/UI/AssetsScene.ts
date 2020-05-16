@@ -1,22 +1,55 @@
 import { Scene } from "phaser";
-import { DOGCOOK, ASSETS_SCENE, UI_SCENE, EF_SCENE, GAME_SCENE, SOUNDKEY, MUSICKEY } from "@root/constants";
+import { DOGCOOK, ASSETS_SCENE, UI_SCENE, EF_SCENE, GAME_SCENE, SOUNDKEY, MUSICKEY, stageWidth, stageHeight } from "@root/constants";
 import GameSoundManager from "@root/game/soundManager";
 // import { DOGCOOK } from "../constants";
 
 
-
 export default class AssetsScene extends Scene {
+    private progressBar: Graphics
+    private loadingText: PhaserText
+    private assetText: PhaserText
+    private percentText:PhaserText
+
     constructor() {
         super(ASSETS_SCENE)
     }
 
     preload() {
-        this.loadUIAssets()    
+
+
+
+        this.addLoadingProgressUI()
+
+        this.load.on('progress', (value) => {
+            value = value.toFixed(2)
+            this.percentText.setText( value * 100 + '%');
+            this.progressBar.clear();
+            this.progressBar.fillStyle(0xffde00, 1);
+            this.progressBar.fillRect(stageWidth/2 - 150, stageHeight/2, 300 * value, 30);
+        });
+
+
+        // not work
+        this.load.on('fileprogress', (file, value)  =>  {
+            this.assetText.setText('Loading asset: ' + file.key);
+        });
+
+        this.load.on('complete', () => {
+            this.progressBar.destroy();
+            // this.progressBox.destroy();
+            this.loadingText.destroy();
+            this.percentText.destroy();
+            this.assetText.destroy();
+        });
+
+
+        this.loadUIAssets()
         this.loadPics()
         this.loadEmojiAssets()
-        this.loadDogeAnimationAssets() 
-        
-        this.loadMusic()
+        this.loadDogeAnimationAssets()
+
+        this.loadMusic()        
+
     }
 
     create() {
@@ -30,6 +63,39 @@ export default class AssetsScene extends Scene {
     
     }
 
+    addLoadingProgressUI() {
+        this.progressBar = this.add.graphics();
+
+        this.loadingText = this.make.text({
+            x: stageWidth / 2 -50,
+            y: stageHeight / 2 - 50,
+            text: 'Loading... ',
+            style: {
+                font: '18px monospace',
+                fill: '#666666'
+            }
+        }).setOrigin(0.5)
+
+        this.percentText = this.make.text({
+            x: stageWidth / 2 + 50 ,
+            y: stageHeight / 2 - 50,
+            text: '0%',
+            style: {
+                font: '18px monospace',
+                fill: '#666666'
+            }            
+        }).setOrigin(0.5)
+        this.assetText = this.make.text({
+            x: stageWidth / 2,
+            y: stageHeight / 2 + 150,
+            text: '',
+            style: {
+                font: '18px monospace',
+                fill: '#666666'
+            }
+        }).setOrigin(0.5)
+
+    }
 
 
 
@@ -55,8 +121,6 @@ export default class AssetsScene extends Scene {
     }
 
     loadDogeAnimationAssets() {
-
-
 
         let scene = this
         let endIndex = 47

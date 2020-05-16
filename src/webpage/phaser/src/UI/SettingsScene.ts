@@ -11,7 +11,7 @@ const frameWidth = 80
 const frameHeight = 80
 const settingsLeft = stageWidth / 2 - 120
 export default class SettingsScene extends Phaser.Scene {
-        private soundBtn: ImageButton
+    private soundBtn: ImageButton
     private textSound: PhaserText
     private musicBtn: ImageButton
     private textMusic: PhaserText
