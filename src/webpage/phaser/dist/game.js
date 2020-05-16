@@ -1653,6 +1653,7 @@
       GameSoundManager.musicMode = true;
       return GameSoundManager;
   }());
+  //# sourceMappingURL=soundManager.js.map
 
   // import { DOGCOOK } from "../constants";
   var AssetsScene = /** @class */ (function (_super) {
@@ -1661,6 +1662,26 @@
           return _super.call(this, ASSETS_SCENE) || this;
       }
       AssetsScene.prototype.preload = function () {
+          var _this = this;
+          this.addLoadingProgressUI();
+          this.load.on('progress', function (value) {
+              value = value.toFixed(2);
+              _this.percentText.setText(value * 100 + '%');
+              _this.progressBar.clear();
+              _this.progressBar.fillStyle(0xffde00, 1);
+              _this.progressBar.fillRect(stageWidth / 2 - 150, stageHeight / 2, 300 * value, 30);
+          });
+          // not work
+          this.load.on('fileprogress', function (file, value) {
+              _this.assetText.setText('Loading asset: ' + file.key);
+          });
+          this.load.on('complete', function () {
+              _this.progressBar.destroy();
+              // this.progressBox.destroy();
+              _this.loadingText.destroy();
+              _this.percentText.destroy();
+              _this.assetText.destroy();
+          });
           this.loadUIAssets();
           this.loadPics();
           this.loadEmojiAssets();
@@ -1673,6 +1694,36 @@
           this.scene.launch(EF_SCENE);
           this.scene.launch(UI_SCENE);
           GameSoundManager.initMusic(this);
+      };
+      AssetsScene.prototype.addLoadingProgressUI = function () {
+          this.progressBar = this.add.graphics();
+          this.loadingText = this.make.text({
+              x: stageWidth / 2 - 50,
+              y: stageHeight / 2 - 50,
+              text: 'Loading... ',
+              style: {
+                  font: '18px monospace',
+                  fill: '#666666'
+              }
+          }).setOrigin(0.5);
+          this.percentText = this.make.text({
+              x: stageWidth / 2 + 50,
+              y: stageHeight / 2 - 50,
+              text: '0%',
+              style: {
+                  font: '18px monospace',
+                  fill: '#666666'
+              }
+          }).setOrigin(0.5);
+          this.assetText = this.make.text({
+              x: stageWidth / 2,
+              y: stageHeight / 2 + 150,
+              text: '',
+              style: {
+                  font: '18px monospace',
+                  fill: '#666666'
+              }
+          }).setOrigin(0.5);
       };
       AssetsScene.prototype.loadPics = function () {
           var scene = this;
@@ -1727,6 +1778,7 @@
       };
       return AssetsScene;
   }(phaser.Scene));
+  //# sourceMappingURL=AssetsScene.js.map
 
   var fontTitleStyle = { font: '46px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 7, align: 'center' };
   var fontSettingsStyle = { font: '38px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 5, align: 'center' };
@@ -1785,6 +1837,7 @@
       };
       return SettingsScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=SettingsScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
