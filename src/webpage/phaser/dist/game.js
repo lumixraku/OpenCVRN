@@ -100,7 +100,7 @@
           var yVals = mouthPoints.map(function (p) {
               return p.y;
           });
-          console.log('mouth vals', mouthPoints.length);
+          // console.log('mouth vals', mouthPoints.length)
           var minX = Math.min.apply(Math, xVals);
           var maxX = Math.max.apply(Math, xVals);
           var minY = Math.min.apply(Math, yVals);
@@ -108,7 +108,7 @@
           this.mouthCenter.clear();
           var circle = new Phaser.Geom.Circle(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2, 5);
           this.mouthCenter.fillCircleShape(circle);
-          console.log('center', mouthPoints, minX, minY, maxX, maxY, circle.x, circle.y);
+          // console.log('center',mouthPoints, minX, minY, maxX, maxY, circle.x, circle.y )
           this.mouthRect.setPosition(minX, minY);
           this.mouthRect.setSize(maxX - minX, maxY - minY);
       };
@@ -175,7 +175,115 @@
   }());
   //# sourceMappingURL=mouth.js.map
 
+  var offsetXPreview = 170;
+  var offsetYPreview = 250;
+  var previewWidth = 198;
+  var previewHeight = previewWidth * 16 / 9;
   var isPC = window.navigator.userAgent.indexOf("PCMozilla") != -1;
+  // 给坐标加上取景器的偏移信息
+  // 原本的坐标信息是人脸相对取景器的位置
+  // 现在坐标信息变为相对整个画布的位置
+  function addOffsetForFaceData(target) {
+      var checkedType = function (target) {
+          return Object.prototype.toString.call(target).slice(8, -1);
+      };
+      //判断拷贝的数据类型
+      //初始化变量result 成为最终克隆的数据
+      var result;
+      var targetType = checkedType(target);
+      if (targetType === 'Object') {
+          result = {};
+      }
+      else if (targetType === 'Array') {
+          result = [];
+      }
+      else {
+          return target;
+      }
+      //遍历目标数据
+      for (var _i = 0, _a = Object.entries(target); _i < _a.length; _i++) {
+          var _b = _a[_i], key = _b[0], value = _b[1];
+          //获取遍历数据结构的每一项值。
+          // let value = target[key]
+          //判断目标结构里的每一值是否存在对象/数组
+          if (checkedType(value) === 'Object' ||
+              checkedType(value) === 'Array') { //对象/数组里嵌套了对象/数组
+              //继续遍历获取到value值
+              result[key] = addOffsetForFaceData(value);
+          }
+          else { //获取到value值是基本的数据类型或者是函数。
+              if (key == "x") {
+                  result[key] = offsetXPreview + value;
+              }
+              else if (key == "y") {
+                  result[key] = offsetYPreview + value;
+              }
+              else {
+                  result[key] = value;
+              }
+          }
+      }
+      return result;
+  }
+  // set preview area
+  function setPreview() {
+      window.addEventListener("load", function () {
+          setTimeout(function () {
+              window.postMessage({
+                  messageType: MSG_TYPE_CAM,
+                  previewArea: {
+                      y: offsetYPreview,
+                      x: offsetXPreview,
+                      width: previewWidth,
+                      height: previewHeight
+                  },
+              }, "*");
+          }, 1000);
+      }, false);
+  }
+  // 测试嘴巴位置
+  function changeMouth(game) {
+      //contours sample data
+      window.addEventListener("load", function () {
+          // 这个数据是和取景器大小有关的数据 
+          // 当 RN 的部分设置了取景器大小的时候, 返回的脸的位置也根据 RN 这里的实际尺寸有所压缩
+          // 但是和取景器的位移无关  毕竟安卓端也不知道取景器的相对位置
+          fetch('/assets/sampleContours.json').then(function (resp) {
+              return resp.json();
+          }).then(function (data) {
+              setTimeout(function () {
+                  // 在PC上调试
+                  if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
+                      var oneFace_1 = data[0];
+                      setInterval(function () {
+                          // moveFace(oneFace, changeDir)
+                          var afterOffsetForFaceData = addOffsetForFaceData(oneFace_1);
+                          window.postMessage({
+                              messageType: 'face',
+                              faceData: afterOffsetForFaceData
+                          }, "*");
+                      }, 100);
+                  }
+              }, 1000);
+          });
+      }, false);
+      // let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
+  }
+  // 获取鼠标点击位置
+  function testClickEvent(game) {
+      window.addEventListener('load', function () {
+          setTimeout(function () {
+              game.scene.getScene(GAME_SCENE).input.on('pointerup', function (pointer) {
+                  var touchX = pointer.x;
+                  var touchY = pointer.y;
+                  // let x = game.input.mousePointer.x;
+                  // let y = game.input.mousePointer.y;
+                  console.log('clickXY', touchX, touchY);
+                  // ...
+              });
+          });
+      }, false);
+  }
   //# sourceMappingURL=test.js.map
 
   var Point$1 = Phaser.Geom.Point;
@@ -527,33 +635,6 @@
   }(Sprite));
   //# sourceMappingURL=cook.js.map
 
-  // import { DOGCOOK } from "../constants";
-  var AssetsLoader = /** @class */ (function () {
-      function AssetsLoader(scene) {
-          this.scene = scene;
-      }
-      AssetsLoader.prototype.loadPics = function (scene) {
-          // yarn run dev 的时候 这个资源也还是从 dist 中读取的
-          // scene.load.image('bgImg', 'assets/kitchen.png');
-          // scene.load.image('table', 'assets/table.png');
-          // scene.load.image('light', 'assets/light.png');
-          // scene.load.image('food0', 'assets/burger.png');
-          // scene.load.image('food1', 'assets/burrito.png');
-          // scene.load.image('food2', 'assets/cheese-burger.png');
-          // scene.load.image('food3', 'assets/chicken-leg.png');
-          // scene.load.image('food4', 'assets/french-fries.png');
-          // scene.load.image('food5', 'assets/donut.png');
-          // scene.load.image('doglook', 'assets/front.png');
-          // // 应当使用 gif 中的某一帧
-          // // scene.load.image('dogcook', 'assets/back.png');
-          // scene.load.image(DOGCOOK, `assets/dogeFrame/frame_00_delay-0.04s.gif`)
-          // this.loadEmoji()
-          // this.loadDogeAnimation()
-      };
-      return AssetsLoader;
-  }());
-  //# sourceMappingURL=assetsLoader.js.map
-
   // import { COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI, HIT_DIZZY } from "../constants";
   var AnimateManager = /** @class */ (function () {
       function AnimateManager(scene) {
@@ -640,13 +721,10 @@
           _this.previewArea = new Rectagle$2(0, 0, 0, 0);
           _this.frameCounter = 0;
           _this.addCounter = 0;
-          _this.assetsLoader = new AssetsLoader(_this);
           _this.messageListener();
           return _this;
       }
       Demo.prototype.preload = function () {
-          // this.assetsLoader.loadPics(this)
-          // this.assetsLoader = this.scene.get(ASSETS_SCENE) as AssetsLoader
       };
       // preload 中的资源都加载完毕之后 才会调用 create
       Demo.prototype.create = function () {
@@ -675,15 +753,15 @@
           this.cameras.main.fadeIn(250);
       };
       Demo.prototype.update = function (time, delta) {
-          // this.rotateTable()
-          // this.addFoodIfNeed()
-          // this.movingFoodOnTable()
-          // this.checkIfCouldEat()
-          // this.frameCounter += 1
-          // if (this.frameCounter >= 60) {
-          //     this.frameCounter = 0
-          //     this.update60Frame()
-          // }
+          this.rotateTable();
+          this.addFoodIfNeed();
+          this.movingFoodOnTable();
+          this.checkIfCouldEat();
+          this.frameCounter += 1;
+          if (this.frameCounter >= 60) {
+              this.frameCounter = 0;
+              this.update60Frame();
+          }
       };
       Demo.prototype.update60Frame = function () {
           var elapsed = this.timer.getElapsedSeconds();
@@ -907,7 +985,7 @@
           });
       };
       Demo.prototype.caughtAnimation = function () {
-          this.effScene.addHammer(this);
+          this.effScene.addHammer(this, this.addScore);
           this.uiScene.createCaughtText(stageWidth$4 / 2, stageHeight$4 / 2, function () { });
       };
       Demo.prototype.missAnimation = function () {
@@ -1012,7 +1090,6 @@
       };
       return Demo;
   }(Phaser.Scene));
-  //# sourceMappingURL=game.js.map
 
   var UIHelper = /** @class */ (function () {
       function UIHelper() {
@@ -1447,12 +1524,16 @@
   var Rectagle$4 = Phaser.Geom.Rectangle;
   var stageWidth$6 = document.body.clientWidth;
   var stageHeight$6 = document.body.clientWidth / 9 * 16;
+  var coinScorePos = new Point$5(305, 50);
+  var coinRadius = 25;
   var EffectScene = /** @class */ (function (_super) {
       __extends(EffectScene, _super);
       function EffectScene() {
           var _this = _super.call(this, EF_SCENE) || this;
           _this.animationPlaying = {
-              hammer: false
+              hammer: false,
+              dropCoin: false,
+              addCoin: false,
           };
           return _this;
       }
@@ -1462,13 +1543,37 @@
           //     url: '/rexuiplugin.min.js',
           //     sceneKey: 'rexUI'
           // });
-          this.load.image('coin', 'assets/coin.png');
-          this.load.image('hammer', 'assets/hammer.png');
-          this.load.image('dizzy1', 'assets/dizzy1.png');
-          this.load.image('dizzy2', 'assets/dizzy2.png');
+          // this.load.image('coin', 'assets/coin.png');
+          // this.load.image('hammer', 'assets/hammer.png');
+          // this.load.image('dizzy1', 'assets/dizzy1.png');
+          // this.load.image('dizzy2', 'assets/dizzy2.png');
       };
       EffectScene.prototype.create = function () {
           this.createScoreArea();
+          this.droppingCoins = [];
+          var ground = this.matter.add.image(stageWidth$6 / 2, stageHeight$6, 'ground');
+          ground.setStatic(true);
+          ground.setScale(2, 0.2);
+          // ground.setAngle(10);
+          ground.setFriction(0.005);
+      };
+      EffectScene.prototype.update = function () {
+          var _this = this;
+          var _loop_1 = function (idx) {
+              var dropCoin = this_1.droppingCoins[idx];
+              if (dropCoin && Math.abs(dropCoin.y + coinRadius - stageHeight$6) < 15) {
+                  setTimeout(function () {
+                      dropCoin.destroy();
+                      _this.droppingCoins.splice(idx--, 1);
+                  }, 432);
+              }
+              out_idx_1 = idx;
+          };
+          var this_1 = this, out_idx_1;
+          for (var idx = 0; idx < this.droppingCoins.length; idx++) {
+              _loop_1(idx);
+              idx = out_idx_1;
+          }
       };
       EffectScene.prototype.addCoin = function (addScoreCount) {
           var _this = this;
@@ -1476,13 +1581,15 @@
           // this.coin.displayWidth = 64
           // this.coin.displayHeight = 64
           // scale 是根据原图的大小而言的。
-          this.coin.setScale(0.1);
+          var originScale = coinRadius / 512;
+          this.coin.setScale(originScale);
           var dest = {
               x: 210, y: 50
           };
+          this.animationPlaying.addCoin = true;
           this.tweens.add({
               targets: this.coin,
-              scale: 0.5,
+              scale: 0.2,
               duration: 132,
               ease: 'Power4',
               onComplete: function () {
@@ -1491,18 +1598,19 @@
                       targets: _this.coin,
                       x: dest.x,
                       y: dest.y,
-                      scale: 0.1,
+                      scale: originScale,
                       duration: 332,
                       ease: 'Circ',
                       onComplete: function () {
                           addScoreCount(1);
                           _this.coin.destroy();
+                          _this.animationPlaying.addCoin = false;
                       }
                   });
               }
           });
       };
-      EffectScene.prototype.addHammer = function (gameScene) {
+      EffectScene.prototype.addHammer = function (gameScene, addScoreCount) {
           var _this = this;
           if (this.animationPlaying.hammer) {
               return;
@@ -1522,6 +1630,8 @@
           var holdDuration = 332;
           setTimeout(function () {
               gameScene.cameras.main.shake(100, 0.01, true);
+              addScoreCount(-1);
+              _this.dropACoin();
           }, 332);
           this.tweens.add({
               targets: this.hammer,
@@ -1545,12 +1655,12 @@
       // 原本这个是放在 UIScene 中的  但是因为addCoin 动画要表现在这里
       // 如果放在 UIScene (UIScene 在层级上最高) Coin会被UIScene 遮住
       EffectScene.prototype.createScoreArea = function () {
-          var scoreAreaCenter = new Point$5(stageWidth$6 / 2, 50);
+          var scoreAreaCenter = new Point$5(stageWidth$6 / 2 + 100, 50);
           var graphicsTopLeft = new Point$5(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y);
           this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y);
           var bg = this.add.graphics();
           bg.beginPath();
-          bg.fillStyle(0xFEDE52); //yellow
+          bg.fillStyle(0xf9ebe9); //yellow
           bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth$6, 100);
           bg.closePath();
           var scoreBoxWidth = 300;
@@ -1568,9 +1678,18 @@
           this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText]);
           return this.scoreArea;
       };
+      EffectScene.prototype.dropACoin = function () {
+          var dropCoin = this.matter.add.image(coinScorePos.x, coinScorePos.y, 'coin');
+          dropCoin.setScale(coinRadius * 2 / 512);
+          this.droppingCoins.push(dropCoin);
+          dropCoin.setCircle(coinRadius);
+          dropCoin.setFriction(0.005);
+          dropCoin.setBounce(0.6);
+          dropCoin.setVelocityX(1);
+          dropCoin.setAngularVelocity(0.15);
+      };
       return EffectScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=EffectScene.js.map
 
   var stageWidth$7 = document.body.clientWidth;
   var stageHeight$7 = document.body.clientWidth / 9 * 16;
@@ -1605,7 +1724,6 @@
       };
       return BaseScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=BaseScene.js.map
 
   var GameSoundManager = /** @class */ (function () {
       function GameSoundManager() {
@@ -1737,6 +1855,11 @@
           scene.load.image('food3', 'assets/chicken-leg.png');
           scene.load.image('food4', 'assets/french-fries.png');
           scene.load.image('food5', 'assets/donut.png');
+          scene.load.image('coin', 'assets/coin.png');
+          scene.load.image('hammer', 'assets/hammer.png');
+          scene.load.image('dizzy1', 'assets/dizzy1.png');
+          scene.load.image('dizzy2', 'assets/dizzy2.png');
+          scene.load.image('ground', 'assets/ground.png');
           // // 应当使用 gif 中的某一帧
           // // scene.load.image('dogcook', 'assets/back.png');
           scene.load.image(DOGCOOK, "assets/dogeFrame/frame_00_delay-0.04s.gif");
@@ -1837,7 +1960,6 @@
       };
       return SettingsScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=SettingsScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
@@ -1857,18 +1979,18 @@
       scene: [BaseScene, AssetsScene, Demo, EffectScene, GameUIScene, SettingsScene],
       transparent: true,
       physics: {
-          "default": 'arcade',
-          arcade: {
-              gravity: { y: 300 },
-              debug: false
+          "default": 'matter',
+          matter: {
+              debug: false,
+              enableSleeping: true
           }
       },
   };
   var game = new Phaser.Game(config);
   console.log(game.scene.isSleeping(BASE_SCENE));
-  // changeMouth(game)
-  // setPreview()
-  // testClickEvent(game)
+  changeMouth();
+  setPreview();
+  testClickEvent(game);
   //# sourceMappingURL=index.js.map
 
 }(Phaser));

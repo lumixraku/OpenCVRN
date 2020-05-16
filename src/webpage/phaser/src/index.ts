@@ -37,12 +37,19 @@ const config: Phaser.Types.Core.GameConfig = {
     scene: [BaseScene, AssetsScene, GameScene, EFScene, GameUIScene, SettingsScene],
     transparent: true,
     physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 300 },
-            debug: false
+        default: 'matter',
+        matter: {
+            debug: false,
+            enableSleeping: true
         }
-    },
+    },    
+    // physics: {
+    //     default: 'arcade',
+    //     arcade: {
+    //         gravity: { y: 300 },
+    //         debug: false
+    //     }
+    // },
     // 这个 npm 包存在问题
     // plugins: {
     //     scene: [
@@ -65,7 +72,7 @@ console.log(game.scene.isSleeping(BASE_SCENE))
 import { changeMouth, setPreview, testClickEvent } from 'test'
 import SettingsScene from './UI/SettingsScene';
 
-// changeMouth(game)
-// setPreview()
-// testClickEvent(game)
+changeMouth(game)
+setPreview()
+testClickEvent(game)
 

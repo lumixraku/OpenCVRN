@@ -14,8 +14,13 @@ import { UIHelper } from "./UIUtil";
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientWidth / 9 * 16;
 
+
+let coinScorePos = new Point(305, 50)
+let coinRadius = 25
 interface AnimationPlaying {
     hammer: boolean
+    dropCoin: boolean
+    addCoin: boolean
     
 }
 
@@ -25,14 +30,18 @@ export default class EffectScene extends Phaser.Scene {
     public emojiFace: PhaserImage
     public dizzy: Sprite
 
-    public coinPlaying: boolean
 
 
     public scoreArea: Container
     public scoreText: PhaserText
 
+    private droppingCoins: Phaser.Physics.Matter.Image[] 
+
+
     public animationPlaying: AnimationPlaying = {
-        hammer: false
+        hammer: false,
+        dropCoin: false,
+        addCoin: false,
     }
 
     constructor() {
@@ -44,32 +53,57 @@ export default class EffectScene extends Phaser.Scene {
         //     url: '/rexuiplugin.min.js',
         //     sceneKey: 'rexUI'
         // });
-        this.load.image('coin', 'assets/coin.png');
-        this.load.image('hammer', 'assets/hammer.png');
-        this.load.image('dizzy1', 'assets/dizzy1.png');
-        this.load.image('dizzy2', 'assets/dizzy2.png');
+        // this.load.image('coin', 'assets/coin.png');
+        // this.load.image('hammer', 'assets/hammer.png');
+        // this.load.image('dizzy1', 'assets/dizzy1.png');
+        // this.load.image('dizzy2', 'assets/dizzy2.png');
     }
 
     create(){
         this.createScoreArea()
+
+        this.droppingCoins = []
+
+
+        var ground = this.matter.add.image(stageWidth/2, stageHeight, 'ground');
+        ground.setStatic(true);
+        ground.setScale(2, 0.2);
+        // ground.setAngle(10);
+        ground.setFriction(0.005);        
+
     }
     
-
+    update() {
+        
+        for(let idx = 0; idx < this.droppingCoins.length; idx++) {
+            let dropCoin = this.droppingCoins[idx]
+            if ( dropCoin && Math.abs(dropCoin.y + coinRadius - stageHeight) < 15 ) {
+                setTimeout( ()=>{
+                    dropCoin.destroy()
+                    this.droppingCoins.splice(idx--, 1);
+                }, 432 )
+            }
+        }
+    }
 
     addCoin(addScoreCount: Function) {
         this.coin = this.add.image(stageWidth/2, stageHeight/2, 'coin')
         // this.coin.displayWidth = 64
         // this.coin.displayHeight = 64
         // scale 是根据原图的大小而言的。
-        this.coin.setScale(0.1)
+
+        let originScale = coinRadius / 512
+        this.coin.setScale(originScale )
 
         let self = this
         let dest = {
             x: 210, y:50
         }
+
+        this.animationPlaying.addCoin = true
         this.tweens.add({
             targets: this.coin,
-            scale: 0.5,
+            scale: 0.2,
             duration: 132,
             ease: 'Power4',
             onComplete: () => {
@@ -79,19 +113,20 @@ export default class EffectScene extends Phaser.Scene {
                     targets: this.coin,
                     x: dest.x,
                     y: dest.y,
-                    scale: 0.1,
+                    scale: originScale,
                     duration: 332,
                     ease: 'Circ',
                     onComplete: () => {
                         addScoreCount(1)
                         this.coin.destroy()
+                        this.animationPlaying.addCoin = false
                     }
                 })                 
             }            
         })
     }
 
-    addHammer(gameScene: Scene) {
+    addHammer(gameScene: Scene, addScoreCount: Function) {
         if (this.animationPlaying.hammer) {
             return 
         }
@@ -117,7 +152,9 @@ export default class EffectScene extends Phaser.Scene {
         let animationDuration = 232
         let holdDuration = 332
         setTimeout( ()=> {
-            gameScene.cameras.main.shake(100, 0.01, true);            
+            gameScene.cameras.main.shake(100, 0.01, true);       
+            addScoreCount(-1)     
+            this.dropACoin()
         }, 332 )
         this.tweens.add({
             targets: this.hammer,
@@ -146,13 +183,13 @@ export default class EffectScene extends Phaser.Scene {
     // 原本这个是放在 UIScene 中的  但是因为addCoin 动画要表现在这里
     // 如果放在 UIScene (UIScene 在层级上最高) Coin会被UIScene 遮住
     createScoreArea(): Container {
-        let scoreAreaCenter = new Point(stageWidth / 2, 50)
+        let scoreAreaCenter = new Point(stageWidth / 2 + 100, 50)
         let graphicsTopLeft = new Point(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y)
         this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y)
 
         let bg = this.add.graphics()
         bg.beginPath()
-        bg.fillStyle(0xFEDE52) //yellow
+        bg.fillStyle(0xf9ebe9) //yellow
         bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth, 100)
         bg.closePath()
 
@@ -194,4 +231,20 @@ export default class EffectScene extends Phaser.Scene {
         return this.scoreArea
     }
 
+    dropACoin() {
+        let dropCoin = this.matter.add.image(coinScorePos.x, coinScorePos.y, 'coin')
+        dropCoin.setScale(coinRadius*2/512)
+        this.droppingCoins.push(dropCoin)
+
+        
+
+        dropCoin.setCircle(coinRadius);
+        dropCoin.setFriction(0.005);
+        dropCoin.setBounce(0.6);
+        dropCoin.setVelocityX(1);
+        dropCoin.setAngularVelocity(0.15);
+
+
+        
+    }
 }

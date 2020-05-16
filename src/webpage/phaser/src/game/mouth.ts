@@ -48,7 +48,7 @@ export default class Mouth {
         let yVals = mouthPoints.map(p => {
             return p.y
         })
-        console.log('mouth vals', mouthPoints.length)
+        // console.log('mouth vals', mouthPoints.length)
 
         let minX = Math.min(...xVals)
         let maxX = Math.max(...xVals)
@@ -59,7 +59,7 @@ export default class Mouth {
         var circle = new Phaser.Geom.Circle( minX + (maxX - minX)/2,  minY + (maxY - minY) /2, 5);
         this.mouthCenter.fillCircleShape(circle);
 
-        console.log('center',mouthPoints, minX, minY, maxX, maxY, circle.x, circle.y )
+        // console.log('center',mouthPoints, minX, minY, maxX, maxY, circle.x, circle.y )
 
         
         this.mouthRect.setPosition(minX, minY);

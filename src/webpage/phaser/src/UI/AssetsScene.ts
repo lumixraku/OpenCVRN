@@ -114,6 +114,12 @@ export default class AssetsScene extends Scene {
         scene.load.image('food5', 'assets/donut.png');
 
 
+        scene.load.image('coin', 'assets/coin.png');
+        scene.load.image('hammer', 'assets/hammer.png');
+        scene.load.image('dizzy1', 'assets/dizzy1.png');
+        scene.load.image('dizzy2', 'assets/dizzy2.png');
+           
+        scene.load.image('ground', 'assets/ground.png');
         // // 应当使用 gif 中的某一帧
         // // scene.load.image('dogcook', 'assets/back.png');
         scene.load.image(DOGCOOK, `assets/dogeFrame/frame_00_delay-0.04s.gif`)
