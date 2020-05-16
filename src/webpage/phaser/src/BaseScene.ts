@@ -1,14 +1,13 @@
 import { BASE_SCENE, GAME_SCENE, EF_SCENE, UI_SCENE, SETTINGS_SCENE, ASSETS_SCENE } from "./constants";
 import { Scene } from "phaser";
-import UIScene from "./UI/UIScene";
+import GameUIScene from "./UI/GameUIScene";
 import EffectScene from "./UI/EffectScene";
-// import * as WebFont from 'webfontloader';
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientWidth / 9 * 16;
 
 export default class BaseScene extends Phaser.Scene {
 
-    private dialogScene: UIScene
+    private dialogScene: GameUIScene
 
     constructor() {
         super(BASE_SCENE)
@@ -25,7 +24,7 @@ export default class BaseScene extends Phaser.Scene {
             url: '/rexuiplugin.min.js',
             sceneKey: 'rexUI'
         });
-        // WebFont.load({ custom: { families: ['Berlin'], urls: ['assets/fonts/BRLNSDB.css'] } });
+        window.WebFont.load({ custom: { families: ['Berlin'], urls: ['assets/fonts/BRLNSDB.css'] } });
         this.scene.start(ASSETS_SCENE)
 
     }

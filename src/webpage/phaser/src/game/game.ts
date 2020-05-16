@@ -12,7 +12,7 @@ const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientWidth / 9 * 16;
 // 在 RN 中得到的宽和高 是411 * 823
 // 在 webview 得到的宽高是 412 * 804  // 因为我的APP 并没有打开全屏
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE, ASSETS_SCENE } from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE, ASSETS_SCENE, SETTINGS_SCENE } from '@root/constants';
 import { isPC } from '@root/test'
 
 
@@ -24,10 +24,11 @@ import CamFaceCheck, { FaceInCircle } from './facePosCheck';
 import Cook from './cook';
 import { UIPlugin } from 'UI';
 import { Scene } from 'phaser';
-import UIScene from '@root/UI/UIScene';
+import GameUIScene from '@root/UI/GameUIScene';
 import EffectScene from '@root/UI/EffectScene';
 import AssetsLoader from './assetsLoader';
 import AnimateManager from './animate';
+import { UIHelper, ImageButton } from '@root/UI/UIUtil';
 
 
 export default class Demo extends Phaser.Scene {
@@ -75,8 +76,10 @@ export default class Demo extends Phaser.Scene {
     private previewArea: Rectagle = new Rectagle(0, 0, 0, 0)
 
     // scene
-    private uiScene: UIScene;
+    private uiScene: GameUIScene;
     private effScene: EffectScene;
+
+
 
 
     constructor() {
@@ -93,7 +96,6 @@ export default class Demo extends Phaser.Scene {
 
     // preload 中的资源都加载完毕之后 才会调用 create
     create() {
-
 
         this.timer = this.time.addEvent({
             // delay: 500,                // ms
@@ -118,7 +120,7 @@ export default class Demo extends Phaser.Scene {
 
         this.addText();
 
-        this.uiScene = this.scene.get(UI_SCENE) as UIScene
+        this.uiScene = this.scene.get(UI_SCENE) as GameUIScene
         this.effScene = this.scene.get(EF_SCENE) as EffectScene
 
 
@@ -126,6 +128,7 @@ export default class Demo extends Phaser.Scene {
         this.animateManager.registerAnimation()
 
         this.addScore = this.addScore.bind(this)
+
 
 
         // Main Scene
@@ -559,5 +562,8 @@ export default class Demo extends Phaser.Scene {
         this.score = this.score + sc
         this.effScene.scoreText.text = '' + this.score
     }
+
+
+    
 
 }
