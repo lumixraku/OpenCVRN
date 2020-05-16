@@ -24,6 +24,7 @@ import EFScene from '@root/UI/EffectScene'
 // import UIScene from 'UI/UIScene'
 // import EFScene from 'UI/EffectScene'
 import BaseScene from './BaseScene';
+import AssetsScene from '@root/UI/AssetsScene';
 
 
 
@@ -33,7 +34,7 @@ const config: Phaser.Types.Core.GameConfig = {
     // parent: 'phaser-example',
     width: stageWidth,
     height: stageHeight,
-    scene: [ BaseScene, GameScene,EFScene, UIScene],
+    scene: [BaseScene, AssetsScene, GameScene,EFScene, UIScene],
     transparent: true,
     physics: {
         default: 'arcade',
@@ -63,7 +64,7 @@ console.log(game.scene.isSleeping(BASE_SCENE))
 
 import { changeMouth, setPreview, testClickEvent } from 'test'
 
-changeMouth(game)
-setPreview()
-testClickEvent(game)
+// changeMouth(game)
+// setPreview()
+// testClickEvent(game)
 

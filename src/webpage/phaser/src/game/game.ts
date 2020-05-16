@@ -12,7 +12,7 @@ const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientWidth / 9 * 16;
 // 在 RN 中得到的宽和高 是411 * 823
 // 在 webview 得到的宽高是 412 * 804  // 因为我的APP 并没有打开全屏
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE } from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE, ASSETS_SCENE } from '@root/constants';
 import { isPC } from '@root/test'
 
 
@@ -79,7 +79,6 @@ export default class Demo extends Phaser.Scene {
     private effScene: EffectScene;
 
 
-
     constructor() {
         super(GAME_SCENE);
         this.assetsLoader = new AssetsLoader(this)
@@ -87,7 +86,8 @@ export default class Demo extends Phaser.Scene {
     }
 
     preload() {
-        this.assetsLoader.loadPics()
+        // this.assetsLoader.loadPics(this)
+        // this.assetsLoader = this.scene.get(ASSETS_SCENE) as AssetsLoader
     }
 
 
@@ -136,17 +136,17 @@ export default class Demo extends Phaser.Scene {
     private frameCounter = 0
     update(time, delta) {
 
-        this.rotateTable()
-        this.addFoodIfNeed()
-        this.movingFoodOnTable()
-        this.checkIfCouldEat()
+        // this.rotateTable()
+        // this.addFoodIfNeed()
+        // this.movingFoodOnTable()
+        // this.checkIfCouldEat()
 
-        this.frameCounter += 1
+        // this.frameCounter += 1
 
-        if (this.frameCounter >= 60) {
-            this.frameCounter = 0
-            this.update60Frame()
-        }
+        // if (this.frameCounter >= 60) {
+        //     this.frameCounter = 0
+        //     this.update60Frame()
+        // }
 
     }
 

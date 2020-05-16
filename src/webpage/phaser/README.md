@@ -69,6 +69,15 @@ https://github.com/s-panferov/awesome-typescript-loader/issues/311
 ### webpack `__extends not defined`
 set `"noEmitHelpers": false,`
 
+
+### About Rollup Config
+(!) Missing global variable name
+Use output.globals to specify browser global variable names corresponding to external modules
+phaser (guessing 'phaser')
+
+https://github.com/rollup/rollup-plugin-babel/issues/162
+
+
 ### Physics.add Error
 
 https://github.com/photonstorm/phaser/issues/3754
@@ -85,6 +94,18 @@ Even peer dependencies installed still not work.
 
 https://stackoverflow.com/questions/46636318/dts-gen-fails-to-find-globally-installed-modules/46640889#46640889
 The post suggests not installing global but local instead.
+
+### About webfontloader
+'WebFont' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+
+
+```
+import * as WebFont from 'webfontloader';
+```
+webfontloader are written in UMD, so you should import like this.
+
+
+
 
 ### Tweens
 https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ease-function/
