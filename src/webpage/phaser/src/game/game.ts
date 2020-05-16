@@ -84,13 +84,10 @@ export default class Demo extends Phaser.Scene {
 
     constructor() {
         super(GAME_SCENE);
-        this.assetsLoader = new AssetsLoader(this)
         this.messageListener()
     }
 
     preload() {
-        // this.assetsLoader.loadPics(this)
-        // this.assetsLoader = this.scene.get(ASSETS_SCENE) as AssetsLoader
     }
 
 
@@ -139,17 +136,17 @@ export default class Demo extends Phaser.Scene {
     private frameCounter = 0
     update(time, delta) {
 
-        // this.rotateTable()
-        // this.addFoodIfNeed()
-        // this.movingFoodOnTable()
-        // this.checkIfCouldEat()
+        this.rotateTable()
+        this.addFoodIfNeed()
+        this.movingFoodOnTable()
+        this.checkIfCouldEat()
 
-        // this.frameCounter += 1
+        this.frameCounter += 1
 
-        // if (this.frameCounter >= 60) {
-        //     this.frameCounter = 0
-        //     this.update60Frame()
-        // }
+        if (this.frameCounter >= 60) {
+            this.frameCounter = 0
+            this.update60Frame()
+        }
 
     }
 
@@ -433,7 +430,7 @@ export default class Demo extends Phaser.Scene {
     }
 
     caughtAnimation() {
-        this.effScene.addHammer(this)
+        this.effScene.addHammer(this, this.addScore)
         this.uiScene.createCaughtText(stageWidth / 2, stageHeight / 2, () => { })
 
     }
