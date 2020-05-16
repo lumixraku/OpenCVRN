@@ -11,7 +11,7 @@ const GAME_SCENE = 'game'
 const UI_SCENE = 'uiScene'
 const EF_SCENE = 'effectScene'
 const SETTINGS_SCENE = 'settingsScene'
-
+const ASSETS_SCENE = 'assetsScene'
 
 // game
 const DOGLOOK = 'doglook'
@@ -51,5 +51,6 @@ export {
   GAME_SCENE,
   UI_SCENE,
   EF_SCENE,
-  SETTINGS_SCENE
+  SETTINGS_SCENE,
+  ASSETS_SCENE,
 }

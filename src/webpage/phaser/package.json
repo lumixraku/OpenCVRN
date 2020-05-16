@@ -40,6 +40,7 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
+    "@types/webfontloader": "^1.6.29",
     "esbuild": "^0.3.2",
     "phaser3-rex-plugins": "/Users/luonan/repos/phaser3-rex-plugins"
   }

@@ -1,4 +1,4 @@
-(function () {
+(function (phaser) {
   'use strict';
 
   var global = window;
@@ -13,6 +13,7 @@
   var GAME_SCENE = 'game';
   var UI_SCENE = 'uiScene';
   var EF_SCENE = 'effectScene';
+  var ASSETS_SCENE = 'assetsScene';
   var DOGCOOK = 'dogcook';
   var CHECKING_INTERVAL = 2000; // 回头检测的最短间隔
   var FIRST_CHECK_ELAPSE = 2; // 第一次检查的时  游戏已经进行的时间
@@ -167,115 +168,7 @@
   }());
   //# sourceMappingURL=mouth.js.map
 
-  var offsetXPreview = 170;
-  var offsetYPreview = 250;
-  var previewWidth = 198;
-  var previewHeight = previewWidth * 16 / 9;
   var isPC = window.navigator.userAgent.indexOf("PCMozilla") != -1;
-  // 给坐标加上取景器的偏移信息
-  // 原本的坐标信息是人脸相对取景器的位置
-  // 现在坐标信息变为相对整个画布的位置
-  function addOffsetForFaceData(target) {
-      var checkedType = function (target) {
-          return Object.prototype.toString.call(target).slice(8, -1);
-      };
-      //判断拷贝的数据类型
-      //初始化变量result 成为最终克隆的数据
-      var result;
-      var targetType = checkedType(target);
-      if (targetType === 'Object') {
-          result = {};
-      }
-      else if (targetType === 'Array') {
-          result = [];
-      }
-      else {
-          return target;
-      }
-      //遍历目标数据
-      for (var _i = 0, _a = Object.entries(target); _i < _a.length; _i++) {
-          var _b = _a[_i], key = _b[0], value = _b[1];
-          //获取遍历数据结构的每一项值。
-          // let value = target[key]
-          //判断目标结构里的每一值是否存在对象/数组
-          if (checkedType(value) === 'Object' ||
-              checkedType(value) === 'Array') { //对象/数组里嵌套了对象/数组
-              //继续遍历获取到value值
-              result[key] = addOffsetForFaceData(value);
-          }
-          else { //获取到value值是基本的数据类型或者是函数。
-              if (key == "x") {
-                  result[key] = offsetXPreview + value;
-              }
-              else if (key == "y") {
-                  result[key] = offsetYPreview + value;
-              }
-              else {
-                  result[key] = value;
-              }
-          }
-      }
-      return result;
-  }
-  // set preview area
-  function setPreview() {
-      window.addEventListener("load", function () {
-          setTimeout(function () {
-              window.postMessage({
-                  messageType: MSG_TYPE_CAM,
-                  previewArea: {
-                      y: offsetYPreview,
-                      x: offsetXPreview,
-                      width: previewWidth,
-                      height: previewHeight
-                  },
-              }, "*");
-          }, 1000);
-      }, false);
-  }
-  // 测试嘴巴位置
-  function changeMouth(game) {
-      //contours sample data
-      window.addEventListener("load", function () {
-          // 这个数据是和取景器大小有关的数据 
-          // 当 RN 的部分设置了取景器大小的时候, 返回的脸的位置也根据 RN 这里的实际尺寸有所压缩
-          // 但是和取景器的位移无关  毕竟安卓端也不知道取景器的相对位置
-          fetch('/assets/sampleContours.json').then(function (resp) {
-              return resp.json();
-          }).then(function (data) {
-              setTimeout(function () {
-                  // 在PC上调试
-                  if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
-                      var oneFace_1 = data[0];
-                      setInterval(function () {
-                          // moveFace(oneFace, changeDir)
-                          var afterOffsetForFaceData = addOffsetForFaceData(oneFace_1);
-                          window.postMessage({
-                              messageType: 'face',
-                              faceData: afterOffsetForFaceData
-                          }, "*");
-                      }, 100);
-                  }
-              }, 1000);
-          });
-      }, false);
-      // let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
-  }
-  // 获取鼠标点击位置
-  function testClickEvent(game) {
-      window.addEventListener('load', function () {
-          setTimeout(function () {
-              game.scene.getScene(GAME_SCENE).input.on('pointerup', function (pointer) {
-                  var touchX = pointer.x;
-                  var touchY = pointer.y;
-                  // let x = game.input.mousePointer.x;
-                  // let y = game.input.mousePointer.y;
-                  console.log('clickXY', touchX, touchY);
-                  // ...
-              });
-          });
-      }, false);
-  }
   //# sourceMappingURL=test.js.map
 
   var Point$1 = Phaser.Geom.Point;
@@ -632,26 +525,25 @@
       function AssetsLoader(scene) {
           this.scene = scene;
       }
-      AssetsLoader.prototype.loadPics = function () {
-          var scene = this.scene;
+      AssetsLoader.prototype.loadPics = function (scene) {
           // yarn run dev 的时候 这个资源也还是从 dist 中读取的
-          scene.load.image('bgImg', 'assets/kitchen.png');
-          scene.load.image('table', 'assets/table.png');
-          scene.load.image('light', 'assets/light.png');
-          scene.load.image('food0', 'assets/burger.png');
-          scene.load.image('food1', 'assets/burrito.png');
-          scene.load.image('food2', 'assets/cheese-burger.png');
-          scene.load.image('food3', 'assets/chicken-leg.png');
-          scene.load.image('food4', 'assets/french-fries.png');
-          scene.load.image('food5', 'assets/donut.png');
-          scene.load.image('doglook', 'assets/front.png');
-          // 应当使用 gif 中的某一帧
-          // scene.load.image('dogcook', 'assets/back.png');
-          scene.load.image(DOGCOOK, "assets/dogeFrame/frame_00_delay-0.04s.gif");
-          this.loadEmoji();
-          this.loadDogeAnimation();
+          // scene.load.image('bgImg', 'assets/kitchen.png');
+          // scene.load.image('table', 'assets/table.png');
+          // scene.load.image('light', 'assets/light.png');
+          // scene.load.image('food0', 'assets/burger.png');
+          // scene.load.image('food1', 'assets/burrito.png');
+          // scene.load.image('food2', 'assets/cheese-burger.png');
+          // scene.load.image('food3', 'assets/chicken-leg.png');
+          // scene.load.image('food4', 'assets/french-fries.png');
+          // scene.load.image('food5', 'assets/donut.png');
+          // scene.load.image('doglook', 'assets/front.png');
+          // // 应当使用 gif 中的某一帧
+          // // scene.load.image('dogcook', 'assets/back.png');
+          // scene.load.image(DOGCOOK, `assets/dogeFrame/frame_00_delay-0.04s.gif`)
+          // this.loadEmoji()
+          // this.loadDogeAnimation()
       };
-      AssetsLoader.prototype.loadDogeAnimation = function () {
+      AssetsLoader.prototype.loadDogeAnimationAssets = function () {
           var scene = this.scene;
           var endIndex = 47;
           for (var idx = 0; idx <= endIndex; idx++) {
@@ -762,7 +654,8 @@
           return _this;
       }
       Demo.prototype.preload = function () {
-          this.assetsLoader.loadPics();
+          // this.assetsLoader.loadPics(this)
+          // this.assetsLoader = this.scene.get(ASSETS_SCENE) as AssetsLoader
       };
       // preload 中的资源都加载完毕之后 才会调用 create
       Demo.prototype.create = function () {
@@ -791,15 +684,15 @@
           this.cameras.main.fadeIn(250);
       };
       Demo.prototype.update = function (time, delta) {
-          this.rotateTable();
-          this.addFoodIfNeed();
-          this.movingFoodOnTable();
-          this.checkIfCouldEat();
-          this.frameCounter += 1;
-          if (this.frameCounter >= 60) {
-              this.frameCounter = 0;
-              this.update60Frame();
-          }
+          // this.rotateTable()
+          // this.addFoodIfNeed()
+          // this.movingFoodOnTable()
+          // this.checkIfCouldEat()
+          // this.frameCounter += 1
+          // if (this.frameCounter >= 60) {
+          //     this.frameCounter = 0
+          //     this.update60Frame()
+          // }
       };
       Demo.prototype.update60Frame = function () {
           var elapsed = this.timer.getElapsedSeconds();
@@ -1128,6 +1021,7 @@
       };
       return Demo;
   }(Phaser.Scene));
+  //# sourceMappingURL=game.js.map
 
   var drawRoundRect = function (scene, size, radius, color, borderWidth, borderColor) {
       var bg = scene.add.graphics();
@@ -1629,6 +1523,7 @@
   }(Phaser.Scene));
   //# sourceMappingURL=EffectScene.js.map
 
+  // import * as WebFont from 'webfontloader';
   var stageWidth$6 = document.body.clientWidth;
   var stageHeight$6 = document.body.clientWidth / 9 * 16;
   var BaseScene = /** @class */ (function (_super) {
@@ -1644,11 +1539,10 @@
               url: '/rexuiplugin.min.js',
               sceneKey: 'rexUI'
           });
+          // WebFont.load({ custom: { families: ['Berlin'], urls: ['assets/fonts/BRLNSDB.css'] } });
+          this.scene.start(ASSETS_SCENE);
       };
       BaseScene.prototype.create = function () {
-          this.scene.launch(GAME_SCENE);
-          this.scene.launch(EF_SCENE);
-          this.scene.launch(UI_SCENE);
           // this.scene.launch(UI_SCENE).start();
           // this.scene.launch(EF_SCENE);        
           // this.scene.launch(UI_SCENE)
@@ -1656,7 +1550,7 @@
           // this.scene.launch(EF_SCENE);
           // this.dialogScene.showWelcome()
           // this.effScene.addHammer()
-          this.dialogScene = this.scene.get(UI_SCENE);
+          // this.dialogScene = this.scene.get(UI_SCENE) as UIScene
           // this.effScene = this.scene.get(EF_SCENE) as EffectScene
           // 此刻调用提示 rexUI undefined
           // this.dialogScene.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
@@ -1664,6 +1558,58 @@
       return BaseScene;
   }(Phaser.Scene));
   //# sourceMappingURL=BaseScene.js.map
+
+  // import { DOGCOOK } from "../constants";
+  var AssetsScene = /** @class */ (function (_super) {
+      __extends(AssetsScene, _super);
+      function AssetsScene() {
+          return _super.call(this, ASSETS_SCENE) || this;
+      }
+      AssetsScene.prototype.preload = function () {
+          this.loadPics();
+          this.loadEmojiAssets();
+          this.loadDogeAnimationAssets();
+      };
+      AssetsScene.prototype.create = function () {
+          this.scene.launch(GAME_SCENE);
+          this.scene.launch(EF_SCENE);
+          this.scene.launch(UI_SCENE);
+      };
+      AssetsScene.prototype.loadPics = function () {
+          var scene = this;
+          // yarn run dev 的时候 这个资源也还是从 dist 中读取的
+          scene.load.image('bgImg', 'assets/kitchen.png');
+          scene.load.image('table', 'assets/table.png');
+          scene.load.image('light', 'assets/light.png');
+          scene.load.image('food0', 'assets/burger.png');
+          scene.load.image('food1', 'assets/burrito.png');
+          scene.load.image('food2', 'assets/cheese-burger.png');
+          scene.load.image('food3', 'assets/chicken-leg.png');
+          scene.load.image('food4', 'assets/french-fries.png');
+          scene.load.image('food5', 'assets/donut.png');
+          // // 应当使用 gif 中的某一帧
+          // // scene.load.image('dogcook', 'assets/back.png');
+          scene.load.image(DOGCOOK, "assets/dogeFrame/frame_00_delay-0.04s.gif");
+      };
+      AssetsScene.prototype.loadDogeAnimationAssets = function () {
+          var scene = this;
+          var endIndex = 47;
+          for (var idx = 0; idx <= endIndex; idx++) {
+              var idxStr = (idx < 10) ? '0' + idx : '' + idx;
+              var fname = "assets/dogeFrame/frame_" + idxStr + "_delay-0.04s.gif";
+              var keyname = "dogeFrame" + idx;
+              scene.load.image(keyname, fname);
+          }
+      };
+      AssetsScene.prototype.loadEmojiAssets = function () {
+          var scene = this;
+          scene.load.image('sad', "assets/sad.png");
+          scene.load.image('cry', "assets/cry.png");
+          scene.load.image('sour', "assets/sour.png");
+      };
+      return AssetsScene;
+  }(phaser.Scene));
+  //# sourceMappingURL=AssetsScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
@@ -1680,7 +1626,7 @@
       // parent: 'phaser-example',
       width: stageWidth$7,
       height: stageHeight$7,
-      scene: [BaseScene, Demo, EffectScene, UIScene],
+      scene: [BaseScene, AssetsScene, Demo, EffectScene, UIScene],
       transparent: true,
       physics: {
           "default": 'arcade',
@@ -1692,10 +1638,10 @@
   };
   var game = new Phaser.Game(config);
   console.log(game.scene.isSleeping(BASE_SCENE));
-  changeMouth();
-  setPreview();
-  testClickEvent(game);
+  // changeMouth(game)
+  // setPreview()
+  // testClickEvent(game)
   //# sourceMappingURL=index.js.map
 
-}());
+}(Phaser));
 //# sourceMappingURL=game.js.map

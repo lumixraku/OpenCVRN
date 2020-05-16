@@ -1,8 +1,8 @@
-import { BASE_SCENE, GAME_SCENE, EF_SCENE, UI_SCENE } from "./constants";
+import { BASE_SCENE, GAME_SCENE, EF_SCENE, UI_SCENE, SETTINGS_SCENE, ASSETS_SCENE } from "./constants";
 import { Scene } from "phaser";
 import UIScene from "./UI/UIScene";
 import EffectScene from "./UI/EffectScene";
-
+// import * as WebFont from 'webfontloader';
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientWidth / 9 * 16;
 
@@ -25,14 +25,12 @@ export default class BaseScene extends Phaser.Scene {
             url: '/rexuiplugin.min.js',
             sceneKey: 'rexUI'
         });
+        // WebFont.load({ custom: { families: ['Berlin'], urls: ['assets/fonts/BRLNSDB.css'] } });
+        this.scene.start(ASSETS_SCENE)
 
-
-        
     }
     create() {
-        this.scene.launch(GAME_SCENE)
-        this.scene.launch(EF_SCENE)
-        this.scene.launch(UI_SCENE)
+
         // this.scene.launch(UI_SCENE).start();
         // this.scene.launch(EF_SCENE);        
 
@@ -43,7 +41,7 @@ export default class BaseScene extends Phaser.Scene {
         
         // this.dialogScene.showWelcome()
         // this.effScene.addHammer()
-        this.dialogScene = this.scene.get(UI_SCENE) as UIScene
+        // this.dialogScene = this.scene.get(UI_SCENE) as UIScene
         // this.effScene = this.scene.get(EF_SCENE) as EffectScene
 
         // 此刻调用提示 rexUI undefined
