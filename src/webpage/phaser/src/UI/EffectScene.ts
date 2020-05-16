@@ -8,7 +8,7 @@ import Rectagle = Phaser.Geom.Rectangle;
 import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
 import Container = Phaser.GameObjects.Container
-import { drawRoundRect } from "./UIUtil";
+import { UIHelper } from "./UIUtil";
 
 
 const stageWidth = document.body.clientWidth;
@@ -167,7 +167,7 @@ export default class EffectScene extends Phaser.Scene {
             scoreBoxWidth,
             scoreBoxHeight
         )
-        let scoreBox = drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, 0xFc6158, scoreBoxBorder, 0xf9ebe9)
+        let scoreBox = UIHelper.drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, 0xFc6158, scoreBoxBorder, 0xf9ebe9)
 
         let scoreTitlePos = new Point(scoreAreaCenter.x - 50, scoreAreaCenter.y)
         let scoreTitle = this.add.text(

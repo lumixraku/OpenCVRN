@@ -18,7 +18,7 @@ canvasELlem.style.top = `${(documentHeight - stageHeight)/2}px`
 
 
 import GameScene from '@game/game'
-import UIScene from '@root/UI/UIScene'
+import GameUIScene from '@root/UI/GameUIScene'
 import EFScene from '@root/UI/EffectScene'
 // import GameScene from 'game/game'
 // import UIScene from 'UI/UIScene'
@@ -34,7 +34,7 @@ const config: Phaser.Types.Core.GameConfig = {
     // parent: 'phaser-example',
     width: stageWidth,
     height: stageHeight,
-    scene: [BaseScene, AssetsScene, GameScene,EFScene, UIScene],
+    scene: [BaseScene, AssetsScene, GameScene, EFScene, GameUIScene, SettingsScene],
     transparent: true,
     physics: {
         default: 'arcade',
@@ -63,6 +63,7 @@ console.log(game.scene.isSleeping(BASE_SCENE))
 
 
 import { changeMouth, setPreview, testClickEvent } from 'test'
+import SettingsScene from './UI/SettingsScene';
 
 // changeMouth(game)
 // setPreview()

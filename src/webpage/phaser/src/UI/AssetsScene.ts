@@ -1,5 +1,6 @@
 import { Scene } from "phaser";
-import { DOGCOOK, ASSETS_SCENE, UI_SCENE, EF_SCENE, GAME_SCENE } from "@root/constants";
+import { DOGCOOK, ASSETS_SCENE, UI_SCENE, EF_SCENE, GAME_SCENE, SOUNDKEY, MUSICKEY } from "@root/constants";
+import GameSoundManager from "@root/game/soundManager";
 // import { DOGCOOK } from "../constants";
 
 
@@ -10,19 +11,26 @@ export default class AssetsScene extends Scene {
     }
 
     preload() {
+        this.loadUIAssets()    
         this.loadPics()
-
         this.loadEmojiAssets()
-
-        this.loadDogeAnimationAssets()        
+        this.loadDogeAnimationAssets() 
+        
+        this.loadMusic()
     }
 
     create() {
+
+        // 这些逻辑不能放在 index 中  因为他们需要资源加载完成之后才能加载 
         this.scene.launch(GAME_SCENE)
         this.scene.launch(EF_SCENE)
         this.scene.launch(UI_SCENE)        
 
+        GameSoundManager.initMusic(this)
+    
     }
+
+
 
 
     loadPics() {
@@ -70,4 +78,34 @@ export default class AssetsScene extends Scene {
         scene.load.image('sour', `assets/sour.png`)
 
     }
+
+    loadUIAssets() {
+        let scene = this;
+
+        // let loadFn = scene.load.spritesheet
+        // loadFn.apply(scene.load, ['button-sound-on', `assets/UI/button-sound-on.png`, { frameWidth: 80, frameHeight: 80 }])
+        // loadFn.apply(scene.load, ['button-sound-off', `assets/UI/button-sound-off.png`, { frameWidth: 80, frameHeight: 80 }])
+        // loadFn.apply(scene.load, ['button-settings', `assets/UI/button-settings.png`, { frameWidth: 80, frameHeight: 80 }])
+        scene.load.image('background', 'assets/UI/background.png');
+
+
+        scene.load.spritesheet('button-sound-on', `assets/UI/button-sound-on.png`, { frameWidth: 80, frameHeight: 80 })
+        scene.load.spritesheet('button-sound-off', `assets/UI/button-sound-off.png`, { frameWidth: 80, frameHeight: 80 })
+        scene.load.spritesheet('button-music-on', `assets/UI/button-music-on.png`, { frameWidth: 80, frameHeight: 80 })
+        scene.load.spritesheet('button-music-off', `assets/UI/button-music-off.png`, { frameWidth: 80, frameHeight: 80 })
+
+        scene.load.spritesheet('button-back', `assets/UI/button-back.png`, { frameWidth: 70, frameHeight: 70 })
+
+        scene.load.spritesheet('button-settings', `assets/UI/button-settings.png`, { frameWidth: 80, frameHeight: 80 })                
+
+        
+    }
+
+
+    loadMusic(){
+        let scene = this
+        scene.load.audio(SOUNDKEY, ['assets/audio/audio-button.m4a', 'assets/audio/audio-button.mp3', 'assets/audio/audio-button.ogg'])
+        scene.load.audio(MUSICKEY, ['assets/audio/music-bitsnbites-liver.m4a', 'assets/audio/music-bitsnbites-liver.mp3', 'assets/audio/music-bitsnbites-liver.ogg'])
+    }
+
 }

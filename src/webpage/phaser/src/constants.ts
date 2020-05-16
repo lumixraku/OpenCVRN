@@ -1,3 +1,9 @@
+
+const stageWidth = document.body.clientWidth;
+const stageHeight = document.body.clientWidth / 9 * 16;
+
+
+
 // Message 类型
 const MSG_TYPE_FACE = 'face'
 const MSG_TYPE_CAM = 'cam' // RN  告知 WEB 取景器的位置
@@ -8,7 +14,7 @@ const MSG_TYPE_FACE_TARGET_POS = 'face_target' // WEB 告知 RN 人脸应该固�
 // scene
 const BASE_SCENE = 'base'
 const GAME_SCENE = 'game'
-const UI_SCENE = 'uiScene'
+const UI_SCENE = 'gameUIScene'
 const EF_SCENE = 'effectScene'
 const SETTINGS_SCENE = 'settingsScene'
 const ASSETS_SCENE = 'assetsScene'
@@ -21,6 +27,11 @@ const CHECK_PROB = 0.9 //回头检测的概率
 const CHECKING_DURATION = 3000
 const FIRST_CHECK_ELAPSE = 2 // 第一次检查的时  游戏已经进行的时间
 
+// game UI
+const BACKGROUND = 'background'
+const SOUNDKEY = 'clickSound'
+const MUSICKEY = 'music'
+
 // animation
 const COOK_LOOKBACK_ANIMI = 'lookback'
 const COOK_TOCOOK_ANIMI = 'cookAgain'
@@ -28,6 +39,11 @@ const HIT_DIZZY = 'hitDizzy'
 
 
 export {
+  //SCREEN 
+  stageWidth, 
+  stageHeight,
+
+
   //game
   MSG_TYPE_FACE,
   MSG_TYPE_CAM,
@@ -40,6 +56,9 @@ export {
   CHECKING_DURATION,
   FIRST_CHECK_ELAPSE,
 
+  BACKGROUND,
+  SOUNDKEY,
+  MUSICKEY,
 
   // animation
   COOK_LOOKBACK_ANIMI,

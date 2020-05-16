@@ -105,7 +105,23 @@ import * as WebFont from 'webfontloader';
 webfontloader are written in UMD, so you should import like this.
 
 
+The method mentioned above would not working.
+See this https://github.com/typekit/webfontloader/issues/393
+```
+window.WebFont.load(...);
+```
 
 
 ### Tweens
 https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ease-function/
+
+
+## Read More
+
+### Progressbar
+https://gamedevacademy.org/creating-a-preloading-screen-in-phaser-3/?a=13
+
+### multi scenes
+https://www.html5gamedevs.com/topic/37708-setting-up-a-game-for-multiple-scenes-using-preload-create-and-update/
+
+https://labs.phaser.io/edit.html?src=src%5Cscenes%5Cchange%20scene%20from%20create%20es6.js

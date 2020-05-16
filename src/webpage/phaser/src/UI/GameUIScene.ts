@@ -10,9 +10,9 @@ import Container = Phaser.GameObjects.Container
 import InputButton = Phaser.Input.Gamepad.Button
 
 
-import { UI_SCENE } from "../constants";
+import { UI_SCENE, SETTINGS_SCENE } from "../constants";
 import { World } from "matter";
-import { drawRoundRect } from "./UIUtil";
+import { UIHelper, ImageButton } from "./UIUtil";
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientWidth / 9 * 16;
 
@@ -25,7 +25,7 @@ const TopLeftToCenter = (width: number, height: number, topLeftPoint: Point): Po
     )
 }
 
-export default class UIScene extends Phaser.Scene {
+export default class GameUIScene extends Phaser.Scene {
 
     public testView: UI.Dialog
     public welcome: UI.Dialog
@@ -34,6 +34,9 @@ export default class UIScene extends Phaser.Scene {
     public testGraphic: Graphics
     public scoreArea: Container
     public scoreText: PhaserText
+
+    // UI 
+    private settingsBtn: ImageButton
 
 
     constructor() {
@@ -49,8 +52,10 @@ export default class UIScene extends Phaser.Scene {
     }
 
     create() {
-        this.welcome = this.createWelcomeDialog(this, 300, 500)
-        this.welcome.visible = false
+        this.addUIBtns()
+
+        // this.welcome = this.createWelcomeDialog(this, 300, 500)
+        // this.welcome.visible = false
         // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
         
         
@@ -220,7 +225,7 @@ export default class UIScene extends Phaser.Scene {
             // content: makeContentLabel(contentStr),
             content: makeScrollSizer(contentStr),
             actions: [
-                this.createButton(this, 'OK', 0xf57f17),
+                this.createRexUIButton(this, 'OK', 0xf57f17),
             ],
 
             actionsAlign: '  center  ',
@@ -334,7 +339,7 @@ export default class UIScene extends Phaser.Scene {
         // 而 container 的默认origin 是中心位置， （且无法更改？？）
         // 添加元素的时候也是将子元素的origin 和 父容器的origin 对齐
         // graphic 的 origin 是左上角
-        let bg = drawRoundRect(
+        let bg = UIHelper.drawRoundRect(
             this,
             new Rectagle(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight),
             20,
@@ -460,7 +465,7 @@ export default class UIScene extends Phaser.Scene {
 
     }
 
-    createButton(scene: Scene, text: string, color: any, space?: any) {
+    createRexUIButton(scene: Scene, text: string, color: any, space?: any) {
         return scene.rexUI.add.label({
             x: 0,
             y: 100,
@@ -482,6 +487,17 @@ export default class UIScene extends Phaser.Scene {
         });
     }
 
+
+    addUIBtns() {
+        let settingsClick = (e) => {
+            UIHelper.fadeToScene(SETTINGS_SCENE, this)
+        }
+
+
+        this.settingsBtn = new ImageButton(this, 50, 50, 'button-settings', settingsClick)
+        this.add.existing(this.settingsBtn);
+
+    }
 
 }
 

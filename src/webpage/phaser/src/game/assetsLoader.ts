@@ -36,27 +36,25 @@ export default class AssetsLoader  {
     }
 
 
-
-
-    loadDogeAnimationAssets() {
-        let scene = this.scene
-        let endIndex = 47
+    // loadDogeAnimationAssets() {
+    //     let scene = this.scene
+    //     let endIndex = 47
     
-        for(let idx = 0; idx<= endIndex; idx++) {
-            let idxStr = (idx < 10) ? '0' + idx : '' + idx
-            let fname = `assets/dogeFrame/frame_${idxStr}_delay-0.04s.gif`
-            let keyname = `dogeFrame${idx}`;
+    //     for(let idx = 0; idx<= endIndex; idx++) {
+    //         let idxStr = (idx < 10) ? '0' + idx : '' + idx
+    //         let fname = `assets/dogeFrame/frame_${idxStr}_delay-0.04s.gif`
+    //         let keyname = `dogeFrame${idx}`;
 
-            scene.load.image(keyname, fname)
+    //         scene.load.image(keyname, fname)
 
-        }
-    }
+    //     }
+    // }
 
-    loadEmoji(){
-        let scene = this.scene;
-        scene.load.image('sad', `assets/sad.png`)
-        scene.load.image('cry', `assets/cry.png`)
-        scene.load.image('sour', `assets/sour.png`)
+    // loadEmoji(){
+    //     let scene = this.scene;
+    //     scene.load.image('sad', `assets/sad.png`)
+    //     scene.load.image('cry', `assets/cry.png`)
+    //     scene.load.image('sour', `assets/sour.png`)
 
-    }
+    // }
 }

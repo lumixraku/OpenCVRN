@@ -3,6 +3,8 @@
 
   var global = window;
 
+  var stageWidth = document.body.clientWidth;
+  var stageHeight = document.body.clientWidth / 9 * 16;
   // Message 类型
   var MSG_TYPE_FACE = 'face';
   var MSG_TYPE_CAM = 'cam'; // RN  告知 WEB 取景器的位置
@@ -11,12 +13,17 @@
   // scene
   var BASE_SCENE = 'base';
   var GAME_SCENE = 'game';
-  var UI_SCENE = 'uiScene';
+  var UI_SCENE = 'gameUIScene';
   var EF_SCENE = 'effectScene';
+  var SETTINGS_SCENE = 'settingsScene';
   var ASSETS_SCENE = 'assetsScene';
   var DOGCOOK = 'dogcook';
   var CHECKING_INTERVAL = 2000; // 回头检测的最短间隔
   var FIRST_CHECK_ELAPSE = 2; // 第一次检查的时  游戏已经进行的时间
+  // game UI
+  var BACKGROUND = 'background';
+  var SOUNDKEY = 'clickSound';
+  var MUSICKEY = 'music';
   // animation
   var COOK_LOOKBACK_ANIMI = 'lookback';
   var COOK_TOCOOK_ANIMI = 'cookAgain';
@@ -62,15 +69,15 @@
 
   var Point = Phaser.Geom.Point;
   var Rectagle = Phaser.Geom.Rectangle;
-  var stageWidth = document.body.clientWidth;
-  var stageHeight = document.body.clientWidth / 9 * 16;
+  var stageWidth$1 = document.body.clientWidth;
+  var stageHeight$1 = document.body.clientWidth / 9 * 16;
   var Mouth = /** @class */ (function () {
       // private mouthColor: Graphics;
       function Mouth(scene) {
           this.mouthRect = new Rectagle(0, 0, 0, 0);
           this.mouthContour = scene.add.graphics();
           this.mouthCenter = scene.add.graphics();
-          this.mouthStateText = scene.add.text(stageWidth - 100, 100, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+          this.mouthStateText = scene.add.text(stageWidth$1 - 100, 100, 'Hello World', { fontFamily: '"Roboto Condensed"' });
       }
       Mouth.prototype.setMouthContourPoints = function (upperTop, upperBottom, lowerTop, lowerBottom) {
           if (upperTop === void 0) { upperTop = []; }
@@ -172,8 +179,8 @@
   //# sourceMappingURL=test.js.map
 
   var Point$1 = Phaser.Geom.Point;
-  var stageWidth$1 = document.body.clientWidth;
-  var stageHeight$1 = document.body.clientWidth / 9 * 16;
+  var stageWidth$2 = document.body.clientWidth;
+  var stageHeight$2 = document.body.clientWidth / 9 * 16;
   // import { isPC } from '../test'
   var angle2Rad = function (angle) {
       return (Math.PI / 180) * angle;
@@ -183,8 +190,8 @@
           this.angleVal = 0;
           this.rotationVal = 0;
           this.spSpinSpeed = 1;
-          this.circleRadius = stageWidth$1;
-          this.circleCenter = new Point$1(stageWidth$1 / 2, stageHeight$1 + this.circleRadius / 2.3);
+          this.circleRadius = stageWidth$2;
+          this.circleCenter = new Point$1(stageWidth$2 / 2, stageHeight$2 + this.circleRadius / 2.3);
           this.distanceAngle = 60; //食物和食物之间的间隔(角度)
           this.tableCapacity = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
           this.distanceRad = 2 * Math.PI / this.tableCapacity;
@@ -259,14 +266,14 @@
   var Point$2 = Phaser.Geom.Point;
   var Vector2 = Phaser.Math.Vector2;
   var Rectagle$1 = Phaser.Geom.Rectangle;
-  var stageWidth$2 = document.body.clientWidth;
-  var stageHeight$2 = document.body.clientWidth / 9 * 16;
+  var stageWidth$3 = document.body.clientWidth;
+  var stageHeight$3 = document.body.clientWidth / 9 * 16;
   var CamFaceCheck = /** @class */ (function () {
       function CamFaceCheck(scene) {
           this.scene = scene;
           this.faceRect = scene.add.graphics();
           this.previewRect = scene.add.graphics();
-          this.facePosText = scene.add.text(stageWidth$2 - 100, 250, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+          this.facePosText = scene.add.text(stageWidth$3 - 100, 250, 'Hello World', { fontFamily: '"Roboto Condensed"' });
       }
       CamFaceCheck.prototype.refreshFacePosition = function (faceBounds, facePoints) {
           this.faceBounds = faceBounds;
@@ -543,22 +550,6 @@
           // this.loadEmoji()
           // this.loadDogeAnimation()
       };
-      AssetsLoader.prototype.loadDogeAnimationAssets = function () {
-          var scene = this.scene;
-          var endIndex = 47;
-          for (var idx = 0; idx <= endIndex; idx++) {
-              var idxStr = (idx < 10) ? '0' + idx : '' + idx;
-              var fname = "assets/dogeFrame/frame_" + idxStr + "_delay-0.04s.gif";
-              var keyname = "dogeFrame" + idx;
-              scene.load.image(keyname, fname);
-          }
-      };
-      AssetsLoader.prototype.loadEmoji = function () {
-          var scene = this.scene;
-          scene.load.image('sad', "assets/sad.png");
-          scene.load.image('cry', "assets/cry.png");
-          scene.load.image('sour', "assets/sour.png");
-      };
       return AssetsLoader;
   }());
   //# sourceMappingURL=assetsLoader.js.map
@@ -632,16 +623,16 @@
 
   var Point$3 = Phaser.Geom.Point;
   var Rectagle$2 = Phaser.Geom.Rectangle;
-  var stageWidth$3 = document.body.clientWidth;
-  var stageHeight$3 = document.body.clientWidth / 9 * 16;
+  var stageWidth$4 = document.body.clientWidth;
+  var stageHeight$4 = document.body.clientWidth / 9 * 16;
   var Demo = /** @class */ (function (_super) {
       __extends(Demo, _super);
       function Demo() {
           var _this = _super.call(this, GAME_SCENE) || this;
           _this.score = 0;
           _this.spSpinSpeed = 1;
-          _this.circleRadius = stageWidth$3 * 1.5;
-          _this.tablePos = new Point$3(stageWidth$3 / 2 + _this.circleRadius / 2.2, stageHeight$3 + _this.circleRadius / 2);
+          _this.circleRadius = stageWidth$4 * 1.5;
+          _this.tablePos = new Point$3(stageWidth$4 / 2 + _this.circleRadius / 2.2, stageHeight$4 + _this.circleRadius / 2);
           _this.distanceAngle = 60; //食物和食物之间的间隔(角度)
           _this.tableCapacity = 360 / _this.distanceAngle; //根据间隔计算得到的桌面容量
           _this.foodList = __spreadArrays(Array(_this.tableCapacity)).map(function (_) { return null; });
@@ -917,7 +908,7 @@
       };
       Demo.prototype.caughtAnimation = function () {
           this.effScene.addHammer(this);
-          this.uiScene.createCaughtText(stageWidth$3 / 2, stageHeight$3 / 2, function () { });
+          this.uiScene.createCaughtText(stageWidth$4 / 2, stageHeight$4 / 2, function () { });
       };
       Demo.prototype.missAnimation = function () {
       };
@@ -926,20 +917,20 @@
           var faceRadius = 200;
           this.bg.beginPath();
           this.bg.moveTo(0, 0);
-          this.bg.lineTo(stageWidth$3, 0);
-          this.bg.lineTo(stageWidth$3, faceCenter.y);
+          this.bg.lineTo(stageWidth$4, 0);
+          this.bg.lineTo(stageWidth$4, faceCenter.y);
           this.bg.lineTo(faceCenter.x + faceRadius, faceCenter.y);
           this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI, true);
           this.bg.lineTo(0, faceCenter.y);
           this.bg.lineTo(0, 0);
           this.bg.fillStyle(0xffeeff);
           this.bg.fill();
-          this.bg.moveTo(stageWidth$3, stageHeight$3);
-          this.bg.lineTo(stageWidth$3, faceCenter.y);
+          this.bg.moveTo(stageWidth$4, stageHeight$4);
+          this.bg.lineTo(stageWidth$4, faceCenter.y);
           this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI, false);
           this.bg.lineTo(0, faceCenter.y);
-          this.bg.lineTo(0, stageHeight$3);
-          this.bg.lineTo(stageWidth$3, stageHeight$3);
+          this.bg.lineTo(0, stageHeight$4);
+          this.bg.lineTo(stageWidth$4, stageHeight$4);
           this.bg.fillStyle(0xffeeff);
           this.bg.fill();
       };
@@ -948,9 +939,9 @@
           var bd = this.bgImg.getBounds();
           this.bgImg.setPosition(0, 0);
           // Phaser 中 Image 的默认 pivot 就是图片的中心点
-          this.bgImg.x = stageWidth$3 / 2;
-          this.bgImg.y = stageHeight$3 / 2;
-          this.bgImg.setScale(stageWidth$3 / bd.width, stageHeight$3 / bd.height);
+          this.bgImg.x = stageWidth$4 / 2;
+          this.bgImg.y = stageHeight$4 / 2;
+          this.bgImg.setScale(stageWidth$4 / bd.width, stageHeight$4 / bd.height);
           // if (isPC) {
           this.bgImg.alpha = 0.5;
           // }
@@ -992,8 +983,8 @@
       Demo.prototype.showScoreToast = function (text, delay, cb) {
           var _this = this;
           var toastText = this.add.text(0, 0, '', { fontFamily: '"Roboto Condensed"' });
-          toastText.x = stageWidth$3 / 2;
-          toastText.y = stageWidth$3 / 2;
+          toastText.x = stageWidth$4 / 2;
+          toastText.y = stageWidth$4 / 2;
           toastText.text = text;
           toastText.setFontSize(32);
           toastText.setColor('red');
@@ -1023,51 +1014,101 @@
   }(Phaser.Scene));
   //# sourceMappingURL=game.js.map
 
-  var drawRoundRect = function (scene, size, radius, color, borderWidth, borderColor) {
-      var bg = scene.add.graphics();
-      bg.clear();
-      bg.beginPath();
-      var x = size.x;
-      var y = size.y;
-      var width = size.width;
-      var height = size.height;
-      bg.fillStyle(color);
-      // graphics 的 origin 是左上角
-      bg.fillRoundedRect(x, y, width, height, radius);
-      if (borderWidth) {
-          var x2 = x + borderWidth;
-          var y2 = y + borderWidth;
-          bg.fillStyle(borderColor);
-          bg.fillRoundedRect(x2, y2, width - 2 * borderWidth, height - 2 * borderWidth, radius - borderWidth);
+  var UIHelper = /** @class */ (function () {
+      function UIHelper() {
       }
-      return bg;
-  };
+      UIHelper.drawRoundRect = function (scene, size, radius, color, borderWidth, borderColor) {
+          var bg = scene.add.graphics();
+          bg.clear();
+          bg.beginPath();
+          var x = size.x;
+          var y = size.y;
+          var width = size.width;
+          var height = size.height;
+          bg.fillStyle(color);
+          // graphics 的 origin 是左上角
+          bg.fillRoundedRect(x, y, width, height, radius);
+          if (borderWidth) {
+              var x2 = x + borderWidth;
+              var y2 = y + borderWidth;
+              bg.fillStyle(borderColor);
+              bg.fillRoundedRect(x2, y2, width - 2 * borderWidth, height - 2 * borderWidth, radius - borderWidth);
+          }
+          return bg;
+      };
+      UIHelper.createImageButton = function (scene, x, y, texture, callback, noframes) {
+          return new ImageButton(scene, x, y, texture, callback, noframes);
+      };
+      UIHelper.fadeToScene = function (newScene, currentScene) {
+          currentScene.cameras.main.fadeOut(250);
+          currentScene.time.addEvent({
+              delay: 250,
+              callback: function () {
+                  currentScene.scene.start(newScene);
+              },
+              callbackScope: currentScene
+          });
+      };
+      return UIHelper;
+  }());
+  var ImageButton = /** @class */ (function (_super) {
+      __extends(ImageButton, _super);
+      function ImageButton(scene, x, y, texture, callback, noframes) {
+          var _this = _super.call(this, scene, x, y, texture, 0) || this;
+          _this.setInteractive({ useHandCursor: true });
+          _this.on('pointerup', function () {
+              if (!noframes) {
+                  this.setFrame(1);
+              }
+          }, _this);
+          _this.on('pointerdown', function () {
+              if (!noframes) {
+                  this.setFrame(2);
+              }
+              callback.call(scene);
+          }, _this);
+          _this.on('pointerover', function () {
+              if (!noframes) {
+                  this.setFrame(1);
+              }
+          }, _this);
+          _this.on('pointerout', function () {
+              if (!noframes) {
+                  this.setFrame(0);
+              }
+          }, _this);
+          return _this;
+          // scene.add.existing(this);
+      }
+      return ImageButton;
+  }(Phaser.GameObjects.Image));
   //# sourceMappingURL=UIUtil.js.map
 
   var Point$4 = Phaser.Geom.Point;
   var Rectagle$3 = Phaser.Geom.Rectangle;
-  var stageWidth$4 = document.body.clientWidth;
-  var stageHeight$4 = document.body.clientWidth / 9 * 16;
+  var stageWidth$5 = document.body.clientWidth;
+  var stageHeight$5 = document.body.clientWidth / 9 * 16;
   var TopLeftToCenter = function (width, height, topLeftPoint) {
       var halfW = width / 2;
       var halfH = height / 2;
       return new Point$4(topLeftPoint.x - halfW, topLeftPoint.y - halfH);
   };
-  var UIScene = /** @class */ (function (_super) {
-      __extends(UIScene, _super);
-      function UIScene() {
+  var GameUIScene = /** @class */ (function (_super) {
+      __extends(GameUIScene, _super);
+      function GameUIScene() {
           return _super.call(this, UI_SCENE) || this;
       }
-      UIScene.prototype.preload = function () {
+      GameUIScene.prototype.preload = function () {
           this.load.scenePlugin({
               key: 'rexuiplugin',
               url: '/rexuiplugin.min.js',
               sceneKey: 'rexUI'
           });
       };
-      UIScene.prototype.create = function () {
-          this.welcome = this.createWelcomeDialog(this, 300, 500);
-          this.welcome.visible = false;
+      GameUIScene.prototype.create = function () {
+          this.addUIBtns();
+          // this.welcome = this.createWelcomeDialog(this, 300, 500)
+          // this.welcome.visible = false
           // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
           // this.testView = this.createDemoDialog(this, 0, 0)
           // this.testView.visible = false
@@ -1076,12 +1117,12 @@
           // this.testGraphic.strokeLineShape( new Phaser.Geom.Line(200, 300, 250, 300))
           // this.testGraphic.rotation = 2* Math.PI
       };
-      UIScene.prototype.update = function (time, delta) {
+      GameUIScene.prototype.update = function (time, delta) {
       };
-      UIScene.prototype.showWelcome = function () {
+      GameUIScene.prototype.showWelcome = function () {
           this.welcome.visible = true;
       };
-      UIScene.prototype.createWelcomeDialog = function (scene, width, height) {
+      GameUIScene.prototype.createWelcomeDialog = function (scene, width, height) {
           var _this = this;
           var makeFixWidthPanel = function (maxwidth, content) {
               var sizer = _this.rexUI.add.fixWidthSizer({
@@ -1153,8 +1194,8 @@
               return scrollPanel;
           };
           // x y 用于定位panel的位置  默认 xy 是panel 的中心点
-          var x = stageWidth$4 / 2;
-          var y = stageHeight$4 / 2;
+          var x = stageWidth$5 / 2;
+          var y = stageHeight$5 / 2;
           var contentStr = "Phaser is a fast, free, and fun open source HTML5 game framework that offers WebGL and Canvas rendering across desktop and mobile web browsers. Games can be compiled to iOS, Android and native apps by using 3rd party tools. You can use JavaScript or TypeScript for development.\n        Along with the fantastic open source community, Phaser is actively developed and maintained by Photon Storm. As a result of rapid support, and a developer friendly API, Phaser is currently one of the most starred game frameworks on GitHub.\n        Thousands of developers from indie and multi-national digital agencies, and universities worldwide use Phaser. You can take a look at their incredible games.";
           // 默认x y 是 Dialog 中心位置   也就是说 Pivot 默认是 center 
           var dialog = scene.rexUI.add.dialog({
@@ -1179,7 +1220,7 @@
               // content: makeContentLabel(contentStr),
               content: makeScrollSizer(contentStr),
               actions: [
-                  this.createButton(this, 'OK', 0xf57f17),
+                  this.createRexUIButton(this, 'OK', 0xf57f17),
               ],
               actionsAlign: '  center  ',
               space: {
@@ -1207,7 +1248,7 @@
           dialog.visible = false;
           return dialog;
       };
-      UIScene.prototype.createDemoDialog = function (scene, x, y) {
+      GameUIScene.prototype.createDemoDialog = function (scene, x, y) {
           scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63);
           return scene.rexUI.add.dialog({
               x: x,
@@ -1248,11 +1289,11 @@
               //.drawBounds(this.add.graphics(), 0xff0000)
               .popUp(500);
       };
-      UIScene.prototype.createCaughtText = function (x, y, cb) {
+      GameUIScene.prototype.createCaughtText = function (x, y, cb) {
           var _this = this;
           var containerWidth = 400;
           var containerHeight = 100;
-          var containerPos = new Point$4(stageWidth$4 / 2, stageHeight$4 / 2 * 1.6);
+          var containerPos = new Point$4(stageWidth$5 / 2, stageHeight$5 / 2 * 1.6);
           var container = this.add.container(containerPos.x, containerPos.y);
           // (250,  50) 这个点是相对于容器左上角而言的
           var toastPos = TopLeftToCenter(400, 100, new Point$4(250, 50));
@@ -1271,7 +1312,7 @@
           // 而 container 的默认origin 是中心位置， （且无法更改？？）
           // 添加元素的时候也是将子元素的origin 和 父容器的origin 对齐
           // graphic 的 origin 是左上角
-          var bg = drawRoundRect(this, new Rectagle$3(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, 0x99aaee, 5, 0xaabbff);
+          var bg = UIHelper.drawRoundRect(this, new Rectagle$3(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, 0x99aaee, 5, 0xaabbff);
           var AlternativeEmoji = ['sad', 'cry', 'sour'];
           var hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji);
           var emojiPos = TopLeftToCenter(400, 100, new Point$4(50, 50));
@@ -1305,7 +1346,7 @@
           });
           return container;
       };
-      UIScene.prototype.createGetCaughtDialog = function (x, y) {
+      GameUIScene.prototype.createGetCaughtDialog = function (x, y) {
           var scene = this;
           scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xe91e63);
           // 你被抓住了 计划从左移动到右 这样的形式进入屏幕 显示
@@ -1372,7 +1413,7 @@
           // })
           return popup;
       };
-      UIScene.prototype.createButton = function (scene, text, color, space) {
+      GameUIScene.prototype.createRexUIButton = function (scene, text, color, space) {
           return scene.rexUI.add.label({
               x: 0,
               y: 100,
@@ -1390,14 +1431,22 @@
               }
           });
       };
-      return UIScene;
+      GameUIScene.prototype.addUIBtns = function () {
+          var _this = this;
+          var settingsClick = function (e) {
+              UIHelper.fadeToScene(SETTINGS_SCENE, _this);
+          };
+          this.settingsBtn = new ImageButton(this, 50, 50, 'button-settings', settingsClick);
+          this.add.existing(this.settingsBtn);
+      };
+      return GameUIScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=UIScene.js.map
+  //# sourceMappingURL=GameUIScene.js.map
 
   var Point$5 = Phaser.Geom.Point;
   var Rectagle$4 = Phaser.Geom.Rectangle;
-  var stageWidth$5 = document.body.clientWidth;
-  var stageHeight$5 = document.body.clientWidth / 9 * 16;
+  var stageWidth$6 = document.body.clientWidth;
+  var stageHeight$6 = document.body.clientWidth / 9 * 16;
   var EffectScene = /** @class */ (function (_super) {
       __extends(EffectScene, _super);
       function EffectScene() {
@@ -1423,7 +1472,7 @@
       };
       EffectScene.prototype.addCoin = function (addScoreCount) {
           var _this = this;
-          this.coin = this.add.image(stageWidth$5 / 2, stageHeight$5 / 2, 'coin');
+          this.coin = this.add.image(stageWidth$6 / 2, stageHeight$6 / 2, 'coin');
           // this.coin.displayWidth = 64
           // this.coin.displayHeight = 64
           // scale 是根据原图的大小而言的。
@@ -1496,20 +1545,20 @@
       // 原本这个是放在 UIScene 中的  但是因为addCoin 动画要表现在这里
       // 如果放在 UIScene (UIScene 在层级上最高) Coin会被UIScene 遮住
       EffectScene.prototype.createScoreArea = function () {
-          var scoreAreaCenter = new Point$5(stageWidth$5 / 2, 50);
+          var scoreAreaCenter = new Point$5(stageWidth$6 / 2, 50);
           var graphicsTopLeft = new Point$5(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y);
           this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y);
           var bg = this.add.graphics();
           bg.beginPath();
           bg.fillStyle(0xFEDE52); //yellow
-          bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth$5, 100);
+          bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth$6, 100);
           bg.closePath();
           var scoreBoxWidth = 300;
           var scoreBoxHeight = 66;
           var scoreBoxRadius = scoreBoxHeight / 2;
           var scoreBoxBorder = 10;
           var scoreBoxRectagle = new Rectagle$4((scoreAreaCenter.x - scoreBoxWidth / 2) - scoreAreaCenter.x, (scoreAreaCenter.y - scoreBoxHeight / 2) - scoreAreaCenter.y, scoreBoxWidth, scoreBoxHeight);
-          var scoreBox = drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, 0xFc6158, scoreBoxBorder, 0xf9ebe9);
+          var scoreBox = UIHelper.drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, 0xFc6158, scoreBoxBorder, 0xf9ebe9);
           var scoreTitlePos = new Point$5(scoreAreaCenter.x - 50, scoreAreaCenter.y);
           var scoreTitle = this.add.text(scoreTitlePos.x - scoreAreaCenter.x, scoreTitlePos.y - scoreAreaCenter.y, 'score:', { fontFamily: 'Arial', fontSize: 22, color: '#cca398' });
           scoreTitle.setOrigin(0.5);
@@ -1523,9 +1572,8 @@
   }(Phaser.Scene));
   //# sourceMappingURL=EffectScene.js.map
 
-  // import * as WebFont from 'webfontloader';
-  var stageWidth$6 = document.body.clientWidth;
-  var stageHeight$6 = document.body.clientWidth / 9 * 16;
+  var stageWidth$7 = document.body.clientWidth;
+  var stageHeight$7 = document.body.clientWidth / 9 * 16;
   var BaseScene = /** @class */ (function (_super) {
       __extends(BaseScene, _super);
       function BaseScene() {
@@ -1539,7 +1587,7 @@
               url: '/rexuiplugin.min.js',
               sceneKey: 'rexUI'
           });
-          // WebFont.load({ custom: { families: ['Berlin'], urls: ['assets/fonts/BRLNSDB.css'] } });
+          window.WebFont.load({ custom: { families: ['Berlin'], urls: ['assets/fonts/BRLNSDB.css'] } });
           this.scene.start(ASSETS_SCENE);
       };
       BaseScene.prototype.create = function () {
@@ -1559,6 +1607,53 @@
   }(Phaser.Scene));
   //# sourceMappingURL=BaseScene.js.map
 
+  var GameSoundManager = /** @class */ (function () {
+      function GameSoundManager() {
+      }
+      GameSoundManager.initMusic = function (scene) {
+          GameSoundManager.scene = scene;
+          GameSoundManager.sound = GameSoundManager.scene.sound.add(SOUNDKEY, {
+              mute: false,
+              volume: 1,
+              rate: 1,
+              detune: 0,
+              seek: 0,
+              loop: false,
+              delay: 0
+          });
+          GameSoundManager.bgmusic = GameSoundManager.scene.sound.add(MUSICKEY, {
+              mute: false,
+              volume: 1,
+              rate: 1,
+              detune: 0,
+              seek: 0,
+              loop: true,
+              delay: 0
+          });
+          GameSoundManager.bgmusic.play();
+      };
+      GameSoundManager.toggleSoundMode = function () {
+          GameSoundManager.soundMode = !GameSoundManager.soundMode;
+      };
+      GameSoundManager.playSound = function () {
+          if (GameSoundManager.soundMode && GameSoundManager.sound) {
+              GameSoundManager.sound.play();
+          }
+      };
+      GameSoundManager.toogleMusicMode = function () {
+          GameSoundManager.musicMode = !GameSoundManager.musicMode;
+          if (!GameSoundManager.musicMode) {
+              GameSoundManager.bgmusic.pause();
+          }
+          else {
+              GameSoundManager.bgmusic.resume();
+          }
+      };
+      GameSoundManager.soundMode = true;
+      GameSoundManager.musicMode = true;
+      return GameSoundManager;
+  }());
+
   // import { DOGCOOK } from "../constants";
   var AssetsScene = /** @class */ (function (_super) {
       __extends(AssetsScene, _super);
@@ -1566,14 +1661,18 @@
           return _super.call(this, ASSETS_SCENE) || this;
       }
       AssetsScene.prototype.preload = function () {
+          this.loadUIAssets();
           this.loadPics();
           this.loadEmojiAssets();
           this.loadDogeAnimationAssets();
+          this.loadMusic();
       };
       AssetsScene.prototype.create = function () {
+          // 这些逻辑不能放在 index 中  因为他们需要资源加载完成之后才能加载 
           this.scene.launch(GAME_SCENE);
           this.scene.launch(EF_SCENE);
           this.scene.launch(UI_SCENE);
+          GameSoundManager.initMusic(this);
       };
       AssetsScene.prototype.loadPics = function () {
           var scene = this;
@@ -1607,26 +1706,102 @@
           scene.load.image('cry', "assets/cry.png");
           scene.load.image('sour', "assets/sour.png");
       };
+      AssetsScene.prototype.loadUIAssets = function () {
+          var scene = this;
+          // let loadFn = scene.load.spritesheet
+          // loadFn.apply(scene.load, ['button-sound-on', `assets/UI/button-sound-on.png`, { frameWidth: 80, frameHeight: 80 }])
+          // loadFn.apply(scene.load, ['button-sound-off', `assets/UI/button-sound-off.png`, { frameWidth: 80, frameHeight: 80 }])
+          // loadFn.apply(scene.load, ['button-settings', `assets/UI/button-settings.png`, { frameWidth: 80, frameHeight: 80 }])
+          scene.load.image('background', 'assets/UI/background.png');
+          scene.load.spritesheet('button-sound-on', "assets/UI/button-sound-on.png", { frameWidth: 80, frameHeight: 80 });
+          scene.load.spritesheet('button-sound-off', "assets/UI/button-sound-off.png", { frameWidth: 80, frameHeight: 80 });
+          scene.load.spritesheet('button-music-on', "assets/UI/button-music-on.png", { frameWidth: 80, frameHeight: 80 });
+          scene.load.spritesheet('button-music-off', "assets/UI/button-music-off.png", { frameWidth: 80, frameHeight: 80 });
+          scene.load.spritesheet('button-back', "assets/UI/button-back.png", { frameWidth: 70, frameHeight: 70 });
+          scene.load.spritesheet('button-settings', "assets/UI/button-settings.png", { frameWidth: 80, frameHeight: 80 });
+      };
+      AssetsScene.prototype.loadMusic = function () {
+          var scene = this;
+          scene.load.audio(SOUNDKEY, ['assets/audio/audio-button.m4a', 'assets/audio/audio-button.mp3', 'assets/audio/audio-button.ogg']);
+          scene.load.audio(MUSICKEY, ['assets/audio/music-bitsnbites-liver.m4a', 'assets/audio/music-bitsnbites-liver.mp3', 'assets/audio/music-bitsnbites-liver.ogg']);
+      };
       return AssetsScene;
   }(phaser.Scene));
-  //# sourceMappingURL=AssetsScene.js.map
+
+  var fontTitleStyle = { font: '46px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 7, align: 'center' };
+  var fontSettingsStyle = { font: '38px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 5, align: 'center' };
+  var frameHeight = 80;
+  var settingsLeft = stageWidth / 2 - 120;
+  var SettingsScene = /** @class */ (function (_super) {
+      __extends(SettingsScene, _super);
+      function SettingsScene() {
+          return _super.call(this, SETTINGS_SCENE) || this;
+      }
+      SettingsScene.prototype.preload = function () {
+      };
+      SettingsScene.prototype.create = function () {
+          this.createBackground();
+          this.createTitle();
+          this.createSoundBtn();
+          this.createMusicBtn();
+          this.createBackBtn();
+      };
+      SettingsScene.prototype.createBackground = function () {
+          this.add.sprite(0, 0, BACKGROUND).setOrigin(0, 0);
+      };
+      SettingsScene.prototype.createTitle = function () {
+          // text 的默认origin 是 0 0
+          var settingsText = this.add.text(stageWidth / 2, 50, 'settings', fontTitleStyle);
+          settingsText.setOrigin(0.5, 0.5);
+      };
+      SettingsScene.prototype.createBackBtn = function () {
+          var _this = this;
+          var backClick = function () {
+              GameSoundManager.playSound();
+              UIHelper.fadeToScene(UI_SCENE, _this);
+          };
+          this.backBtn = new ImageButton(this, 50, 50, 'button-back', backClick);
+          this.add.existing(this.backBtn);
+      };
+      SettingsScene.prototype.createSoundBtn = function () {
+          var clickSound = function () {
+              GameSoundManager.toggleSoundMode();
+          };
+          var soundHeight = 150;
+          this.soundBtn = new ImageButton(this, settingsLeft, soundHeight, 'button-sound-on', clickSound);
+          this.textSound = this.add.text(settingsLeft + frameHeight / 2, soundHeight, 'Sound: ON!', fontSettingsStyle);
+          this.textSound.setOrigin(0, 0.5);
+          this.add.existing(this.soundBtn);
+      };
+      SettingsScene.prototype.createMusicBtn = function () {
+          var clickMusic = function () {
+              GameSoundManager.toogleMusicMode();
+          };
+          var musicHeight = 250;
+          this.musicBtn = new ImageButton(this, settingsLeft, musicHeight, 'button-music-on', clickMusic);
+          this.textSound = this.add.text(settingsLeft + frameHeight / 2, musicHeight, 'Music: ON!', fontSettingsStyle);
+          this.textSound.setOrigin(0, 0.5);
+          this.add.existing(this.musicBtn);
+      };
+      return SettingsScene;
+  }(Phaser.Scene));
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
   // import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
   var canvasELlem = document.querySelector('#gameCanvas');
-  var stageWidth$7 = document.body.clientWidth;
-  var stageHeight$7 = document.body.clientWidth / 9 * 16;
+  var stageWidth$8 = document.body.clientWidth;
+  var stageHeight$8 = document.body.clientWidth / 9 * 16;
   var documentWidth = document.body.clientWidth;
   var documentHeight = document.body.clientHeight;
-  canvasELlem.style.top = (documentHeight - stageHeight$7) / 2 + "px";
+  canvasELlem.style.top = (documentHeight - stageHeight$8) / 2 + "px";
   var config = {
       canvas: canvasELlem,
       type: Phaser.WEBGL,
       // parent: 'phaser-example',
-      width: stageWidth$7,
-      height: stageHeight$7,
-      scene: [BaseScene, AssetsScene, Demo, EffectScene, UIScene],
+      width: stageWidth$8,
+      height: stageHeight$8,
+      scene: [BaseScene, AssetsScene, Demo, EffectScene, GameUIScene, SettingsScene],
       transparent: true,
       physics: {
           "default": 'arcade',
