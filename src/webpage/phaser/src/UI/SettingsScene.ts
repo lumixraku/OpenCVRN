@@ -1,5 +1,5 @@
 import { EF_SCENE, SETTINGS_SCENE, BACKGROUND, stageHeight, stageWidth, GAME_SCENE, UI_SCENE } from "@root/constants";
-import { ImageButton, UIHelper } from "./UIUtil";
+import { ImageButton, UIHelper } from "./UIHelper";
 import EffectScene from "./EffectScene";
 import GameSoundManager from "@root/game/soundManager";
 
@@ -16,7 +16,6 @@ export default class SettingsScene extends Phaser.Scene {
     private musicBtn: ImageButton
     private textMusic: PhaserText
     private backBtn: ImageButton
-
 
         constructor() {
             super(SETTINGS_SCENE)
@@ -75,8 +74,6 @@ export default class SettingsScene extends Phaser.Scene {
             this.soundBtn = new ImageButton(this, settingsLeft, soundHeight, 'button-sound-on', clickSound);
             this.textSound = this.add.text(settingsLeft + frameHeight / 2, soundHeight, 'Sound: ON!', fontSettingsStyle);
             this.textSound.setOrigin(0, 0.5);
-
-
             this.add.existing(this.soundBtn)
         }
 
