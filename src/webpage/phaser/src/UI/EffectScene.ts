@@ -15,8 +15,12 @@ const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientWidth / 9 * 16;
 
 
-let coinScorePos = new Point(305, 50)
-let coinRadius = 25
+const coinScorePos = new Point(210, 50)
+const coinSize = 25
+const originCoinScale = coinSize / 512
+
+
+// 
 interface AnimationPlaying {
     hammer: boolean
     dropCoin: boolean
@@ -77,7 +81,7 @@ export default class EffectScene extends Phaser.Scene {
         
         for(let idx = 0; idx < this.droppingCoins.length; idx++) {
             let dropCoin = this.droppingCoins[idx]
-            if ( dropCoin && Math.abs(dropCoin.y + coinRadius - stageHeight) < 15 ) {
+            if ( dropCoin && Math.abs(dropCoin.y + coinSize - stageHeight) < 15 ) {
                 setTimeout( ()=>{
                     dropCoin.destroy()
                     this.droppingCoins.splice(idx--, 1);
@@ -92,13 +96,10 @@ export default class EffectScene extends Phaser.Scene {
         // this.coin.displayHeight = 64
         // scale 是根据原图的大小而言的。
 
-        let originScale = coinRadius / 512
-        this.coin.setScale(originScale )
+        this.coin.setScale(originCoinScale )
 
         let self = this
-        let dest = {
-            x: 210, y:50
-        }
+
 
         this.animationPlaying.addCoin = true
         this.tweens.add({
@@ -111,9 +112,9 @@ export default class EffectScene extends Phaser.Scene {
 
                 this.tweens.add({
                     targets: this.coin,
-                    x: dest.x,
-                    y: dest.y,
-                    scale: originScale,
+                    x: coinScorePos.x,
+                    y: coinScorePos.y,
+                    scale: originCoinScale,
                     duration: 332,
                     ease: 'Circ',
                     onComplete: () => {
@@ -189,7 +190,7 @@ export default class EffectScene extends Phaser.Scene {
 
         let bg = this.add.graphics()
         bg.beginPath()
-        bg.fillStyle(0xf9ebe9) //yellow
+        bg.fillStyle(0xfc6158) //yellow
         bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth, 100)
         bg.closePath()
 
@@ -226,19 +227,20 @@ export default class EffectScene extends Phaser.Scene {
 
 
         this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText])
-
+        let coinIcon = this.add.image(coinScorePos.x, coinScorePos.y, 'coin') 
+        coinIcon.setScale(originCoinScale)   
+        
 
         return this.scoreArea
     }
 
     dropACoin() {
         let dropCoin = this.matter.add.image(coinScorePos.x, coinScorePos.y, 'coin')
-        dropCoin.setScale(coinRadius*2/512)
+        dropCoin.setScale(originCoinScale)
         this.droppingCoins.push(dropCoin)
 
-        
-
-        dropCoin.setCircle(coinRadius);
+    
+        dropCoin.setCircle(coinSize/2);
         dropCoin.setFriction(0.005);
         dropCoin.setBounce(0.6);
         dropCoin.setVelocityX(1);

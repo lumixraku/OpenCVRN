@@ -12,7 +12,7 @@ const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientWidth / 9 * 16;
 // 在 RN 中得到的宽和高 是411 * 823
 // 在 webview 得到的宽高是 412 * 804  // 因为我的APP 并没有打开全屏
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE, ASSETS_SCENE, SETTINGS_SCENE } from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE, ASSETS_SCENE, SETTINGS_SCENE, DISTANCE_ANGLE } from '@root/constants';
 import { isPC } from '@root/test'
 
 
@@ -41,13 +41,12 @@ export default class Demo extends Phaser.Scene {
     // // 旋转圆心
     public spinTable: SpinTable
     public spSpinSpeed: number = 1;
-    public circleRadius: number = stageWidth * 1.5
-    public tablePos: Point = new Point(stageWidth / 2 + this.circleRadius / 2.2, stageHeight + this.circleRadius / 2);
 
-    public distanceAngle: number = 60  //食物和食物之间的间隔(角度)
+    public distanceAngle: number = DISTANCE_ANGLE  //食物和食物之间的间隔(角度)
     public tableCapacity: number = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
 
     public foodList: Food[] = [...Array(this.tableCapacity)].map(_ => null);
+    
 
     // mouth
     public mouthObj: Mouth;
@@ -266,9 +265,10 @@ export default class Demo extends Phaser.Scene {
 
             // let foodAngle = this.spinTable.calcFoodIAngle(i) //当前食物在桌上的角度
             // let point = this.spinTable.calcAngleToPoint(foodAngle)
-
-            let foodRad = this.spinTable.calcFoodIRad(i)
-            let point = this.spinTable.caleRadToPoint(foodRad)
+            
+            let foodRad = this.spinTable.calcRadByIdx(i)
+            let circle = new Circle(this.spinTable.circleCenter.x, this.spinTable.circleCenter.y, this.spinTable.platePosRadius)
+            let point = this.spinTable.calcRadToPoint(foodRad, circle)
 
 
             food.x = point.x
@@ -484,8 +484,8 @@ export default class Demo extends Phaser.Scene {
     }
 
     drawWheel() {
-        this.spinTable = new SpinTable(this.tablePos, this.circleRadius, this.spSpinSpeed)
-        this.spinTable.addToContainer(this)
+        this.spinTable = new SpinTable(this, this.spSpinSpeed)
+        this.spinTable.createTable()
     }
 
     addFace() {
@@ -556,6 +556,9 @@ export default class Demo extends Phaser.Scene {
     }
 
     addScore(sc: number) {
+        if (this.score == 0  && sc < 0) {
+            return 
+        }
         this.score = this.score + sc
         this.effScene.scoreText.text = '' + this.score
     }
