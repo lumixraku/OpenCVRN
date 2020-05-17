@@ -8,7 +8,7 @@ import Rectagle = Phaser.Geom.Rectangle;
 import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
 import Container = Phaser.GameObjects.Container
-import { UIHelper } from "./UIUtil";
+import { UIHelper } from "./UIHelper";
 
 
 const stageWidth = document.body.clientWidth;
@@ -20,7 +20,7 @@ const coinSize = 25
 const originCoinScale = coinSize / 512
 
 
-// 
+
 interface AnimationPlaying {
     hammer: boolean
     dropCoin: boolean
@@ -212,7 +212,7 @@ export default class EffectScene extends Phaser.Scene {
             scoreTitlePos.x - scoreAreaCenter.x,
             scoreTitlePos.y - scoreAreaCenter.y,
             'score:',
-            { fontFamily: 'Arial', fontSize: 22, color: '#cca398' }
+            { fontFamily: 'Arial', fontSize: 22, color: '#ffffff' }
         )
         scoreTitle.setOrigin(0.5)
 
@@ -221,7 +221,7 @@ export default class EffectScene extends Phaser.Scene {
             scorePos.x - scoreAreaCenter.x,
             scorePos.y - scoreAreaCenter.y,
             '0',
-            { fontFamily: 'Arial', fontSize: 22, color: '#cca398' }
+            { fontFamily: 'Arial', fontSize: 22, color: '#ffffff' }
         )
         scoreText.setOrigin(0.5)
 

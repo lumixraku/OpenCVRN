@@ -14,7 +14,17 @@ export { UIHelper, ImageButton }
 
 
 class UIHelper {
-    public static drawRoundRect(scene: Scene, size: Rectagle, radius: number, color: any, borderWidth?: number, borderColor?: any) {
+
+    /**
+     * 
+     * @param scene parent scene
+     * @param size size of rectangle
+     * @param radius 
+     * @param color mainColor
+     * @param borderWidth 
+     * @param outerColor border Color (little darken than main color)
+     */
+    public static drawRoundRect(scene: Scene, size: Rectagle, radius: number, color: any, borderWidth?: number, outerColor?: any) {
 
 
         let bg = scene.add.graphics()
@@ -25,14 +35,14 @@ class UIHelper {
         let y = size.y
         let width = size.width
         let height = size.height
-        bg.fillStyle(color)
+        bg.fillStyle(outerColor)
         // graphics 的 origin 是左上角
         bg.fillRoundedRect(x, y, width, height, radius)
 
         if (borderWidth) {
             let x2 = x + borderWidth
             let y2 = y + borderWidth
-            bg.fillStyle(borderColor)
+            bg.fillStyle(color)
             bg.fillRoundedRect(x2, y2, width - 2 * borderWidth, height - 2 * borderWidth, radius - borderWidth)
         }
 

@@ -12,7 +12,7 @@ import InputButton = Phaser.Input.Gamepad.Button
 
 import { UI_SCENE, SETTINGS_SCENE } from "../constants";
 import { World } from "matter";
-import { UIHelper, ImageButton } from "./UIUtil";
+import { UIHelper, ImageButton } from "./UIHelper";
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientWidth / 9 * 16;
 
@@ -323,15 +323,16 @@ export default class GameUIScene extends Phaser.Scene {
         let toastText = this.add.text(toastPos.x, toastPos.y ,
             'You get Caught!!', 
             { 
-                fontFamily: '"Arial"' ,
-                fontSize: '20px'                
+                fontFamily: 'Berlin',
+                stroke: '#000',
+                fontSize: 30, 
+                strokeThickness: 4, 
+                align: 'center'
             }
         )
         // this.hasCaughtToast = true
         // toastText.x = stageWidth / 2
         // toastText.y = stageHeight / 2
-        toastText.setFontSize(42)
-        toastText.setColor('red')
         toastText.setOrigin(0.5)
 
         // let bg = this.rexUI.add.roundRectangle(0, 0, 100, 240, 0, 0x00ccbb)
@@ -339,13 +340,15 @@ export default class GameUIScene extends Phaser.Scene {
         // 而 container 的默认origin 是中心位置， （且无法更改？？）
         // 添加元素的时候也是将子元素的origin 和 父容器的origin 对齐
         // graphic 的 origin 是左上角
+
+        // f9ebe9
         let bg = UIHelper.drawRoundRect(
             this,
             new Rectagle(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight),
             20,
-            0x99aaee,
+            0xf9ebe9,
             5,
-            0xaabbff,
+            0xfc6158,
         )
         
         let AlternativeEmoji = ['sad', 'cry', 'sour']

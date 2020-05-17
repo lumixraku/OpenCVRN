@@ -28,7 +28,7 @@ import GameUIScene from '@root/UI/GameUIScene';
 import EffectScene from '@root/UI/EffectScene';
 import AssetsLoader from './assetsLoader';
 import AnimateManager from './animate';
-import { UIHelper, ImageButton } from '@root/UI/UIUtil';
+import { UIHelper, ImageButton } from '@root/UI/UIHelper';
 
 
 export default class Demo extends Phaser.Scene {

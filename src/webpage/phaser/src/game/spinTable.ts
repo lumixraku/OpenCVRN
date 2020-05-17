@@ -16,7 +16,7 @@ import { Scene } from "phaser";
 
 // import { isPC } from '../test'
 import { isPC } from '@root/test'
-import { ImageButton } from "@root/UI/UIUtil";
+import { ImageButton } from "@root/UI/UIHelper";
 import { DISTANCE_ANGLE, stageWidth, stageHeight } from "@root/constants";
 
 

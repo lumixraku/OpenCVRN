@@ -29,7 +29,6 @@
   var COOK_LOOKBACK_ANIMI = 'lookback';
   var COOK_TOCOOK_ANIMI = 'cookAgain';
   var HIT_DIZZY = 'hitDizzy';
-  //# sourceMappingURL=constants.js.map
 
   /*! *****************************************************************************
   Copyright (c) Microsoft Corporation. All rights reserved.
@@ -174,7 +173,6 @@
       };
       return Mouth;
   }());
-  //# sourceMappingURL=mouth.js.map
 
   var Circle = Phaser.Geom.Circle;
   var Point$1 = Phaser.Geom.Point;
@@ -277,7 +275,6 @@
       };
       return SpinTable;
   }());
-  //# sourceMappingURL=spinTable.js.map
 
   var Point$2 = Phaser.Geom.Point;
   var Vector2 = Phaser.Math.Vector2;
@@ -456,7 +453,6 @@
       };
       return CamFaceCheck;
   }());
-  //# sourceMappingURL=facePosCheck.js.map
 
   var Sprite = Phaser.GameObjects.Sprite;
   // import { DOGLOOK, DOGCOOK, CHECKING_INTERVAL, COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI } from '../constants'
@@ -541,7 +537,6 @@
       };
       return Cook;
   }(Sprite));
-  //# sourceMappingURL=cook.js.map
 
   // import { COOK_LOOKBACK_ANIMI, COOK_TOCOOK_ANIMI, HIT_DIZZY } from "../constants";
   var AnimateManager = /** @class */ (function () {
@@ -608,7 +603,6 @@
       };
       return AnimateManager;
   }());
-  //# sourceMappingURL=animate.js.map
 
   var Circle$1 = Phaser.Geom.Circle;
   var Point$3 = Phaser.Geom.Point;
@@ -1005,7 +999,16 @@
   var UIHelper = /** @class */ (function () {
       function UIHelper() {
       }
-      UIHelper.drawRoundRect = function (scene, size, radius, color, borderWidth, borderColor) {
+      /**
+       *
+       * @param scene parent scene
+       * @param size size of rectangle
+       * @param radius
+       * @param color mainColor
+       * @param borderWidth
+       * @param outerColor border Color (little darken than main color)
+       */
+      UIHelper.drawRoundRect = function (scene, size, radius, color, borderWidth, outerColor) {
           var bg = scene.add.graphics();
           bg.clear();
           bg.beginPath();
@@ -1013,13 +1016,13 @@
           var y = size.y;
           var width = size.width;
           var height = size.height;
-          bg.fillStyle(color);
+          bg.fillStyle(outerColor);
           // graphics 的 origin 是左上角
           bg.fillRoundedRect(x, y, width, height, radius);
           if (borderWidth) {
               var x2 = x + borderWidth;
               var y2 = y + borderWidth;
-              bg.fillStyle(borderColor);
+              bg.fillStyle(color);
               bg.fillRoundedRect(x2, y2, width - 2 * borderWidth, height - 2 * borderWidth, radius - borderWidth);
           }
           return bg;
@@ -1070,7 +1073,6 @@
       }
       return ImageButton;
   }(Phaser.GameObjects.Image));
-  //# sourceMappingURL=UIUtil.js.map
 
   var Point$4 = Phaser.Geom.Point;
   var Rectagle$3 = Phaser.Geom.Rectangle;
@@ -1286,21 +1288,23 @@
           // (250,  50) 这个点是相对于容器左上角而言的
           var toastPos = TopLeftToCenter(400, 100, new Point$4(250, 50));
           var toastText = this.add.text(toastPos.x, toastPos.y, 'You get Caught!!', {
-              fontFamily: '"Arial"',
-              fontSize: '20px'
+              fontFamily: 'Berlin',
+              stroke: '#000',
+              fontSize: 30,
+              strokeThickness: 4,
+              align: 'center'
           });
           // this.hasCaughtToast = true
           // toastText.x = stageWidth / 2
           // toastText.y = stageHeight / 2
-          toastText.setFontSize(42);
-          toastText.setColor('red');
           toastText.setOrigin(0.5);
           // let bg = this.rexUI.add.roundRectangle(0, 0, 100, 240, 0, 0x00ccbb)
           // 使用graphics的时候都是从左上角开始画  
           // 而 container 的默认origin 是中心位置， （且无法更改？？）
           // 添加元素的时候也是将子元素的origin 和 父容器的origin 对齐
           // graphic 的 origin 是左上角
-          var bg = UIHelper.drawRoundRect(this, new Rectagle$3(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, 0x99aaee, 5, 0xaabbff);
+          // f9ebe9
+          var bg = UIHelper.drawRoundRect(this, new Rectagle$3(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, 0xf9ebe9, 5, 0xfc6158);
           var AlternativeEmoji = ['sad', 'cry', 'sour'];
           var hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji);
           var emojiPos = TopLeftToCenter(400, 100, new Point$4(50, 50));
@@ -1429,7 +1433,6 @@
       };
       return GameUIScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=GameUIScene.js.map
 
   var Point$5 = Phaser.Geom.Point;
   var Rectagle$4 = Phaser.Geom.Rectangle;
@@ -1578,10 +1581,10 @@
           var scoreBoxRectagle = new Rectagle$4((scoreAreaCenter.x - scoreBoxWidth / 2) - scoreAreaCenter.x, (scoreAreaCenter.y - scoreBoxHeight / 2) - scoreAreaCenter.y, scoreBoxWidth, scoreBoxHeight);
           var scoreBox = UIHelper.drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, 0xFc6158, scoreBoxBorder, 0xf9ebe9);
           var scoreTitlePos = new Point$5(scoreAreaCenter.x - 50, scoreAreaCenter.y);
-          var scoreTitle = this.add.text(scoreTitlePos.x - scoreAreaCenter.x, scoreTitlePos.y - scoreAreaCenter.y, 'score:', { fontFamily: 'Arial', fontSize: 22, color: '#cca398' });
+          var scoreTitle = this.add.text(scoreTitlePos.x - scoreAreaCenter.x, scoreTitlePos.y - scoreAreaCenter.y, 'score:', { fontFamily: 'Arial', fontSize: 22, color: '#ffffff' });
           scoreTitle.setOrigin(0.5);
           var scorePos = new Point$5(scoreAreaCenter.x + 0, scoreAreaCenter.y);
-          var scoreText = this.scoreText = this.add.text(scorePos.x - scoreAreaCenter.x, scorePos.y - scoreAreaCenter.y, '0', { fontFamily: 'Arial', fontSize: 22, color: '#cca398' });
+          var scoreText = this.scoreText = this.add.text(scorePos.x - scoreAreaCenter.x, scorePos.y - scoreAreaCenter.y, '0', { fontFamily: 'Arial', fontSize: 22, color: '#ffffff' });
           scoreText.setOrigin(0.5);
           this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText]);
           var coinIcon = this.add.image(coinScorePos.x, coinScorePos.y, 'coin');
@@ -1600,7 +1603,6 @@
       };
       return EffectScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=EffectScene.js.map
 
   var stageWidth$6 = document.body.clientWidth;
   var stageHeight$6 = document.body.clientWidth / 9 * 16;
@@ -1635,7 +1637,6 @@
       };
       return BaseScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=BaseScene.js.map
 
   var GameSoundManager = /** @class */ (function () {
       function GameSoundManager() {
@@ -1683,7 +1684,6 @@
       GameSoundManager.musicMode = true;
       return GameSoundManager;
   }());
-  //# sourceMappingURL=soundManager.js.map
 
   // import { DOGCOOK } from "../constants";
   var AssetsScene = /** @class */ (function (_super) {
@@ -1828,7 +1828,6 @@
       };
       return AssetsScene;
   }(phaser.Scene));
-  //# sourceMappingURL=AssetsScene.js.map
 
   var offsetXPreview = 170;
   var offsetYPreview = 250;
@@ -1939,7 +1938,6 @@
           });
       }, false);
   }
-  //# sourceMappingURL=test.js.map
 
   var fontTitleStyle = { font: '46px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 7, align: 'center' };
   var fontSettingsStyle = { font: '38px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 5, align: 'center' };
@@ -1998,7 +1996,6 @@
       };
       return SettingsScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=SettingsScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
@@ -2030,7 +2027,6 @@
   changeMouth();
   setPreview();
   testClickEvent(game);
-  //# sourceMappingURL=index.js.map
 
 }(Phaser));
 //# sourceMappingURL=game.js.map
