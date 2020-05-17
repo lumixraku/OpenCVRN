@@ -20,6 +20,7 @@
   var DOGCOOK = 'dogcook';
   var CHECKING_INTERVAL = 2000; // 回头检测的最短间隔
   var FIRST_CHECK_ELAPSE = 2; // 第一次检查的时  游戏已经进行的时间
+  var DISTANCE_ANGLE = 40;
   // game UI
   var BACKGROUND = 'background';
   var SOUNDKEY = 'clickSound';
@@ -175,147 +176,38 @@
   }());
   //# sourceMappingURL=mouth.js.map
 
-  var offsetXPreview = 170;
-  var offsetYPreview = 250;
-  var previewWidth = 198;
-  var previewHeight = previewWidth * 16 / 9;
-  var isPC = window.navigator.userAgent.indexOf("PCMozilla") != -1;
-  // 给坐标加上取景器的偏移信息
-  // 原本的坐标信息是人脸相对取景器的位置
-  // 现在坐标信息变为相对整个画布的位置
-  function addOffsetForFaceData(target) {
-      var checkedType = function (target) {
-          return Object.prototype.toString.call(target).slice(8, -1);
-      };
-      //判断拷贝的数据类型
-      //初始化变量result 成为最终克隆的数据
-      var result;
-      var targetType = checkedType(target);
-      if (targetType === 'Object') {
-          result = {};
-      }
-      else if (targetType === 'Array') {
-          result = [];
-      }
-      else {
-          return target;
-      }
-      //遍历目标数据
-      for (var _i = 0, _a = Object.entries(target); _i < _a.length; _i++) {
-          var _b = _a[_i], key = _b[0], value = _b[1];
-          //获取遍历数据结构的每一项值。
-          // let value = target[key]
-          //判断目标结构里的每一值是否存在对象/数组
-          if (checkedType(value) === 'Object' ||
-              checkedType(value) === 'Array') { //对象/数组里嵌套了对象/数组
-              //继续遍历获取到value值
-              result[key] = addOffsetForFaceData(value);
-          }
-          else { //获取到value值是基本的数据类型或者是函数。
-              if (key == "x") {
-                  result[key] = offsetXPreview + value;
-              }
-              else if (key == "y") {
-                  result[key] = offsetYPreview + value;
-              }
-              else {
-                  result[key] = value;
-              }
-          }
-      }
-      return result;
-  }
-  // set preview area
-  function setPreview() {
-      window.addEventListener("load", function () {
-          setTimeout(function () {
-              window.postMessage({
-                  messageType: MSG_TYPE_CAM,
-                  previewArea: {
-                      y: offsetYPreview,
-                      x: offsetXPreview,
-                      width: previewWidth,
-                      height: previewHeight
-                  },
-              }, "*");
-          }, 1000);
-      }, false);
-  }
-  // 测试嘴巴位置
-  function changeMouth(game) {
-      //contours sample data
-      window.addEventListener("load", function () {
-          // 这个数据是和取景器大小有关的数据 
-          // 当 RN 的部分设置了取景器大小的时候, 返回的脸的位置也根据 RN 这里的实际尺寸有所压缩
-          // 但是和取景器的位移无关  毕竟安卓端也不知道取景器的相对位置
-          fetch('/assets/sampleContours.json').then(function (resp) {
-              return resp.json();
-          }).then(function (data) {
-              setTimeout(function () {
-                  // 在PC上调试
-                  if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
-                      var oneFace_1 = data[0];
-                      setInterval(function () {
-                          // moveFace(oneFace, changeDir)
-                          var afterOffsetForFaceData = addOffsetForFaceData(oneFace_1);
-                          window.postMessage({
-                              messageType: 'face',
-                              faceData: afterOffsetForFaceData
-                          }, "*");
-                      }, 100);
-                  }
-              }, 1000);
-          });
-      }, false);
-      // let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
-  }
-  // 获取鼠标点击位置
-  function testClickEvent(game) {
-      window.addEventListener('load', function () {
-          setTimeout(function () {
-              game.scene.getScene(GAME_SCENE).input.on('pointerup', function (pointer) {
-                  var touchX = pointer.x;
-                  var touchY = pointer.y;
-                  // let x = game.input.mousePointer.x;
-                  // let y = game.input.mousePointer.y;
-                  console.log('clickXY', touchX, touchY);
-                  // ...
-              });
-          });
-      }, false);
-  }
-  //# sourceMappingURL=test.js.map
-
+  var Circle = Phaser.Geom.Circle;
   var Point$1 = Phaser.Geom.Point;
-  var stageWidth$2 = document.body.clientWidth;
-  var stageHeight$2 = document.body.clientWidth / 9 * 16;
-  // import { isPC } from '../test'
   var angle2Rad = function (angle) {
       return (Math.PI / 180) * angle;
   };
   var SpinTable = /** @class */ (function () {
-      function SpinTable(pos, radius, spinSpeed) {
+      function SpinTable(scene, spinSpeed) {
           this.angleVal = 0;
           this.rotationVal = 0;
           this.spSpinSpeed = 1;
-          this.circleRadius = stageWidth$2;
-          this.circleCenter = new Point$1(stageWidth$2 / 2, stageHeight$2 + this.circleRadius / 2.3);
-          this.distanceAngle = 60; //食物和食物之间的间隔(角度)
+          this.circleRadius = stageWidth;
+          this.circleCenter = new Point$1(stageWidth / 2 + 200, stageHeight + 100);
+          this.platePosRadius = this.circleRadius * 0.9;
+          this.distanceAngle = DISTANCE_ANGLE; //食物和食物之间的间隔(角度)
           this.tableCapacity = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
           this.distanceRad = 2 * Math.PI / this.tableCapacity;
-          this.circleCenter = pos;
-          this.circleRadius = radius;
+          this.plates = [];
           this.spSpinSpeed = spinSpeed;
+          this.scene = scene;
       }
-      SpinTable.prototype.addToContainer = function (scene) {
-          this.spinTable = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'table');
-          if (isPC) {
-              this.spinTable.alpha = 0.5;
-          }
+      SpinTable.prototype.createTable = function () {
+          this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);
+          this.tableContainer = this.scene.add.container(this.circleCenter.x, this.circleCenter.y);
+          this.spinTable = this.scene.add.sprite(0, 0, 'table');
           var bds = this.spinTable.getBounds();
           var width = bds.width;
           this.spinTable.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2));
-          this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);
+          // if (isPC) {
+          //     this.spinTable.alpha = 0.5
+          // }
+          this.tableContainer.add(this.spinTable);
+          this.addPlates();
       };
       SpinTable.prototype.setTableCapacity = function (tableCapacity) {
           this.tableCapacity = tableCapacity;
@@ -327,7 +219,8 @@
           // angle 是角度
           this.angleVal += this.spSpinSpeed;
           this.rotationVal += angle2Rad(this.spSpinSpeed);
-          this.spinTable.rotation = this.rotationVal;
+          // this.spinTable.rotation = this.rotationVal
+          this.tableContainer.rotation = this.rotationVal;
       };
       SpinTable.prototype.getAngle = function () {
           return this.angleVal;
@@ -335,13 +228,23 @@
       SpinTable.prototype.getRotation = function () {
           return this.rotationVal;
       };
+      SpinTable.prototype.addPlates = function () {
+          for (var i = 0; i < this.tableCapacity; i++) {
+              var rad = this.calcRadByIdx(i);
+              var circle = new Circle(0, 0, this.platePosRadius);
+              var p = this.calcRadToPoint(rad, circle);
+              this.plates[i] = this.scene.add.image(p.x, p.y, 'plate');
+              this.plates[i].setScale(2);
+              this.tableContainer.add(this.plates[i]);
+          }
+      };
       /**
        * 计算第 i 个食物的在当前桌面上的角度
        * 桌子是顺时针旋转  但是食物的摆放顺序是逆时针
        * i starts from 0
        * @param i
        */
-      SpinTable.prototype.calcFoodIAngle = function (i) {
+      SpinTable.prototype.calcAngleByIndx = function (i) {
           var rawAngle = this.getAngle();
           var angle = rawAngle + this.distanceAngle * (this.tableCapacity - i);
           return angle;
@@ -352,7 +255,7 @@
        * 计算第 i 个食物的在当前桌面上的角度
        * 桌子是顺时针旋转  但是食物的摆放顺序是逆时针
        */
-      SpinTable.prototype.calcFoodIRad = function (i) {
+      SpinTable.prototype.calcRadByIdx = function (i) {
           var rawRad = this.rotationVal;
           var rad = rawRad + this.distanceRad * (this.tableCapacity - i);
           return rad;
@@ -362,9 +265,14 @@
           Phaser.Geom.Circle.CircumferencePoint(this.circle, angle2Rad(angle), point);
           return point;
       };
-      SpinTable.prototype.caleRadToPoint = function (rad) {
+      // 默认是以桌面半径计算位置 
+      // 但是有时候半径会不一样  比如盘子和食物
+      SpinTable.prototype.calcRadToPoint = function (rad, circle) {
+          if (!circle) {
+              circle = this.circle;
+          }
           var point = new Phaser.Geom.Point(0, 0);
-          Phaser.Geom.Circle.CircumferencePoint(this.circle, rad, point);
+          Phaser.Geom.Circle.CircumferencePoint(circle, rad, point);
           return point;
       };
       return SpinTable;
@@ -374,14 +282,14 @@
   var Point$2 = Phaser.Geom.Point;
   var Vector2 = Phaser.Math.Vector2;
   var Rectagle$1 = Phaser.Geom.Rectangle;
-  var stageWidth$3 = document.body.clientWidth;
-  var stageHeight$3 = document.body.clientWidth / 9 * 16;
+  var stageWidth$2 = document.body.clientWidth;
+  var stageHeight$2 = document.body.clientWidth / 9 * 16;
   var CamFaceCheck = /** @class */ (function () {
       function CamFaceCheck(scene) {
           this.scene = scene;
           this.faceRect = scene.add.graphics();
           this.previewRect = scene.add.graphics();
-          this.facePosText = scene.add.text(stageWidth$3 - 100, 250, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+          this.facePosText = scene.add.text(stageWidth$2 - 100, 250, 'Hello World', { fontFamily: '"Roboto Condensed"' });
       }
       CamFaceCheck.prototype.refreshFacePosition = function (faceBounds, facePoints) {
           this.faceBounds = faceBounds;
@@ -702,19 +610,18 @@
   }());
   //# sourceMappingURL=animate.js.map
 
+  var Circle$1 = Phaser.Geom.Circle;
   var Point$3 = Phaser.Geom.Point;
   var Rectagle$2 = Phaser.Geom.Rectangle;
-  var stageWidth$4 = document.body.clientWidth;
-  var stageHeight$4 = document.body.clientWidth / 9 * 16;
+  var stageWidth$3 = document.body.clientWidth;
+  var stageHeight$3 = document.body.clientWidth / 9 * 16;
   var Demo = /** @class */ (function (_super) {
       __extends(Demo, _super);
       function Demo() {
           var _this = _super.call(this, GAME_SCENE) || this;
           _this.score = 0;
           _this.spSpinSpeed = 1;
-          _this.circleRadius = stageWidth$4 * 1.5;
-          _this.tablePos = new Point$3(stageWidth$4 / 2 + _this.circleRadius / 2.2, stageHeight$4 + _this.circleRadius / 2);
-          _this.distanceAngle = 60; //食物和食物之间的间隔(角度)
+          _this.distanceAngle = DISTANCE_ANGLE; //食物和食物之间的间隔(角度)
           _this.tableCapacity = 360 / _this.distanceAngle; //根据间隔计算得到的桌面容量
           _this.foodList = __spreadArrays(Array(_this.tableCapacity)).map(function (_) { return null; });
           // preview 取景器
@@ -857,8 +764,9 @@
               // 第四象限是 0 ~ 90  第三象限是 90 ~ 180
               // let foodAngle = this.spinTable.calcFoodIAngle(i) //当前食物在桌上的角度
               // let point = this.spinTable.calcAngleToPoint(foodAngle)
-              var foodRad = this.spinTable.calcFoodIRad(i);
-              var point = this.spinTable.caleRadToPoint(foodRad);
+              var foodRad = this.spinTable.calcRadByIdx(i);
+              var circle = new Circle$1(this.spinTable.circleCenter.x, this.spinTable.circleCenter.y, this.spinTable.platePosRadius);
+              var point = this.spinTable.calcRadToPoint(foodRad, circle);
               food.x = point.x;
               food.y = point.y;
           }
@@ -986,7 +894,7 @@
       };
       Demo.prototype.caughtAnimation = function () {
           this.effScene.addHammer(this, this.addScore);
-          this.uiScene.createCaughtText(stageWidth$4 / 2, stageHeight$4 / 2, function () { });
+          this.uiScene.createCaughtText(stageWidth$3 / 2, stageHeight$3 / 2, function () { });
       };
       Demo.prototype.missAnimation = function () {
       };
@@ -995,20 +903,20 @@
           var faceRadius = 200;
           this.bg.beginPath();
           this.bg.moveTo(0, 0);
-          this.bg.lineTo(stageWidth$4, 0);
-          this.bg.lineTo(stageWidth$4, faceCenter.y);
+          this.bg.lineTo(stageWidth$3, 0);
+          this.bg.lineTo(stageWidth$3, faceCenter.y);
           this.bg.lineTo(faceCenter.x + faceRadius, faceCenter.y);
           this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI, true);
           this.bg.lineTo(0, faceCenter.y);
           this.bg.lineTo(0, 0);
           this.bg.fillStyle(0xffeeff);
           this.bg.fill();
-          this.bg.moveTo(stageWidth$4, stageHeight$4);
-          this.bg.lineTo(stageWidth$4, faceCenter.y);
+          this.bg.moveTo(stageWidth$3, stageHeight$3);
+          this.bg.lineTo(stageWidth$3, faceCenter.y);
           this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI, false);
           this.bg.lineTo(0, faceCenter.y);
-          this.bg.lineTo(0, stageHeight$4);
-          this.bg.lineTo(stageWidth$4, stageHeight$4);
+          this.bg.lineTo(0, stageHeight$3);
+          this.bg.lineTo(stageWidth$3, stageHeight$3);
           this.bg.fillStyle(0xffeeff);
           this.bg.fill();
       };
@@ -1017,16 +925,16 @@
           var bd = this.bgImg.getBounds();
           this.bgImg.setPosition(0, 0);
           // Phaser 中 Image 的默认 pivot 就是图片的中心点
-          this.bgImg.x = stageWidth$4 / 2;
-          this.bgImg.y = stageHeight$4 / 2;
-          this.bgImg.setScale(stageWidth$4 / bd.width, stageHeight$4 / bd.height);
+          this.bgImg.x = stageWidth$3 / 2;
+          this.bgImg.y = stageHeight$3 / 2;
+          this.bgImg.setScale(stageWidth$3 / bd.width, stageHeight$3 / bd.height);
           // if (isPC) {
           this.bgImg.alpha = 0.5;
           // }
       };
       Demo.prototype.drawWheel = function () {
-          this.spinTable = new SpinTable(this.tablePos, this.circleRadius, this.spSpinSpeed);
-          this.spinTable.addToContainer(this);
+          this.spinTable = new SpinTable(this, this.spSpinSpeed);
+          this.spinTable.createTable();
       };
       Demo.prototype.addFace = function () {
           this.camFaceCheck = new CamFaceCheck(this);
@@ -1061,8 +969,8 @@
       Demo.prototype.showScoreToast = function (text, delay, cb) {
           var _this = this;
           var toastText = this.add.text(0, 0, '', { fontFamily: '"Roboto Condensed"' });
-          toastText.x = stageWidth$4 / 2;
-          toastText.y = stageWidth$4 / 2;
+          toastText.x = stageWidth$3 / 2;
+          toastText.y = stageWidth$3 / 2;
           toastText.text = text;
           toastText.setFontSize(32);
           toastText.setColor('red');
@@ -1085,6 +993,9 @@
           }, delay);
       };
       Demo.prototype.addScore = function (sc) {
+          if (this.score == 0 && sc < 0) {
+              return;
+          }
           this.score = this.score + sc;
           this.effScene.scoreText.text = '' + this.score;
       };
@@ -1163,8 +1074,8 @@
 
   var Point$4 = Phaser.Geom.Point;
   var Rectagle$3 = Phaser.Geom.Rectangle;
-  var stageWidth$5 = document.body.clientWidth;
-  var stageHeight$5 = document.body.clientWidth / 9 * 16;
+  var stageWidth$4 = document.body.clientWidth;
+  var stageHeight$4 = document.body.clientWidth / 9 * 16;
   var TopLeftToCenter = function (width, height, topLeftPoint) {
       var halfW = width / 2;
       var halfH = height / 2;
@@ -1271,8 +1182,8 @@
               return scrollPanel;
           };
           // x y 用于定位panel的位置  默认 xy 是panel 的中心点
-          var x = stageWidth$5 / 2;
-          var y = stageHeight$5 / 2;
+          var x = stageWidth$4 / 2;
+          var y = stageHeight$4 / 2;
           var contentStr = "Phaser is a fast, free, and fun open source HTML5 game framework that offers WebGL and Canvas rendering across desktop and mobile web browsers. Games can be compiled to iOS, Android and native apps by using 3rd party tools. You can use JavaScript or TypeScript for development.\n        Along with the fantastic open source community, Phaser is actively developed and maintained by Photon Storm. As a result of rapid support, and a developer friendly API, Phaser is currently one of the most starred game frameworks on GitHub.\n        Thousands of developers from indie and multi-national digital agencies, and universities worldwide use Phaser. You can take a look at their incredible games.";
           // 默认x y 是 Dialog 中心位置   也就是说 Pivot 默认是 center 
           var dialog = scene.rexUI.add.dialog({
@@ -1370,7 +1281,7 @@
           var _this = this;
           var containerWidth = 400;
           var containerHeight = 100;
-          var containerPos = new Point$4(stageWidth$5 / 2, stageHeight$5 / 2 * 1.6);
+          var containerPos = new Point$4(stageWidth$4 / 2, stageHeight$4 / 2 * 1.6);
           var container = this.add.container(containerPos.x, containerPos.y);
           // (250,  50) 这个点是相对于容器左上角而言的
           var toastPos = TopLeftToCenter(400, 100, new Point$4(250, 50));
@@ -1522,10 +1433,11 @@
 
   var Point$5 = Phaser.Geom.Point;
   var Rectagle$4 = Phaser.Geom.Rectangle;
-  var stageWidth$6 = document.body.clientWidth;
-  var stageHeight$6 = document.body.clientWidth / 9 * 16;
-  var coinScorePos = new Point$5(305, 50);
-  var coinRadius = 25;
+  var stageWidth$5 = document.body.clientWidth;
+  var stageHeight$5 = document.body.clientWidth / 9 * 16;
+  var coinScorePos = new Point$5(210, 50);
+  var coinSize = 25;
+  var originCoinScale = coinSize / 512;
   var EffectScene = /** @class */ (function (_super) {
       __extends(EffectScene, _super);
       function EffectScene() {
@@ -1551,7 +1463,7 @@
       EffectScene.prototype.create = function () {
           this.createScoreArea();
           this.droppingCoins = [];
-          var ground = this.matter.add.image(stageWidth$6 / 2, stageHeight$6, 'ground');
+          var ground = this.matter.add.image(stageWidth$5 / 2, stageHeight$5, 'ground');
           ground.setStatic(true);
           ground.setScale(2, 0.2);
           // ground.setAngle(10);
@@ -1561,7 +1473,7 @@
           var _this = this;
           var _loop_1 = function (idx) {
               var dropCoin = this_1.droppingCoins[idx];
-              if (dropCoin && Math.abs(dropCoin.y + coinRadius - stageHeight$6) < 15) {
+              if (dropCoin && Math.abs(dropCoin.y + coinSize - stageHeight$5) < 15) {
                   setTimeout(function () {
                       dropCoin.destroy();
                       _this.droppingCoins.splice(idx--, 1);
@@ -1577,15 +1489,11 @@
       };
       EffectScene.prototype.addCoin = function (addScoreCount) {
           var _this = this;
-          this.coin = this.add.image(stageWidth$6 / 2, stageHeight$6 / 2, 'coin');
+          this.coin = this.add.image(stageWidth$5 / 2, stageHeight$5 / 2, 'coin');
           // this.coin.displayWidth = 64
           // this.coin.displayHeight = 64
           // scale 是根据原图的大小而言的。
-          var originScale = coinRadius / 512;
-          this.coin.setScale(originScale);
-          var dest = {
-              x: 210, y: 50
-          };
+          this.coin.setScale(originCoinScale);
           this.animationPlaying.addCoin = true;
           this.tweens.add({
               targets: this.coin,
@@ -1596,9 +1504,9 @@
                   // cb()
                   _this.tweens.add({
                       targets: _this.coin,
-                      x: dest.x,
-                      y: dest.y,
-                      scale: originScale,
+                      x: coinScorePos.x,
+                      y: coinScorePos.y,
+                      scale: originCoinScale,
                       duration: 332,
                       ease: 'Circ',
                       onComplete: function () {
@@ -1655,13 +1563,13 @@
       // 原本这个是放在 UIScene 中的  但是因为addCoin 动画要表现在这里
       // 如果放在 UIScene (UIScene 在层级上最高) Coin会被UIScene 遮住
       EffectScene.prototype.createScoreArea = function () {
-          var scoreAreaCenter = new Point$5(stageWidth$6 / 2 + 100, 50);
+          var scoreAreaCenter = new Point$5(stageWidth$5 / 2 + 100, 50);
           var graphicsTopLeft = new Point$5(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y);
           this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y);
           var bg = this.add.graphics();
           bg.beginPath();
-          bg.fillStyle(0xf9ebe9); //yellow
-          bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth$6, 100);
+          bg.fillStyle(0xfc6158); //yellow
+          bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth$5, 100);
           bg.closePath();
           var scoreBoxWidth = 300;
           var scoreBoxHeight = 66;
@@ -1676,13 +1584,15 @@
           var scoreText = this.scoreText = this.add.text(scorePos.x - scoreAreaCenter.x, scorePos.y - scoreAreaCenter.y, '0', { fontFamily: 'Arial', fontSize: 22, color: '#cca398' });
           scoreText.setOrigin(0.5);
           this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText]);
+          var coinIcon = this.add.image(coinScorePos.x, coinScorePos.y, 'coin');
+          coinIcon.setScale(originCoinScale);
           return this.scoreArea;
       };
       EffectScene.prototype.dropACoin = function () {
           var dropCoin = this.matter.add.image(coinScorePos.x, coinScorePos.y, 'coin');
-          dropCoin.setScale(coinRadius * 2 / 512);
+          dropCoin.setScale(originCoinScale);
           this.droppingCoins.push(dropCoin);
-          dropCoin.setCircle(coinRadius);
+          dropCoin.setCircle(coinSize / 2);
           dropCoin.setFriction(0.005);
           dropCoin.setBounce(0.6);
           dropCoin.setVelocityX(1);
@@ -1690,9 +1600,10 @@
       };
       return EffectScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=EffectScene.js.map
 
-  var stageWidth$7 = document.body.clientWidth;
-  var stageHeight$7 = document.body.clientWidth / 9 * 16;
+  var stageWidth$6 = document.body.clientWidth;
+  var stageHeight$6 = document.body.clientWidth / 9 * 16;
   var BaseScene = /** @class */ (function (_super) {
       __extends(BaseScene, _super);
       function BaseScene() {
@@ -1724,6 +1635,7 @@
       };
       return BaseScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=BaseScene.js.map
 
   var GameSoundManager = /** @class */ (function () {
       function GameSoundManager() {
@@ -1849,12 +1761,27 @@
           scene.load.image('bgImg', 'assets/kitchen.png');
           scene.load.image('table', 'assets/table.png');
           scene.load.image('light', 'assets/light.png');
-          scene.load.image('food0', 'assets/burger.png');
-          scene.load.image('food1', 'assets/burrito.png');
-          scene.load.image('food2', 'assets/cheese-burger.png');
-          scene.load.image('food3', 'assets/chicken-leg.png');
-          scene.load.image('food4', 'assets/french-fries.png');
-          scene.load.image('food5', 'assets/donut.png');
+          scene.load.image('food0', 'assets/food/burger.png');
+          scene.load.image('food1', 'assets/food/burrito.png');
+          scene.load.image('food2', 'assets/food/cheese-burger.png');
+          scene.load.image('food3', 'assets/food/chicken-leg.png');
+          scene.load.image('food4', 'assets/food/french-fries.png');
+          scene.load.image('food5', 'assets/food/donut.png');
+          scene.load.image('food6', 'assets/food/001-burger.png');
+          scene.load.image('food7', 'assets/food/001-ice-cream.png');
+          scene.load.image('food8', 'assets/food/002-burger-1.png');
+          scene.load.image('food9', 'assets/food/002-ice-cream-1.png');
+          scene.load.image('food10', 'assets/food/003-french-fries.png');
+          scene.load.image('food11', 'assets/food/003-ice-cream-2.png');
+          scene.load.image('food12', 'assets/food/004-fried-egg.png');
+          scene.load.image('food13', 'assets/food/004-ice-cream-stick.png');
+          scene.load.image('food14', 'assets/food/005-bottle.png');
+          scene.load.image('food15', 'assets/food/006-banana.png');
+          scene.load.image('food16', 'assets/food/007-orange.png');
+          scene.load.image('food17', 'assets/food/008-orange-1.png');
+          scene.load.image('food18', 'assets/food/009-apple.png');
+          scene.load.image('food19', 'assets/food/010-grapes.png');
+          scene.load.image('plate', 'assets/plate.png');
           scene.load.image('coin', 'assets/coin.png');
           scene.load.image('hammer', 'assets/hammer.png');
           scene.load.image('dizzy1', 'assets/dizzy1.png');
@@ -1902,6 +1829,117 @@
       return AssetsScene;
   }(phaser.Scene));
   //# sourceMappingURL=AssetsScene.js.map
+
+  var offsetXPreview = 170;
+  var offsetYPreview = 250;
+  var previewWidth = 198;
+  var previewHeight = previewWidth * 16 / 9;
+  var isPC = window.navigator.userAgent.indexOf("PCMozilla") != -1;
+  // 给坐标加上取景器的偏移信息
+  // 原本的坐标信息是人脸相对取景器的位置
+  // 现在坐标信息变为相对整个画布的位置
+  function addOffsetForFaceData(target) {
+      var checkedType = function (target) {
+          return Object.prototype.toString.call(target).slice(8, -1);
+      };
+      //判断拷贝的数据类型
+      //初始化变量result 成为最终克隆的数据
+      var result;
+      var targetType = checkedType(target);
+      if (targetType === 'Object') {
+          result = {};
+      }
+      else if (targetType === 'Array') {
+          result = [];
+      }
+      else {
+          return target;
+      }
+      //遍历目标数据
+      for (var _i = 0, _a = Object.entries(target); _i < _a.length; _i++) {
+          var _b = _a[_i], key = _b[0], value = _b[1];
+          //获取遍历数据结构的每一项值。
+          // let value = target[key]
+          //判断目标结构里的每一值是否存在对象/数组
+          if (checkedType(value) === 'Object' ||
+              checkedType(value) === 'Array') { //对象/数组里嵌套了对象/数组
+              //继续遍历获取到value值
+              result[key] = addOffsetForFaceData(value);
+          }
+          else { //获取到value值是基本的数据类型或者是函数。
+              if (key == "x") {
+                  result[key] = offsetXPreview + value;
+              }
+              else if (key == "y") {
+                  result[key] = offsetYPreview + value;
+              }
+              else {
+                  result[key] = value;
+              }
+          }
+      }
+      return result;
+  }
+  // set preview area
+  function setPreview() {
+      window.addEventListener("load", function () {
+          setTimeout(function () {
+              window.postMessage({
+                  messageType: MSG_TYPE_CAM,
+                  previewArea: {
+                      y: offsetYPreview,
+                      x: offsetXPreview,
+                      width: previewWidth,
+                      height: previewHeight
+                  },
+              }, "*");
+          }, 1000);
+      }, false);
+  }
+  // 测试嘴巴位置
+  function changeMouth(game) {
+      //contours sample data
+      window.addEventListener("load", function () {
+          // 这个数据是和取景器大小有关的数据 
+          // 当 RN 的部分设置了取景器大小的时候, 返回的脸的位置也根据 RN 这里的实际尺寸有所压缩
+          // 但是和取景器的位移无关  毕竟安卓端也不知道取景器的相对位置
+          fetch('/assets/sampleContours.json').then(function (resp) {
+              return resp.json();
+          }).then(function (data) {
+              setTimeout(function () {
+                  // 在PC上调试
+                  if (window.navigator.userAgent.indexOf("PCMozilla") != -1) {
+                      var oneFace_1 = data[0];
+                      setInterval(function () {
+                          // moveFace(oneFace, changeDir)
+                          var afterOffsetForFaceData = addOffsetForFaceData(oneFace_1);
+                          window.postMessage({
+                              messageType: 'face',
+                              faceData: afterOffsetForFaceData
+                          }, "*");
+                      }, 100);
+                  }
+              }, 1000);
+          });
+      }, false);
+      // let points = [{x:100, y:500}, {x:200, y:600}, {x:100, y:600}, {x:200, y:600}]
+  }
+  // 获取鼠标点击位置
+  function testClickEvent(game) {
+      window.addEventListener('load', function () {
+          setTimeout(function () {
+              game.scene.getScene(GAME_SCENE).input.on('pointerup', function (pointer) {
+                  var touchX = pointer.x;
+                  var touchY = pointer.y;
+                  // let x = game.input.mousePointer.x;
+                  // let y = game.input.mousePointer.y;
+                  console.log('clickXY', touchX, touchY);
+                  // ...
+              });
+          });
+      }, false);
+  }
+  //# sourceMappingURL=test.js.map
 
   var fontTitleStyle = { font: '46px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 7, align: 'center' };
   var fontSettingsStyle = { font: '38px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 5, align: 'center' };
@@ -1960,22 +1998,23 @@
       };
       return SettingsScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=SettingsScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
   // import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
   var canvasELlem = document.querySelector('#gameCanvas');
-  var stageWidth$8 = document.body.clientWidth;
-  var stageHeight$8 = document.body.clientWidth / 9 * 16;
+  var stageWidth$7 = document.body.clientWidth;
+  var stageHeight$7 = document.body.clientWidth / 9 * 16;
   var documentWidth = document.body.clientWidth;
   var documentHeight = document.body.clientHeight;
-  canvasELlem.style.top = (documentHeight - stageHeight$8) / 2 + "px";
+  canvasELlem.style.top = (documentHeight - stageHeight$7) / 2 + "px";
   var config = {
       canvas: canvasELlem,
       type: Phaser.WEBGL,
       // parent: 'phaser-example',
-      width: stageWidth$8,
-      height: stageHeight$8,
+      width: stageWidth$7,
+      height: stageHeight$7,
       scene: [BaseScene, AssetsScene, Demo, EffectScene, GameUIScene, SettingsScene],
       transparent: true,
       physics: {

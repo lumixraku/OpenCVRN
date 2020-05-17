@@ -5,13 +5,19 @@ import Point = Phaser.Geom.Point;
 import Rectagle = Phaser.Geom.Rectangle;
 import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
+import Container = Phaser.GameObjects.Container
+
 import { Scene } from "phaser";
 
 
-const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientWidth / 9 * 16;
-import { isPC } from '@root/test'
+
+
+
+
 // import { isPC } from '../test'
+import { isPC } from '@root/test'
+import { ImageButton } from "@root/UI/UIUtil";
+import { DISTANCE_ANGLE, stageWidth, stageHeight } from "@root/constants";
 
 
 const angle2Rad = (angle: number) => {
@@ -19,42 +25,47 @@ const angle2Rad = (angle: number) => {
 }
 
 export default class SpinTable {
+    public tableContainer: Container;
+
     public spinTable: Sprite;
+
+
     private angleVal: number = 0;
     private rotationVal:number = 0;
+    public spSpinSpeed: number = 1;
     
     public circle: Circle; //计算位置时用 并不是一个可见的对象
-    public spSpinSpeed: number = 1;
-
     public circleRadius: number = stageWidth
-    public circleCenter: Point = new Point(stageWidth / 2, stageHeight + this.circleRadius / 2.3);    
+    public circleCenter: Point = new Point(stageWidth / 2 + 200, stageHeight + 100);    
+    public platePosRadius: number = this.circleRadius * 0.9
 
-
-    public distanceAngle: number = 60  //食物和食物之间的间隔(角度)
+    public distanceAngle: number = DISTANCE_ANGLE  //食物和食物之间的间隔(角度)
     public tableCapacity: number = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
     public distanceRad: number = 2 * Math.PI / this.tableCapacity
+    public plates: PhaserImage[] = []
 
 
-    constructor(pos: Point, radius: number, spinSpeed: number) {
-        this.circleCenter = pos
-        this.circleRadius = radius
+    public scene: Scene
+    constructor(scene: Scene, spinSpeed: number) {
         this.spSpinSpeed = spinSpeed
+        this.scene = scene
     }
 
-    addToContainer(scene: Scene){
-        this.spinTable = scene.add.sprite(this.circleCenter.x, this.circleCenter.y, 'table');
-        if (isPC) {
-            this.spinTable.alpha = 0.5
-
-        }
-        
-
+    createTable(){
+        this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);       
+        this.tableContainer = this.scene.add.container(this.circleCenter.x, this.circleCenter.y)
+        this.spinTable = this.scene.add.sprite(0, 0, 'table');
         let bds: Rectagle = this.spinTable.getBounds()
         let width = bds.width
+        this.spinTable.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2))        
+        // if (isPC) {
+        //     this.spinTable.alpha = 0.5
 
-        this.spinTable.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2))
-
-        this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);        
+        // }
+        
+        
+        this.tableContainer.add(this.spinTable)
+        this.addPlates()
     }
 
     setTableCapacity(tableCapacity: number) {
@@ -68,7 +79,8 @@ export default class SpinTable {
         // angle 是角度
         this.angleVal += this.spSpinSpeed
         this.rotationVal += angle2Rad(this.spSpinSpeed)
-        this.spinTable.rotation = this.rotationVal
+        // this.spinTable.rotation = this.rotationVal
+        this.tableContainer.rotation = this.rotationVal
     }
 
     getAngle(): number {
@@ -80,6 +92,16 @@ export default class SpinTable {
     }
 
 
+    addPlates() {
+        for (let i = 0; i < this.tableCapacity; i++) {
+            let rad = this.calcRadByIdx(i)
+            let circle = new Circle(0, 0, this.platePosRadius)
+            let p = this.calcRadToPoint(rad, circle)
+            this.plates[i] = this.scene.add.image(p.x, p.y, 'plate')
+            this.plates[i].setScale(2)
+            this.tableContainer.add(this.plates[i])
+        }
+    }
 
 
     /**
@@ -88,7 +110,7 @@ export default class SpinTable {
      * i starts from 0
      * @param i 
      */
-    calcFoodIAngle(i: number):number {
+    calcAngleByIndx(i: number):number {
         let rawAngle = this.getAngle()
         let angle = rawAngle + this.distanceAngle * (this.tableCapacity - i)
         return angle
@@ -100,7 +122,7 @@ export default class SpinTable {
      * 计算第 i 个食物的在当前桌面上的角度
      * 桌子是顺时针旋转  但是食物的摆放顺序是逆时针
      */
-    calcFoodIRad(i) {
+    calcRadByIdx(i) {
         let rawRad = this.rotationVal
         let rad = rawRad + this.distanceRad * (this.tableCapacity - i)
         return rad
@@ -112,9 +134,15 @@ export default class SpinTable {
         return point
     }
 
-    caleRadToPoint(rad: number): Point {
+    // 默认是以桌面半径计算位置 
+    // 但是有时候半径会不一样  比如盘子和食物
+    calcRadToPoint(rad: number, circle?: Circle): Point {
+        if (!circle) {
+            circle = this.circle
+        }
+
         let point = new Phaser.Geom.Point(0, 0)
-        Phaser.Geom.Circle.CircumferencePoint(this.circle, rad, point);
+        Phaser.Geom.Circle.CircumferencePoint(circle, rad, point);
         return point        
     }
 }
