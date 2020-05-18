@@ -88,19 +88,34 @@ export default class Demo extends Phaser.Scene {
     }
 
     preload() {
+        console.log('game preload')
         this.scene.launch(EF_SCENE)
-        this.scene.launch(UI_SCENE);                  
+        this.scene.launch(UI_SCENE)
     }
 
 
     // preload 中的资源都加载完毕之后 才会调用 create
     create() {
+        console.log('game create')
 
         GameSoundManager.initMusic(this)
-        this.scene.pause(GAME_SCENE);
-        this.scene.get(UI_SCENE).events.on('afterCreate', ()=> {
-            (<GameUIScene>this.scene.get(UI_SCENE)).showWelcome()
-        })
+
+
+        // setTimeout(() => {
+        //     this.scene.launch(SETTINGS_SCENE)
+
+
+        //     setTimeout(  ()=> {
+        //         this.scene.sendToBack(SETTINGS_SCENE)
+        //     }, 500)
+        // }, 500);
+
+
+        // this.scene.get(UI_SCENE).events.on('afterCreate', ()=> {
+        //     (<GameUIScene>this.scene.get(UI_SCENE)).showWelcome()
+        // })
+
+
 
 
 
@@ -144,6 +159,7 @@ export default class Demo extends Phaser.Scene {
 
     private frameCounter = 0
     update(time, delta) {
+        console.log('game ')
 
         this.rotateTable()
         this.addFoodIfNeed()
@@ -195,11 +211,14 @@ export default class Demo extends Phaser.Scene {
     }
 
     addCounter = 0
+
+
+
     addFoodIfNeed() {
         for (let i = 0; i < this.foodList.length; i++) {
-            // i = 0 angle 0
-            // i = 1 angle 60
-            // 盘子是空的, 且恰好转到合适的位置. 就添加食物
+            
+            
+            // 盘子是空的, 且恰好转到一个固定的位置. 就添加食物
             if (!this.foodList[i]) {
 
 
@@ -252,7 +271,7 @@ export default class Demo extends Phaser.Scene {
                     let food = this.add.image(0, 0, foodTextureKey) as Food
 
                     food.name = `Food${i}`
-                    food.setScale(2)
+                    food.setScale(1)
                     this.foodList[i] = food
                 }
             }

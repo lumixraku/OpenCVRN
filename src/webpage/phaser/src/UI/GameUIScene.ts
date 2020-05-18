@@ -10,7 +10,7 @@ import Container = Phaser.GameObjects.Container
 import InputButton = Phaser.Input.Gamepad.Button
 
 
-import { UI_SCENE, SETTINGS_SCENE, GAME_SCENE } from "../constants";
+import { UI_SCENE, SETTINGS_SCENE, GAME_SCENE, MAIN_RED_LIGHT, MAIN_RED } from "../constants";
 import { World } from "matter";
 import { UIHelper, ImageButton } from "./UIHelper";
 const stageWidth = document.body.clientWidth;
@@ -54,6 +54,8 @@ export default class GameUIScene extends Phaser.Scene {
     }
 
     create() {
+        this.bindEvents()
+
         this.addUIBtns()
 
         // this.showWelcome()
@@ -79,6 +81,13 @@ export default class GameUIScene extends Phaser.Scene {
         this.welcome = this.createWelcomeDialog(this, 300, 500)
         this.welcome.popUp(500)
     }
+
+    bindEvents() {
+        this.events.on('wake', () => {
+            this.cameras.main.fadeIn(250)
+        }, this)
+    }
+
 
     createWelcomeDialog(scene: Scene, width: number, height: number): UI.Dialog {
 
@@ -125,9 +134,9 @@ export default class GameUIScene extends Phaser.Scene {
         }
 
         let makeScrollSizer = (content: string): UI.ScrollablePanel => {
-            const COLOR_PRIMARY = 0x4e342e;
-            const COLOR_LIGHT = 0x7b5e57;
-            const COLOR_DARK = 0x260e04;
+            // const COLOR_PRIMARY = 0x4e342e;
+            // const COLOR_LIGHT = 0x7b5e57;
+            // const COLOR_DARK = 0x260e04;
 
             let scrollPanel = scene.rexUI.add.scrollablePanel({
                 x: width / 2,
@@ -136,7 +145,7 @@ export default class GameUIScene extends Phaser.Scene {
                 height: 340, // Minimum height of round-rectangle ???      
 
                 scrollMode: 0,
-                background: this.rexUI.add.roundRectangle(0, 0, 2, 2, 10, 0xcccccc),
+                background: this.rexUI.add.roundRectangle(0, 0, 2, 2, 10, 0xffffff),
                 panel: {
                     // child: makeContentLabel(content),
                     child: makeFixWidthPanel(240, content),
@@ -171,7 +180,8 @@ export default class GameUIScene extends Phaser.Scene {
                     for (var wi = 0, wcnt = words.length; wi < wcnt; wi++) {
                         sizer.add(
                             scene.add.text(0, 0, words[wi], {
-                                fontSize: 18
+                                fontSize: 18,
+                                color: '#666'
                             })
                             // .setInteractive()
                             // .on('pointerdown', function () {
@@ -198,7 +208,11 @@ export default class GameUIScene extends Phaser.Scene {
         let x = stageWidth / 2
         let y = stageHeight / 2
 
-        let contentStr = `吃汉堡的游戏吃汉堡的游, 戏吃汉堡的游戏, 吃汉堡的游戏, 吃汉堡的游戏,吃汉堡的游戏吃汉堡的游戏`
+        let contentStr = 
+`这是一个偷吃汉堡的游戏! \n
+⚠️你只可以吃汉堡薯条，喝可乐。\n其他的你都不喜欢吃。\n另外你没有钱，\n只能在厨师看不到你的时候吃。\n\n
+把整张脸都放在框内， 通过张嘴就可以偷吃啦
+`
 
         // 默认x y 是 Dialog 中心位置   也就是说 Pivot 默认是 center 
         let dialog = scene.rexUI.add.dialog({
@@ -208,12 +222,13 @@ export default class GameUIScene extends Phaser.Scene {
             // height: height,
 
             // background 并不在意大小的
-            background: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xf57f17),
+            background: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, MAIN_RED),
 
             title: scene.rexUI.add.label({
-                background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0xbc5100),
+                background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, MAIN_RED_LIGHT),
                 text: scene.add.text(0, 0, 'Eat Burger AR Game', {
-                    fontSize: '20px'
+                    fontSize: '20px',
+                    color: '#FC6158', //string
                 }),
                 space: {
                     left: 10,
@@ -351,9 +366,9 @@ export default class GameUIScene extends Phaser.Scene {
             this,
             new Rectagle(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight),
             20,
-            0xf9ebe9,
+            MAIN_RED_LIGHT,
             5,
-            0xfc6158,
+            MAIN_RED,
         )
         
         let AlternativeEmoji = ['sad', 'cry', 'sour']
@@ -499,10 +514,24 @@ export default class GameUIScene extends Phaser.Scene {
     addUIBtns() {
         
         let settingsClick = (e) => {
-            UIHelper.fadeToScene(SETTINGS_SCENE, this)
+            UIHelper.fadeToAddAnotherScene(SETTINGS_SCENE, this)
+
+
+            // this.scene.get(SETTINGS_SCENE).cameras.main.fadeIn(0)
+            // this.cameras.main.fadeOut(250);
+
+            // if (!this.scene.isActive(SETTINGS_SCENE) &&
+            //     !this.scene.isPaused(SETTINGS_SCENE) &&
+            //     !this.scene.isSleeping(SETTINGS_SCENE)
+            // ) {
+            //     this.scene.launch(SETTINGS_SCENE)
+            // } else {
+            //     if (this.scene.isSleeping(SETTINGS_SCENE)) {
+            //         this.scene.wake(SETTINGS_SCENE);
+            //     }
+            // }
         }
-
-
+        settingsClick.bind(this)
         this.settingsBtn = new ImageButton(this, 50, 50, 'button-settings', settingsClick)
         this.add.existing(this.settingsBtn);
 

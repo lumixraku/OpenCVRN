@@ -109,26 +109,20 @@ export default class AssetsScene extends Scene {
         scene.load.image('table', 'assets/table.png');
         scene.load.image('light', 'assets/light.png');
 
-        scene.load.image('food0', 'assets/food/burger.png');
-        scene.load.image('food1', 'assets/food/burrito.png');
-        scene.load.image('food2', 'assets/food/cheese-burger.png');
-        scene.load.image('food3', 'assets/food/chicken-leg.png');
-        scene.load.image('food4', 'assets/food/french-fries.png');
-        scene.load.image('food5', 'assets/food/donut.png');
-        scene.load.image('food6', 'assets/food/001-burger.png')
-        scene.load.image('food7', 'assets/food/001-ice-cream.png')
-        scene.load.image('food8', 'assets/food/002-burger-1.png')
-        scene.load.image('food9', 'assets/food/002-ice-cream-1.png')
-        scene.load.image('food10', 'assets/food/003-french-fries.png')
-        scene.load.image('food11', 'assets/food/003-ice-cream-2.png')
-        scene.load.image('food12', 'assets/food/004-fried-egg.png')
-        scene.load.image('food13', 'assets/food/004-ice-cream-stick.png')
-        scene.load.image('food14', 'assets/food/005-bottle.png')
-        scene.load.image('food15', 'assets/food/006-banana.png')
-        scene.load.image('food16', 'assets/food/007-orange.png')
-        scene.load.image('food17', 'assets/food/008-orange-1.png')
-        scene.load.image('food18', 'assets/food/009-apple.png')
-        scene.load.image('food19', 'assets/food/010-grapes.png')
+        scene.load.image('food0', 'assets/food/010-grapes.png')
+        scene.load.image('food1', 'assets/food/001-burger.png')
+        scene.load.image('food2', 'assets/food/001-ice-cream.png')
+        scene.load.image('food3', 'assets/food/002-burger-1.png')
+        scene.load.image('food4', 'assets/food/002-ice-cream-1.png')
+        scene.load.image('food5', 'assets/food/003-french-fries.png')
+        scene.load.image('food6', 'assets/food/003-ice-cream-2.png')
+        scene.load.image('food7', 'assets/food/004-fried-egg.png')
+        scene.load.image('food8', 'assets/food/004-ice-cream-stick.png')
+        scene.load.image('food9', 'assets/food/005-bottle.png')
+        scene.load.image('food10', 'assets/food/006-banana.png')
+        scene.load.image('food11', 'assets/food/007-orange.png')
+        scene.load.image('food12', 'assets/food/008-orange-1.png')
+        scene.load.image('food13', 'assets/food/009-apple.png')
 
         scene.load.image('plate', 'assets/plate.png')
 

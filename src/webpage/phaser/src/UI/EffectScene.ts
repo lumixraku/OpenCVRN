@@ -1,5 +1,5 @@
 import { Scene } from "phaser";
-import { EF_SCENE, HIT_DIZZY } from "../constants";
+import { EF_SCENE, HIT_DIZZY, MAIN_RED, MAIN_RED_LIGHT } from "../constants";
 import PhaserImage = Phaser.GameObjects.Image;
 import Sprite = Phaser.GameObjects.Sprite;
 import Circle = Phaser.Geom.Circle;
@@ -92,19 +92,19 @@ export default class EffectScene extends Phaser.Scene {
     }
 
     addCoin(addScoreCount: Function) {
-        this.coin = this.add.image(stageWidth/2, stageHeight/2, 'coin')
+        let coin = this.add.image(stageWidth/2, stageHeight/2, 'coin')
         // this.coin.displayWidth = 64
         // this.coin.displayHeight = 64
         // scale 是根据原图的大小而言的。
 
-        this.coin.setScale(originCoinScale )
+        coin.setScale(originCoinScale )
 
         let self = this
 
 
         this.animationPlaying.addCoin = true
         this.tweens.add({
-            targets: this.coin,
+            targets: coin,
             scale: 0.2,
             duration: 132,
             ease: 'Power4',
@@ -112,7 +112,7 @@ export default class EffectScene extends Phaser.Scene {
                 // cb()
 
                 this.tweens.add({
-                    targets: this.coin,
+                    targets: coin,
                     x: coinScorePos.x,
                     y: coinScorePos.y,
                     scale: originCoinScale,
@@ -120,7 +120,7 @@ export default class EffectScene extends Phaser.Scene {
                     ease: 'Circ',
                     onComplete: () => {
                         addScoreCount(1)
-                        this.coin.destroy()
+                        coin.destroy()
                         this.animationPlaying.addCoin = false
                     }
                 })                 
@@ -191,7 +191,7 @@ export default class EffectScene extends Phaser.Scene {
 
         let bg = this.add.graphics()
         bg.beginPath()
-        bg.fillStyle(0xfc6158) //yellow
+        bg.fillStyle(MAIN_RED) //yellow
         bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth, 100)
         bg.closePath()
 
@@ -206,7 +206,7 @@ export default class EffectScene extends Phaser.Scene {
             scoreBoxWidth,
             scoreBoxHeight
         )
-        let scoreBox = UIHelper.drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, 0xFc6158, scoreBoxBorder, 0xf9ebe9)
+        let scoreBox = UIHelper.drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, MAIN_RED, scoreBoxBorder, MAIN_RED_LIGHT)
 
         let scoreTitlePos = new Point(scoreAreaCenter.x - 50, scoreAreaCenter.y)
         let scoreTitle = this.add.text(
