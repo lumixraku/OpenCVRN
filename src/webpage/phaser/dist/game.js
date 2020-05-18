@@ -12,7 +12,7 @@
   // scene
   var BASE_SCENE = 'base';
   var GAME_SCENE = 'game';
-  var UI_SCENE = 'gameUIScene';
+  var GAMEUI_SCENE = 'gameUIScene';
   var EF_SCENE = 'effectScene';
   var SETTINGS_SCENE = 'settingsScene';
   var ASSETS_SCENE = 'assetsScene';
@@ -28,6 +28,9 @@
   var COOK_LOOKBACK_ANIMI = 'lookback';
   var COOK_TOCOOK_ANIMI = 'cookAgain';
   var HIT_DIZZY = 'hitDizzy';
+  // color
+  var MAIN_RED = 0xfc6158;
+  var MAIN_RED_LIGHT = 0xf9ebe9;
   //# sourceMappingURL=constants.js.map
 
   /*! *****************************************************************************
@@ -298,6 +301,7 @@
           this.spSpinSpeed = 1;
           this.circleRadius = stageWidth;
           this.circleCenter = new Point$1(stageWidth / 2 + 200, stageHeight + 200);
+          // public circleCenter: Point = new Point(stageWidth / 2 , stageHeight - 200);    
           this.platePosRadius = this.circleRadius * 0.9;
           this.distanceAngle = DISTANCE_ANGLE; //食物和食物之间的间隔(角度)
           this.tableCapacity = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
@@ -793,17 +797,23 @@
           return _this;
       }
       Demo.prototype.preload = function () {
+          console.log('game preload');
           this.scene.launch(EF_SCENE);
-          this.scene.launch(UI_SCENE);
+          this.scene.launch(GAMEUI_SCENE);
       };
       // preload 中的资源都加载完毕之后 才会调用 create
       Demo.prototype.create = function () {
-          var _this = this;
+          console.log('game create');
           GameSoundManager.initMusic(this);
-          this.scene.pause(GAME_SCENE);
-          this.scene.get(UI_SCENE).events.on('afterCreate', function () {
-              _this.scene.get(UI_SCENE).showWelcome();
-          });
+          // setTimeout(() => {
+          //     this.scene.launch(SETTINGS_SCENE)
+          //     setTimeout(  ()=> {
+          //         this.scene.sendToBack(SETTINGS_SCENE)
+          //     }, 500)
+          // }, 500);
+          // this.scene.get(UI_SCENE).events.on('afterCreate', ()=> {
+          //     (<GameUIScene>this.scene.get(UI_SCENE)).showWelcome()
+          // })
           this.timer = this.time.addEvent({
               // delay: 500,                // ms
               // callback: callback,
@@ -819,7 +829,7 @@
           this.mouthObj = new Mouth(this);
           this.refreshMouth([], [], [], []);
           this.addText();
-          this.uiScene = this.scene.get(UI_SCENE);
+          this.uiScene = this.scene.get(GAMEUI_SCENE);
           this.effScene = this.scene.get(EF_SCENE);
           this.animateManager = new AnimateManager(this);
           this.animateManager.registerAnimation();
@@ -828,6 +838,7 @@
           this.cameras.main.fadeIn(250);
       };
       Demo.prototype.update = function (time, delta) {
+          console.log('game ');
           this.rotateTable();
           this.addFoodIfNeed();
           this.movingFoodOnTable();
@@ -869,9 +880,7 @@
       };
       Demo.prototype.addFoodIfNeed = function () {
           for (var i = 0; i < this.foodList.length; i++) {
-              // i = 0 angle 0
-              // i = 1 angle 60
-              // 盘子是空的, 且恰好转到合适的位置. 就添加食物
+              // 盘子是空的, 且恰好转到一个固定的位置. 就添加食物
               if (!this.foodList[i]) {
                   //
                   //               +
@@ -914,7 +923,7 @@
                       var foodTextureKey = "food" + i;
                       var food = this.add.image(0, 0, foodTextureKey);
                       food.name = "Food" + i;
-                      food.setScale(2);
+                      food.setScale(1);
                       this.foodList[i] = food;
                   }
               }
@@ -1171,6 +1180,7 @@
       };
       return Demo;
   }(Phaser.Scene));
+  //# sourceMappingURL=game.js.map
 
   var UIHelper = /** @class */ (function () {
       function UIHelper() {
@@ -1206,12 +1216,45 @@
       UIHelper.createImageButton = function (scene, x, y, texture, callback, noframes) {
           return new ImageButton(scene, x, y, texture, callback, noframes);
       };
-      UIHelper.fadeToScene = function (newScene, currentScene) {
+      UIHelper.fadeToStartScene = function (newScene, currentScene) {
           currentScene.cameras.main.fadeOut(250);
           currentScene.time.addEvent({
               delay: 250,
               callback: function () {
                   currentScene.scene.start(newScene);
+              },
+              callbackScope: currentScene
+          });
+      };
+      UIHelper.fadeToAddAnotherScene = function (newScene, currentScene) {
+          // 先把目标场景显示
+          currentScene.scene.get(newScene).cameras.main.fadeIn(0);
+          // 当前场景慢慢淡出
+          currentScene.cameras.main.fadeOut(250);
+          currentScene.time.addEvent({
+              delay: 250,
+              callback: function () {
+                  if (!currentScene.scene.isActive(newScene) &&
+                      !currentScene.scene.isPaused(newScene) &&
+                      !currentScene.scene.isSleeping(newScene)) {
+                      currentScene.scene.launch(newScene);
+                  }
+                  else {
+                      if (currentScene.scene.isSleeping(newScene)) {
+                          currentScene.scene.wake(newScene);
+                      }
+                  }
+              },
+              callbackScope: currentScene
+          });
+      };
+      UIHelper.fadeToPrevScene = function (resumeScene, currentScene) {
+          currentScene.scene.get(resumeScene).cameras.main.fadeIn(0);
+          currentScene.cameras.main.fadeOut(250);
+          currentScene.time.addEvent({
+              delay: 250,
+              callback: function () {
+                  currentScene.scene.sleep(currentScene.scene.key);
               },
               callbackScope: currentScene
           });
@@ -1263,7 +1306,7 @@
   var GameUIScene = /** @class */ (function (_super) {
       __extends(GameUIScene, _super);
       function GameUIScene() {
-          return _super.call(this, UI_SCENE) || this;
+          return _super.call(this, GAMEUI_SCENE) || this;
       }
       GameUIScene.prototype.preload = function () {
           // 用到 rexUI scene 必须加载 scenePlugin
@@ -1274,6 +1317,7 @@
           });
       };
       GameUIScene.prototype.create = function () {
+          this.bindEvents();
           this.addUIBtns();
           // this.showWelcome()
           // this.welcome.visible = false
@@ -1292,6 +1336,12 @@
           this.welcome = this.createWelcomeDialog(this, 300, 500);
           this.welcome.popUp(500);
       };
+      GameUIScene.prototype.bindEvents = function () {
+          var _this = this;
+          this.events.on('wake', function () {
+              _this.cameras.main.fadeIn(250);
+          }, this);
+      };
       GameUIScene.prototype.createWelcomeDialog = function (scene, width, height) {
           var _this = this;
           var makeFixWidthPanel = function (maxwidth, content) {
@@ -1309,13 +1359,16 @@
               return sizer;
           };
           var makeScrollSizer = function (content) {
+              // const COLOR_PRIMARY = 0x4e342e;
+              // const COLOR_LIGHT = 0x7b5e57;
+              // const COLOR_DARK = 0x260e04;
               var scrollPanel = scene.rexUI.add.scrollablePanel({
                   x: width / 2,
                   y: height / 2,
                   width: 240,
                   height: 340,
                   scrollMode: 0,
-                  background: _this.rexUI.add.roundRectangle(0, 0, 2, 2, 10, 0xcccccc),
+                  background: _this.rexUI.add.roundRectangle(0, 0, 2, 2, 10, 0xffffff),
                   panel: {
                       // child: makeContentLabel(content),
                       child: makeFixWidthPanel(),
@@ -1344,7 +1397,8 @@
                       var words = lines[li].split(' ');
                       for (var wi = 0, wcnt = words.length; wi < wcnt; wi++) {
                           sizer.add(scene.add.text(0, 0, words[wi], {
-                              fontSize: 18
+                              fontSize: 18,
+                              color: '#666'
                           })
                           // .setInteractive()
                           // .on('pointerdown', function () {
@@ -1366,7 +1420,7 @@
           // x y 用于定位panel的位置  默认 xy 是panel 的中心点
           var x = stageWidth$4 / 2;
           var y = stageHeight$4 / 2;
-          var contentStr = "\u5403\u6C49\u5821\u7684\u6E38\u620F\u5403\u6C49\u5821\u7684\u6E38, \u620F\u5403\u6C49\u5821\u7684\u6E38\u620F, \u5403\u6C49\u5821\u7684\u6E38\u620F, \u5403\u6C49\u5821\u7684\u6E38\u620F,\u5403\u6C49\u5821\u7684\u6E38\u620F\u5403\u6C49\u5821\u7684\u6E38\u620F";
+          var contentStr = "\u8FD9\u662F\u4E00\u4E2A\u5077\u5403\u6C49\u5821\u7684\u6E38\u620F! \n\n\u26A0\uFE0F\u4F60\u53EA\u53EF\u4EE5\u5403\u6C49\u5821\u85AF\u6761\uFF0C\u559D\u53EF\u4E50\u3002\n\u5176\u4ED6\u7684\u4F60\u90FD\u4E0D\u559C\u6B22\u5403\u3002\n\u53E6\u5916\u4F60\u6CA1\u6709\u94B1\uFF0C\n\u53EA\u80FD\u5728\u53A8\u5E08\u770B\u4E0D\u5230\u4F60\u7684\u65F6\u5019\u5403\u3002\n\n\n\u628A\u6574\u5F20\u8138\u90FD\u653E\u5728\u6846\u5185\uFF0C \u901A\u8FC7\u5F20\u5634\u5C31\u53EF\u4EE5\u5077\u5403\u5566\n";
           // 默认x y 是 Dialog 中心位置   也就是说 Pivot 默认是 center 
           var dialog = scene.rexUI.add.dialog({
               x: x,
@@ -1374,11 +1428,12 @@
               width: width,
               // height: height,
               // background 并不在意大小的
-              background: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xf57f17),
+              background: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, MAIN_RED),
               title: scene.rexUI.add.label({
-                  background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0xbc5100),
+                  background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, MAIN_RED_LIGHT),
                   text: scene.add.text(0, 0, 'Eat Burger AR Game', {
-                      fontSize: '20px'
+                      fontSize: '20px',
+                      color: '#FC6158',
                   }),
                   space: {
                       left: 10,
@@ -1484,7 +1539,7 @@
           // 添加元素的时候也是将子元素的origin 和 父容器的origin 对齐
           // graphic 的 origin 是左上角
           // f9ebe9
-          var bg = UIHelper.drawRoundRect(this, new Rectagle$3(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, 0xf9ebe9, 5, 0xfc6158);
+          var bg = UIHelper.drawRoundRect(this, new Rectagle$3(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, MAIN_RED_LIGHT, 5, MAIN_RED);
           var AlternativeEmoji = ['sad', 'cry', 'sour'];
           var hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji);
           var emojiPos = TopLeftToCenter(400, 100, new Point$4(50, 50));
@@ -1606,13 +1661,27 @@
       GameUIScene.prototype.addUIBtns = function () {
           var _this = this;
           var settingsClick = function (e) {
-              UIHelper.fadeToScene(SETTINGS_SCENE, _this);
+              UIHelper.fadeToAddAnotherScene(SETTINGS_SCENE, _this);
+              // this.scene.get(SETTINGS_SCENE).cameras.main.fadeIn(0)
+              // this.cameras.main.fadeOut(250);
+              // if (!this.scene.isActive(SETTINGS_SCENE) &&
+              //     !this.scene.isPaused(SETTINGS_SCENE) &&
+              //     !this.scene.isSleeping(SETTINGS_SCENE)
+              // ) {
+              //     this.scene.launch(SETTINGS_SCENE)
+              // } else {
+              //     if (this.scene.isSleeping(SETTINGS_SCENE)) {
+              //         this.scene.wake(SETTINGS_SCENE);
+              //     }
+              // }
           };
+          settingsClick.bind(this);
           this.settingsBtn = new ImageButton(this, 50, 50, 'button-settings', settingsClick);
           this.add.existing(this.settingsBtn);
       };
       return GameUIScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=GameUIScene.js.map
 
   var Point$5 = Phaser.Geom.Point;
   var Rectagle$4 = Phaser.Geom.Rectangle;
@@ -1672,21 +1741,21 @@
       };
       EffectScene.prototype.addCoin = function (addScoreCount) {
           var _this = this;
-          this.coin = this.add.image(stageWidth$5 / 2, stageHeight$5 / 2, 'coin');
+          var coin = this.add.image(stageWidth$5 / 2, stageHeight$5 / 2, 'coin');
           // this.coin.displayWidth = 64
           // this.coin.displayHeight = 64
           // scale 是根据原图的大小而言的。
-          this.coin.setScale(originCoinScale);
+          coin.setScale(originCoinScale);
           this.animationPlaying.addCoin = true;
           this.tweens.add({
-              targets: this.coin,
+              targets: coin,
               scale: 0.2,
               duration: 132,
               ease: 'Power4',
               onComplete: function () {
                   // cb()
                   _this.tweens.add({
-                      targets: _this.coin,
+                      targets: coin,
                       x: coinScorePos.x,
                       y: coinScorePos.y,
                       scale: originCoinScale,
@@ -1694,7 +1763,7 @@
                       ease: 'Circ',
                       onComplete: function () {
                           addScoreCount(1);
-                          _this.coin.destroy();
+                          coin.destroy();
                           _this.animationPlaying.addCoin = false;
                       }
                   });
@@ -1751,7 +1820,7 @@
           this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y);
           var bg = this.add.graphics();
           bg.beginPath();
-          bg.fillStyle(0xfc6158); //yellow
+          bg.fillStyle(MAIN_RED); //yellow
           bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth$5, 100);
           bg.closePath();
           var scoreBoxWidth = 300;
@@ -1759,7 +1828,7 @@
           var scoreBoxRadius = scoreBoxHeight / 2;
           var scoreBoxBorder = 10;
           var scoreBoxRectagle = new Rectagle$4((scoreAreaCenter.x - scoreBoxWidth / 2) - scoreAreaCenter.x, (scoreAreaCenter.y - scoreBoxHeight / 2) - scoreAreaCenter.y, scoreBoxWidth, scoreBoxHeight);
-          var scoreBox = UIHelper.drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, 0xFc6158, scoreBoxBorder, 0xf9ebe9);
+          var scoreBox = UIHelper.drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, MAIN_RED, scoreBoxBorder, MAIN_RED_LIGHT);
           var scoreTitlePos = new Point$5(scoreAreaCenter.x - 50, scoreAreaCenter.y);
           var scoreTitle = this.add.text(scoreTitlePos.x - scoreAreaCenter.x, scoreTitlePos.y - scoreAreaCenter.y, 'score:', { fontFamily: 'Arial', fontSize: 22, color: '#ffffff' });
           scoreTitle.setOrigin(0.5);
@@ -1818,6 +1887,7 @@
       };
       return BaseScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=BaseScene.js.map
 
   // import { DOGCOOK } from "../constants";
   var AssetsScene = /** @class */ (function (_super) {
@@ -1898,26 +1968,20 @@
           scene.load.image('bgImg', 'assets/kitchen.png');
           scene.load.image('table', 'assets/table.png');
           scene.load.image('light', 'assets/light.png');
-          scene.load.image('food0', 'assets/food/burger.png');
-          scene.load.image('food1', 'assets/food/burrito.png');
-          scene.load.image('food2', 'assets/food/cheese-burger.png');
-          scene.load.image('food3', 'assets/food/chicken-leg.png');
-          scene.load.image('food4', 'assets/food/french-fries.png');
-          scene.load.image('food5', 'assets/food/donut.png');
-          scene.load.image('food6', 'assets/food/001-burger.png');
-          scene.load.image('food7', 'assets/food/001-ice-cream.png');
-          scene.load.image('food8', 'assets/food/002-burger-1.png');
-          scene.load.image('food9', 'assets/food/002-ice-cream-1.png');
-          scene.load.image('food10', 'assets/food/003-french-fries.png');
-          scene.load.image('food11', 'assets/food/003-ice-cream-2.png');
-          scene.load.image('food12', 'assets/food/004-fried-egg.png');
-          scene.load.image('food13', 'assets/food/004-ice-cream-stick.png');
-          scene.load.image('food14', 'assets/food/005-bottle.png');
-          scene.load.image('food15', 'assets/food/006-banana.png');
-          scene.load.image('food16', 'assets/food/007-orange.png');
-          scene.load.image('food17', 'assets/food/008-orange-1.png');
-          scene.load.image('food18', 'assets/food/009-apple.png');
-          scene.load.image('food19', 'assets/food/010-grapes.png');
+          scene.load.image('food0', 'assets/food/010-grapes.png');
+          scene.load.image('food1', 'assets/food/001-burger.png');
+          scene.load.image('food2', 'assets/food/001-ice-cream.png');
+          scene.load.image('food3', 'assets/food/002-burger-1.png');
+          scene.load.image('food4', 'assets/food/002-ice-cream-1.png');
+          scene.load.image('food5', 'assets/food/003-french-fries.png');
+          scene.load.image('food6', 'assets/food/003-ice-cream-2.png');
+          scene.load.image('food7', 'assets/food/004-fried-egg.png');
+          scene.load.image('food8', 'assets/food/004-ice-cream-stick.png');
+          scene.load.image('food9', 'assets/food/005-bottle.png');
+          scene.load.image('food10', 'assets/food/006-banana.png');
+          scene.load.image('food11', 'assets/food/007-orange.png');
+          scene.load.image('food12', 'assets/food/008-orange-1.png');
+          scene.load.image('food13', 'assets/food/009-apple.png');
           scene.load.image('plate', 'assets/plate.png');
           scene.load.image('coin', 'assets/coin.png');
           scene.load.image('hammer', 'assets/hammer.png');
@@ -1979,11 +2043,19 @@
       SettingsScene.prototype.preload = function () {
       };
       SettingsScene.prototype.create = function () {
+          this.cameras.main.fadeIn(0);
+          this.bindEvents();
           this.createBackground();
           this.createTitle();
           this.createSoundBtn();
           this.createMusicBtn();
           this.createBackBtn();
+      };
+      SettingsScene.prototype.bindEvents = function () {
+          var _this = this;
+          this.events.on('wake', function () {
+              _this.cameras.main.fadeIn(0);
+          }, this);
       };
       SettingsScene.prototype.createBackground = function () {
           this.add.sprite(0, 0, BACKGROUND).setOrigin(0, 0);
@@ -1997,7 +2069,16 @@
           var _this = this;
           var backClick = function () {
               GameSoundManager.playSound();
-              UIHelper.fadeToScene(UI_SCENE, _this);
+              UIHelper.fadeToPrevScene(GAMEUI_SCENE, _this);
+              // this.scene.get(UI_SCENE).cameras.main.fadeIn(0)
+              // this.cameras.main.fadeOut(250);
+              // this.time.addEvent({
+              //     delay: 250,
+              //     callback: function () {
+              //         this.scene.sleep(SETTINGS_SCENE);
+              //     },
+              //     callbackScope: this                    
+              // })
           };
           this.backBtn = new ImageButton(this, 50, 50, 'button-back', backClick);
           this.add.existing(this.backBtn);
@@ -2038,7 +2119,6 @@
       };
       return SettingsScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=SettingsScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);

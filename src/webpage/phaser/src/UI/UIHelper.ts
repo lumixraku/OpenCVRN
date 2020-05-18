@@ -8,6 +8,7 @@ import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
 import Container = Phaser.GameObjects.Container
 import { Scene } from "phaser";
+import { UI_SCENE } from "@root/constants";
 
 export { UIHelper, ImageButton }
 
@@ -54,12 +55,51 @@ class UIHelper {
         return new ImageButton(scene, x, y, texture, callback, noframes)
     }
 
-    public static fadeToScene(newScene: string, currentScene:Scene){
+    public static fadeToStartScene(newScene: string, currentScene:Scene){
         currentScene.cameras.main.fadeOut(250);
         currentScene.time.addEvent({
             delay: 250,
             callback: function () {
                 currentScene.scene.start(newScene);
+            },
+            callbackScope: currentScene
+        });        
+    }
+
+
+    public static fadeToAddAnotherScene(newScene:string, currentScene: Scene) {
+        // 先把目标场景显示
+        currentScene.scene.get(newScene).cameras.main.fadeIn(0);
+
+        // 当前场景慢慢淡出
+        currentScene.cameras.main.fadeOut(250);
+        currentScene.time.addEvent({
+            delay: 250,
+            callback: function () {
+                if (!currentScene.scene.isActive(newScene) && 
+                    !currentScene.scene.isPaused(newScene) &&
+                    !currentScene.scene.isSleeping(newScene)
+                ) {
+                    currentScene.scene.launch(newScene)
+                }else {
+                    if (currentScene.scene.isSleeping(newScene)) {
+                        currentScene.scene.wake(newScene);
+                    }                    
+                }
+            },
+            callbackScope: currentScene
+        });                
+    }
+
+    public static fadeToPrevScene(resumeScene: string, currentScene: Scene) {
+        currentScene.scene.get(resumeScene).cameras.main.fadeIn(0);
+
+
+        currentScene.cameras.main.fadeOut(250);
+        currentScene.time.addEvent({
+            delay: 250,
+            callback: function () {
+                currentScene.scene.sleep(currentScene.scene.key);
             },
             callbackScope: currentScene
         });        

@@ -14,7 +14,7 @@ const MSG_TYPE_FACE_TARGET_POS = 'face_target' // WEB 告知 RN 人脸应该固�
 // scene
 const BASE_SCENE = 'base'
 const GAME_SCENE = 'game'
-const UI_SCENE = 'gameUIScene'
+const GAMEUI_SCENE = 'gameUIScene'
 const EF_SCENE = 'effectScene'
 const SETTINGS_SCENE = 'settingsScene'
 const ASSETS_SCENE = 'assetsScene'
@@ -40,7 +40,9 @@ const COOK_LOOKBACK_ANIMI = 'lookback'
 const COOK_TOCOOK_ANIMI = 'cookAgain'
 const HIT_DIZZY = 'hitDizzy'
 
-
+// color
+const MAIN_RED = 0xfc6158
+const MAIN_RED_LIGHT = 0xf9ebe9
 
 export {
   //SCREEN 
@@ -65,6 +67,11 @@ export {
   SOUNDKEY,
   MUSICKEY,
 
+  //color
+  MAIN_RED, 
+  MAIN_RED_LIGHT,
+
+
   // animation
   COOK_LOOKBACK_ANIMI,
   COOK_TOCOOK_ANIMI,
@@ -73,7 +80,7 @@ export {
   // scene
   BASE_SCENE,
   GAME_SCENE,
-  UI_SCENE,
+  GAMEUI_SCENE as UI_SCENE,
   EF_SCENE,
   SETTINGS_SCENE,
   ASSETS_SCENE,

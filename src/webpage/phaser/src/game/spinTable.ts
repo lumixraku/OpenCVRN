@@ -37,6 +37,8 @@ export default class SpinTable {
     public circle: Circle; //计算位置时用 并不是一个可见的对象
     public circleRadius: number = stageWidth
     public circleCenter: Point = new Point(stageWidth / 2 + 200, stageHeight + 200);    
+    // public circleCenter: Point = new Point(stageWidth / 2 , stageHeight - 200);    
+
     public platePosRadius: number = this.circleRadius * 0.9
 
     public distanceAngle: number = DISTANCE_ANGLE  //食物和食物之间的间隔(角度)

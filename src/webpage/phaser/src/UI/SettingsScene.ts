@@ -27,6 +27,10 @@ export default class SettingsScene extends Phaser.Scene {
 
 
         create() {
+            this.cameras.main.fadeIn(0)
+
+            this.bindEvents()
+
             this.createBackground()
             this.createTitle()
             this.createSoundBtn()
@@ -34,7 +38,11 @@ export default class SettingsScene extends Phaser.Scene {
             this.createBackBtn()
             
         }
-
+        bindEvents() {
+            this.events.on('wake', () => {
+                this.cameras.main.fadeIn(0)
+            }, this)
+        }
 
 
         createBackground() {
@@ -55,7 +63,17 @@ export default class SettingsScene extends Phaser.Scene {
 
             let backClick = () => {
                 GameSoundManager.playSound()
-                UIHelper.fadeToScene(UI_SCENE, this)
+                UIHelper.fadeToPrevScene(UI_SCENE, this)
+                // this.scene.get(UI_SCENE).cameras.main.fadeIn(0)
+                // this.cameras.main.fadeOut(250);
+                // this.time.addEvent({
+                //     delay: 250,
+                //     callback: function () {
+                //         this.scene.sleep(SETTINGS_SCENE);
+                //     },
+                //     callbackScope: this                    
+                // })
+
             }
 
             this.backBtn = new ImageButton(this, 50, 50, 'button-back', backClick)

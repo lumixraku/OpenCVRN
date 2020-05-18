@@ -116,6 +116,19 @@ window.WebFont.load(...);
 https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ease-function/
 
 
+### sleep & wake
+https://www.html5gamedevs.com/topic/39799-scene-wake-is-not-called/
+
+```
+            this.scene.sleep('sceneA')
+            this.scene.launch('sceneB')
+            this.scene.wake('sceneB');
+```
+https://stackoverflow.com/questions/53238869/phaser3-scenes-transitions
+
+In phaser 3, the start function actually SHUTS DOWN the previous scene as it starts the new one.
+
+
 ## Read More
 
 ### Progressbar
