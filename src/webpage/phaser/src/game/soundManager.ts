@@ -45,6 +45,7 @@ export default class GameSoundManager {
     static toggleSoundMode(){
         GameSoundManager.soundMode = !GameSoundManager.soundMode
         
+        
     }
 
     static playSound() {

@@ -45,7 +45,7 @@ export default class CamFaceCheck {
         this.scene = scene
         this.faceRect = scene.add.graphics()
         this.previewRect = scene.add.graphics()
-        this.facePosText = scene.add.text(stageWidth - 100, 250, 'Hello World', { fontFamily: '"Roboto Condensed"' });
+        this.facePosText = scene.add.text(stageWidth - 100, 250, '', { fontFamily: '"Roboto Condensed"' });
     }
 
     refreshFacePosition(faceBounds: Bounds, facePoints: Point[]) {
@@ -192,61 +192,62 @@ export default class CamFaceCheck {
         }
     }
 
-    setTargetFaceBounds(facebds: Bounds) {
 
-        if (this.targetFaceBounds == null) {
-            this.targetFaceBounds = facebds
-            let centerX = facebds.origin.x + facebds.size.width
-            let centerY = facebds.origin.y + facebds.size.height
-            let distanceX = this.camPreviewArea.x - centerX
-            let distanceY = this.camPreviewArea.y - centerY      
-            this.faceCenterPos = new Vector2(centerX, centerY)
+    // setTargetFaceBounds(facebds: Bounds) {
+
+    //     if (this.targetFaceBounds == null) {
+    //         this.targetFaceBounds = facebds
+    //         let centerX = facebds.origin.x + facebds.size.width
+    //         let centerY = facebds.origin.y + facebds.size.height
+    //         let distanceX = this.camPreviewArea.x - centerX
+    //         let distanceY = this.camPreviewArea.y - centerY      
+    //         this.faceCenterPos = new Vector2(centerX, centerY)
             
-            // 同时告知 RN?  //脸的位置确定了
-            if (window["ReactNativeWebView"]) {
-                let msg = {
-                    messageType: MSG_TYPE_FACE_TARGET_POS,                    
-                    actualData: {
-                        bounds: facebds,
-                    },
-                    time: +new Date
-                }
-                window["ReactNativeWebView"].postMessage(JSON.stringify(msg));
-            }            
+    //         // 同时告知 RN?  //脸的位置确定了
+    //         if (window["ReactNativeWebView"]) {
+    //             let msg = {
+    //                 messageType: MSG_TYPE_FACE_TARGET_POS,                    
+    //                 actualData: {
+    //                     bounds: facebds,
+    //                 },
+    //                 time: +new Date
+    //             }
+    //             window["ReactNativeWebView"].postMessage(JSON.stringify(msg));
+    //         }            
 
-        }
-    }
+    //     }
+    // }
 
     getTargetFaceBounds(): Bounds {
         return this.faceBounds
     }
 
     updatePreviewPosByTarget(){
-        let faceCenterPos = this.faceCenterPos
-        let firstCamPreviewArea = this.firstSetCamPreviewArea
-        if (!firstCamPreviewArea){
-            return
-        }
+        // let faceCenterPos = this.faceCenterPos
+        // let firstCamPreviewArea = this.firstSetCamPreviewArea
+        // if (!firstCamPreviewArea){
+        //     return
+        // }
 
-        if (!faceCenterPos) {
-            return 
-        }
+        // if (!faceCenterPos) {
+        //     return 
+        // }
         
-        let originCamArea = this.firstSetCamPreviewArea
-        let faceBounds = this.faceBounds
-        let centerX = faceBounds.origin.x + faceBounds.size.width
-        let centerY = faceBounds.origin.y + faceBounds.size.height
+        // let originCamArea = this.firstSetCamPreviewArea
+        // let faceBounds = this.faceBounds
+        // let centerX = faceBounds.origin.x + faceBounds.size.width
+        // let centerY = faceBounds.origin.y + faceBounds.size.height
 
-        let distanceX = this.camPreviewArea.x - centerX
-        let distanceY = this.camPreviewArea.y - centerY 
+        // let distanceX = this.camPreviewArea.x - centerX
+        // let distanceY = this.camPreviewArea.y - centerY 
         
-        let offset = new Point(
-            faceCenterPos.x - centerX,
-            faceCenterPos.y - centerY
-        )
+        // let offset = new Point(
+        //     faceCenterPos.x - centerX,
+        //     faceCenterPos.y - centerY
+        // )
 
-        this.camPreviewArea.x = originCamArea.x + offset.x
-        this.camPreviewArea.y = originCamArea.y + offset.y
+        // this.camPreviewArea.x = originCamArea.x + offset.x
+        // this.camPreviewArea.y = originCamArea.y + offset.y
         // this.drawPreviewBounds(this.camPreviewArea)
 
     }
