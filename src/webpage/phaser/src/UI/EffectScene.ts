@@ -82,10 +82,11 @@ export default class EffectScene extends Phaser.Scene {
         for(let idx = 0; idx < this.droppingCoins.length; idx++) {
             let dropCoin = this.droppingCoins[idx]
             if ( dropCoin && Math.abs(dropCoin.y + coinSize - stageHeight) < 15 ) {
+                // console.log('drop Coin', idx)
+                this.droppingCoins.splice(idx--, 1);
                 setTimeout( ()=>{
                     dropCoin.destroy()
-                    this.droppingCoins.splice(idx--, 1);
-                }, 432 )
+                }, 632 )
             }
         }
     }

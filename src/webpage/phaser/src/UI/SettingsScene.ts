@@ -67,7 +67,12 @@ export default class SettingsScene extends Phaser.Scene {
         createSoundBtn(){
             let clickSound = () => {
                 GameSoundManager.toggleSoundMode()
+                if ( GameSoundManager.soundMode) {
+                    this.textSound.text = 'Sound: OFF'
+                }else {
+                    this.textSound.text = 'Sound: ON!'
 
+                }
             }
 
             let soundHeight = 150
@@ -82,12 +87,18 @@ export default class SettingsScene extends Phaser.Scene {
         createMusicBtn(){
             let clickMusic = () => {
                 GameSoundManager.toogleMusicMode()
+                if (!GameSoundManager.musicMode) {
+                    this.textMusic.text = 'Music: OFF'
+                } else {
+                    this.textMusic.text = 'Music: ON!'
+
+                }
             }
 
             let musicHeight = 250
             this.musicBtn = new ImageButton(this, settingsLeft, musicHeight, 'button-music-on', clickMusic);
-            this.textSound = this.add.text(settingsLeft + frameHeight / 2, musicHeight, 'Music: ON!', fontSettingsStyle);
-            this.textSound.setOrigin(0, 0.5);
+            this.textMusic = this.add.text(settingsLeft + frameHeight / 2, musicHeight, 'Music: ON!', fontSettingsStyle);
+            this.textMusic.setOrigin(0, 0.5);
 
 
             this.add.existing(this.musicBtn)            

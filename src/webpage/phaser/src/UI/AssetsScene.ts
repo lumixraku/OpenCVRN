@@ -5,6 +5,7 @@ import GameSoundManager from "@root/game/soundManager";
 
 
 export default class AssetsScene extends Scene {
+    private bgColor: Graphics
     private progressBar: Graphics
     private loadingText: PhaserText
     private assetText: PhaserText
@@ -17,7 +18,7 @@ export default class AssetsScene extends Scene {
     preload() {
 
 
-
+    
         this.addLoadingProgressUI()
 
         this.load.on('progress', (value) => {
@@ -54,16 +55,18 @@ export default class AssetsScene extends Scene {
 
     create() {
 
-        // 这些逻辑不能放在 index 中  因为他们需要资源加载完成之后才能加载 
-        this.scene.launch(GAME_SCENE)
-        this.scene.launch(EF_SCENE)
-        this.scene.launch(UI_SCENE)        
-
-        GameSoundManager.initMusic(this)
-    
+        // 这些逻辑不能放在 index.ts 中  因为他们需要资源加载完成之后才能加载      
+        this.scene.switch(GAME_SCENE)
     }
 
     addLoadingProgressUI() {
+        this.bgColor = this.add.graphics()
+        this.bgColor.beginPath()
+        // this.bgColor.strokeRoundedRect(0, 0, stageWidth, stageHeight, 20)
+        this.bgColor.fillStyle(0xeeeeee)
+        this.bgColor.fillRoundedRect(0, 0, stageWidth, stageHeight, 20)
+        this.bgColor.closePath()
+
         this.progressBar = this.add.graphics();
 
         this.loadingText = this.make.text({

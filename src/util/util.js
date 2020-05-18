@@ -35,7 +35,7 @@ const postToWebview = (webview, data) => {
 	} else {
 		dataStr = data;
 	}
-	console.log("POST TO WEB",  dataStr)
+	// console.log("POST TO WEB",  dataStr)
 	var runJS = `
 			window.postMessage(${dataStr})
 		`;

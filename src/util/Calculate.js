@@ -79,8 +79,7 @@ export default class FacePosCheck {
       adjustY = adjustY > 0 ? maxRangeY : -maxRangeY
     }
 
-    console.log('adjustXY  ', faceCenterX, faceCenterY, targetCenterX , targetCenterY  )
-    console.log('adjust', adjustX)
+    // console.log('adjustXY  ', faceCenterX, faceCenterY, targetCenterX, targetCenterY, adjustX  )
 
 
     return {

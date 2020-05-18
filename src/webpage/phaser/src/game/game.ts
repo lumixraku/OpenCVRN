@@ -29,6 +29,7 @@ import EffectScene from '@root/UI/EffectScene';
 import AssetsLoader from './assetsLoader';
 import AnimateManager from './animate';
 import { UIHelper, ImageButton } from '@root/UI/UIHelper';
+import GameSoundManager from './soundManager';
 
 
 export default class Demo extends Phaser.Scene {
@@ -87,11 +88,21 @@ export default class Demo extends Phaser.Scene {
     }
 
     preload() {
+        this.scene.launch(EF_SCENE)
+        this.scene.launch(UI_SCENE);                  
     }
 
 
     // preload 中的资源都加载完毕之后 才会调用 create
     create() {
+
+        GameSoundManager.initMusic(this)
+        this.scene.pause(GAME_SCENE);
+        this.scene.get(UI_SCENE).events.on('afterCreate', ()=> {
+            (<GameUIScene>this.scene.get(UI_SCENE)).showWelcome()
+        })
+
+
 
         this.timer = this.time.addEvent({
             // delay: 500,                // ms
@@ -102,7 +113,6 @@ export default class Demo extends Phaser.Scene {
         });
 
 
-        this.bg = this.add.graphics()
 
         this.drawBackground()
         this.addCook()
@@ -468,6 +478,7 @@ export default class Demo extends Phaser.Scene {
     }
 
     drawBackground() {
+        this.bg = this.add.graphics()
         this.bgImg = this.add.image(0, 0, 'bgImg')
         let bd: Rectagle = this.bgImg.getBounds()
 
@@ -477,9 +488,9 @@ export default class Demo extends Phaser.Scene {
         this.bgImg.x = stageWidth / 2
         this.bgImg.y = stageHeight / 2
         this.bgImg.setScale(stageWidth / bd.width, stageHeight / bd.height)
-        // if (isPC) {
-        this.bgImg.alpha = 0.5;
-        // }
+        if (isPC) {
+            this.bgImg.alpha = 0.5;
+        }
 
     }
 
@@ -515,10 +526,12 @@ export default class Demo extends Phaser.Scene {
         this.camFaceCheck.refreshFacePosition(bounds, facePoints)
         this.camFaceCheck.updatePreviewPosByTarget()
 
-        let rs: FaceInCircle = this.camFaceCheck.checkFacePosition(bounds)
-        if (rs.pass) {
-            this.camFaceCheck.setTargetFaceBounds(bounds)
-        }
+
+        // 脸的矫正都放在客户端做。
+        // let rs: FaceInCircle = this.camFaceCheck.checkFacePosition(bounds)
+        // if (rs.pass) {
+        //     // this.camFaceCheck.setTargetFaceBounds(bounds)
+        // }
     }
 
     addCook() {

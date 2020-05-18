@@ -19,11 +19,11 @@ export default class BaseScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.scenePlugin({
-            key: 'rexuiplugin',
-            url: '/rexuiplugin.min.js',
-            sceneKey: 'rexUI'
-        });
+        // this.load.scenePlugin({
+        //     key: 'rexuiplugin',
+        //     url: '/rexuiplugin.min.js',
+        //     sceneKey: 'rexUI'
+        // });
         window.WebFont.load({ custom: { families: ['Berlin'], urls: ['assets/fonts/BRLNSDB.css'] } });
         this.scene.start(ASSETS_SCENE)
 

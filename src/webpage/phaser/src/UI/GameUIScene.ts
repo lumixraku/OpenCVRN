@@ -10,7 +10,7 @@ import Container = Phaser.GameObjects.Container
 import InputButton = Phaser.Input.Gamepad.Button
 
 
-import { UI_SCENE, SETTINGS_SCENE } from "../constants";
+import { UI_SCENE, SETTINGS_SCENE, GAME_SCENE } from "../constants";
 import { World } from "matter";
 import { UIHelper, ImageButton } from "./UIHelper";
 const stageWidth = document.body.clientWidth;
@@ -44,6 +44,8 @@ export default class GameUIScene extends Phaser.Scene {
     }
 
     preload() {
+
+        // 用到 rexUI scene 必须加载 scenePlugin
         this.load.scenePlugin({
             key: 'rexuiplugin',
             url: '/rexuiplugin.min.js',
@@ -54,7 +56,7 @@ export default class GameUIScene extends Phaser.Scene {
     create() {
         this.addUIBtns()
 
-        // this.welcome = this.createWelcomeDialog(this, 300, 500)
+        // this.showWelcome()
         // this.welcome.visible = false
         // this.getCaught = this.createGetCaughtDialog(stageWidth/2, stageHeight/2) 
         
@@ -67,14 +69,15 @@ export default class GameUIScene extends Phaser.Scene {
         // this.testGraphic.strokeLineShape( new Phaser.Geom.Line(200, 300, 250, 300))
         // this.testGraphic.rotation = 2* Math.PI
 
-
+        this.events.emit('afterCreate')
     }
 
     update(time, delta) {
     }
 
     showWelcome() {
-        this.welcome.visible = true
+        this.welcome = this.createWelcomeDialog(this, 300, 500)
+        this.welcome.popUp(500)
     }
 
     createWelcomeDialog(scene: Scene, width: number, height: number): UI.Dialog {
@@ -195,9 +198,7 @@ export default class GameUIScene extends Phaser.Scene {
         let x = stageWidth / 2
         let y = stageHeight / 2
 
-        let contentStr = `Phaser is a fast, free, and fun open source HTML5 game framework that offers WebGL and Canvas rendering across desktop and mobile web browsers. Games can be compiled to iOS, Android and native apps by using 3rd party tools. You can use JavaScript or TypeScript for development.
-        Along with the fantastic open source community, Phaser is actively developed and maintained by Photon Storm. As a result of rapid support, and a developer friendly API, Phaser is currently one of the most starred game frameworks on GitHub.
-        Thousands of developers from indie and multi-national digital agencies, and universities worldwide use Phaser. You can take a look at their incredible games.`
+        let contentStr = `吃汉堡的游戏吃汉堡的游, 戏吃汉堡的游戏, 吃汉堡的游戏, 吃汉堡的游戏,吃汉堡的游戏吃汉堡的游戏`
 
         // 默认x y 是 Dialog 中心位置   也就是说 Pivot 默认是 center 
         let dialog = scene.rexUI.add.dialog({
@@ -211,7 +212,7 @@ export default class GameUIScene extends Phaser.Scene {
 
             title: scene.rexUI.add.label({
                 background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0xbc5100),
-                text: scene.add.text(0, 0, 'Notice', {
+                text: scene.add.text(0, 0, 'Eat Burger AR Game', {
                     fontSize: '20px'
                 }),
                 space: {
@@ -246,6 +247,9 @@ export default class GameUIScene extends Phaser.Scene {
                 // this.print.text += groupName + '-' + index + ': ' + button.text + '\n';
                 dialog.scaleDownDestroy(100);
 
+                this.scene.resume(GAME_SCENE)
+
+
             }, this)
             .on('button.over', function (button, groupName, index, pointer, event) {
                 button.getElement('background').setStrokeStyle(1, 0xffffff);
@@ -255,7 +259,8 @@ export default class GameUIScene extends Phaser.Scene {
             });
 
         dialog.layout()//.pushIntoBounds()
-        dialog.visible = false
+            
+
         return dialog
     }
 
@@ -492,6 +497,7 @@ export default class GameUIScene extends Phaser.Scene {
 
 
     addUIBtns() {
+        
         let settingsClick = (e) => {
             UIHelper.fadeToScene(SETTINGS_SCENE, this)
         }

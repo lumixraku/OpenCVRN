@@ -75,7 +75,7 @@ export default class CameraScreen extends Component {
         previewOffset: previewRawOffset
       })
       console.log('throttleFN ')
-    }, 100);
+    }, 50);
   }
 
   state = {
@@ -159,7 +159,7 @@ export default class CameraScreen extends Component {
 
 
   facesDetected(detectData) {
-    console.log("facesDetected", detectData.faces)
+    // console.log("facesDetected", detectData.faces)
     this.setState({
       faces: detectData.faces,
       // faces: [fakedata[0]],
@@ -210,9 +210,21 @@ export default class CameraScreen extends Component {
       let centerY = bounds.origin.y + bounds.size.height / 2
       let noOffsetX = centerX - offsetXPreviewDefault
       let noOffsetY = centerY - offsetYPreviewDefault
+      
+      console.log('centerX', centerX, offsetXPreviewDefault, noOffsetX)
+      // 某些情况会导致NaN  ？？？ 暂时不知为什么
+      if (isNaN(noOffsetX) ) {
+        noOffsetX = 0
+      }
+      if (isNaN(noOffsetY)) {
+        noOffsetY = 0
+      }
+
+
       // 没有办法弄相对于屏幕的absolute
       // zIndex 无法遮盖。。。不懂。。。
 
+      // 下面的left 和 top 是相对 preview 而言的
       return (
         <View>
           <View
@@ -276,8 +288,8 @@ export default class CameraScreen extends Component {
       return elems
     }
 
-    console.log('contours', faceData)
-    if (faceData.bounds && faceData.upperLipBottom ) {
+    // console.log('contours', faceData)
+    if (faceData.bounds && faceData.upperLipBottom) {
       return (
         <View
           key={faceData.faceID}
