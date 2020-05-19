@@ -142,3 +142,7 @@ https://labs.phaser.io/edit.html?src=src%5Cscenes%5Cchange%20scene%20from%20crea
 ### Some Fonts
 https://www.cufonfonts.com/fonts/list/language/english/2
 https://www.1001fonts.com/comic+google-web-fonts.html?page=2&items=10
+
+
+### Spritesheets VS. Atlas
+https://www.html5gamedevs.com/topic/3007-spritesheets-v-atlases/

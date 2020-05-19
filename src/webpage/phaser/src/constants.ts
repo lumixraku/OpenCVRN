@@ -44,6 +44,25 @@ const HIT_DIZZY = 'hitDizzy'
 const MAIN_RED = 0xfc6158
 const MAIN_RED_LIGHT = 0xf9ebe9
 
+
+// food
+const FOOD_LIST_FNAME_MAP = {
+  'food0':'010-grapes',
+  'food1':'001-burger',
+  'food2':'001-ice-cream',
+  'food3':'002-burger-1',
+  'food4':'002-ice-cream-1',
+  'food5':'003-french-fries',
+  'food6':'003-ice-cream-2',
+  'food7':'004-fried-egg',
+  'food8':'004-ice-cream-stick',
+  'food9':'005-bottle',
+  'food10': '006-banana',
+  'food11': '007-orange',
+  'food12': '008-orange-1',
+  'food13': '009-apple',
+}
+
 export {
   //SCREEN 
   stageWidth, 
@@ -66,6 +85,7 @@ export {
   BACKGROUND,
   SOUNDKEY,
   MUSICKEY,
+  FOOD_LIST_FNAME_MAP, 
 
   //color
   MAIN_RED, 

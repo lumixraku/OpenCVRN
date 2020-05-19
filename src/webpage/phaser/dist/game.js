@@ -31,6 +31,23 @@
   // color
   var MAIN_RED = 0xfc6158;
   var MAIN_RED_LIGHT = 0xf9ebe9;
+  // food
+  var FOOD_LIST_FNAME_MAP = {
+      'food0': '010-grapes',
+      'food1': '001-burger',
+      'food2': '001-ice-cream',
+      'food3': '002-burger-1',
+      'food4': '002-ice-cream-1',
+      'food5': '003-french-fries',
+      'food6': '003-ice-cream-2',
+      'food7': '004-fried-egg',
+      'food8': '004-ice-cream-stick',
+      'food9': '005-bottle',
+      'food10': '006-banana',
+      'food11': '007-orange',
+      'food12': '008-orange-1',
+      'food13': '009-apple',
+  };
   //# sourceMappingURL=constants.js.map
 
   /*! *****************************************************************************
@@ -391,7 +408,6 @@
       };
       return SpinTable;
   }());
-  //# sourceMappingURL=spinTable.js.map
 
   var Point$2 = Phaser.Geom.Point;
   var Vector2 = Phaser.Math.Vector2;
@@ -673,41 +689,56 @@
       };
       AnimateManager.prototype.cookLookback = function () {
           var scene = this.scene;
-          var makeFrames = function () {
-              var arr = [];
-              var endIndex = 33; // 到 33 的时候停下来
-              for (var idx = 0; idx <= endIndex; idx++) {
-                  var keyname = "dogeFrame" + idx;
-                  arr.push({
-                      key: keyname,
-                  });
-              }
-              return arr;
-          };
+          // let makeFrames = ():AnimationFrameType[] => {
+          //     let arr: AnimationFrameType[] = []
+          //     let endIndex = 33 // 到 33 的时候停下来
+          //     for(let idx = 0; idx<= endIndex; idx++) {
+          //         let keyname = `frame_${idx}.gif`;
+          //         arr.push( {
+          //             key:  keyname,
+          //         } as AnimationFrameType)
+          //     }       
+          //     return arr     
+          // }
+          // 第一个参数是 atlas 图集资源的key
+          var makeFrames = scene.anims.generateFrameNames('dogeTurn', {
+              start: 0,
+              end: 33,
+              zeroPad: 2,
+              prefix: 'frame_',
+              suffix: '.gif'
+          });
           // weired !!!
           this.doge = scene.anims.create({
               key: COOK_LOOKBACK_ANIMI,
-              frames: makeFrames(),
+              frames: makeFrames,
               frameRate: 1 / 0.04,
           });
       };
       AnimateManager.prototype.cookAgain = function () {
           var scene = this.scene;
-          var makeFrames = function () {
-              var arr = [];
-              var endIndex = 47; // 到 33 的时候停下来
-              for (var idx = 33; idx <= endIndex; idx++) {
-                  var keyname = "dogeFrame" + idx;
-                  arr.push({
-                      key: keyname,
-                  });
-              }
-              return arr;
-          };
+          // let makeFrames = ():AnimationFrameType[] => {
+          //     let arr: AnimationFrameType[] = []
+          //     let endIndex = 47 // 到 33 的时候停下来
+          //     for(let idx = 33; idx<= endIndex; idx++) {
+          //         let keyname = `dogeFrame${idx}`;
+          //         arr.push( {
+          //             key:  keyname,
+          //         } as AnimationFrameType)
+          //     }       
+          //     return arr     
+          // }
+          var makeFrames = scene.anims.generateFrameNames('dogeTurn', {
+              start: 34,
+              end: 47,
+              zeroPad: 2,
+              prefix: 'frame_',
+              suffix: '.gif'
+          });
           // weired !!! 动画结束的调用方式很奇怪
           this.doge = scene.anims.create({
               key: COOK_TOCOOK_ANIMI,
-              frames: makeFrames(),
+              frames: makeFrames,
               frameRate: 1 / 0.04,
           });
       };
@@ -879,9 +910,11 @@
           this.spinTable.rotateTableSlightly();
       };
       Demo.prototype.addFoodIfNeed = function () {
-          for (var i = 0; i < this.foodList.length; i++) {
+          // for (let i = 0; i < this.foodList.length; i++) {
+          for (var _i = 0, _a = this.foodList.map(function (val, idx) { return ({ idx: idx, val: val }); }); _i < _a.length; _i++) {
+              var _b = _a[_i], idx = _b.idx, val = _b.val;
               // 盘子是空的, 且恰好转到一个固定的位置. 就添加食物
-              if (!this.foodList[i]) {
+              if (!val) {
                   //
                   //               +
                   //               |
@@ -918,13 +951,13 @@
                   // }
                   // 上面的办法虽然对于人类理解比较直观 但是phaser 操作起来却比较复杂 主要是 phaser 的坐标系划分很诡异
                   var spinRad = this.spinTable.getRotation() % (2 * Math.PI);
-                  var foodRad = i * this.spinTable.distanceRad;
+                  var foodRad = idx * this.spinTable.distanceRad;
                   if (Math.abs(spinRad - foodRad) < 0.02) {
-                      var foodTextureKey = "food" + i;
-                      var food = this.add.image(0, 0, foodTextureKey);
-                      food.name = "Food" + i;
+                      var foodTextureKey = "food" + idx;
+                      var food = this.add.sprite(0, 0, "foods", FOOD_LIST_FNAME_MAP[foodTextureKey]);
+                      food.name = "Food" + idx;
                       food.setScale(1);
-                      this.foodList[i] = food;
+                      this.foodList[idx] = food;
                   }
               }
           }
@@ -1180,7 +1213,6 @@
       };
       return Demo;
   }(Phaser.Scene));
-  //# sourceMappingURL=game.js.map
 
   var UIHelper = /** @class */ (function () {
       function UIHelper() {
@@ -1234,16 +1266,17 @@
           currentScene.time.addEvent({
               delay: 250,
               callback: function () {
-                  if (!currentScene.scene.isActive(newScene) &&
-                      !currentScene.scene.isPaused(newScene) &&
-                      !currentScene.scene.isSleeping(newScene)) {
-                      currentScene.scene.launch(newScene);
-                  }
-                  else {
-                      if (currentScene.scene.isSleeping(newScene)) {
-                          currentScene.scene.wake(newScene);
-                      }
-                  }
+                  // if (!currentScene.scene.isActive(newScene) && 
+                  //     !currentScene.scene.isPaused(newScene) &&
+                  //     !currentScene.scene.isSleeping(newScene)
+                  // ) {
+                  //     currentScene.scene.launch(newScene)
+                  // }else {
+                  //     if (currentScene.scene.isSleeping(newScene)) {
+                  //         currentScene.scene.wake(newScene);
+                  //     }                    
+                  // }
+                  currentScene.scene["switch"](newScene);
               },
               callbackScope: currentScene
           });
@@ -1254,7 +1287,8 @@
           currentScene.time.addEvent({
               delay: 250,
               callback: function () {
-                  currentScene.scene.sleep(currentScene.scene.key);
+                  // currentScene.scene.sleep(currentScene.scene.key);
+                  currentScene.scene["switch"](resumeScene);
               },
               callbackScope: currentScene
           });
@@ -1292,7 +1326,6 @@
       }
       return ImageButton;
   }(Phaser.GameObjects.Image));
-  //# sourceMappingURL=UIHelper.js.map
 
   var Point$4 = Phaser.Geom.Point;
   var Rectagle$3 = Phaser.Geom.Rectangle;
@@ -1681,7 +1714,6 @@
       };
       return GameUIScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=GameUIScene.js.map
 
   var Point$5 = Phaser.Geom.Point;
   var Rectagle$4 = Phaser.Geom.Rectangle;
@@ -1852,7 +1884,6 @@
       };
       return EffectScene;
   }(Phaser.Scene));
-  //# sourceMappingURL=EffectScene.js.map
 
   var stageWidth$6 = document.body.clientWidth;
   var stageHeight$6 = document.body.clientWidth / 9 * 16;
@@ -1968,20 +1999,13 @@
           scene.load.image('bgImg', 'assets/kitchen.png');
           scene.load.image('table', 'assets/table.png');
           scene.load.image('light', 'assets/light.png');
-          scene.load.image('food0', 'assets/food/010-grapes.png');
-          scene.load.image('food1', 'assets/food/001-burger.png');
-          scene.load.image('food2', 'assets/food/001-ice-cream.png');
-          scene.load.image('food3', 'assets/food/002-burger-1.png');
-          scene.load.image('food4', 'assets/food/002-ice-cream-1.png');
-          scene.load.image('food5', 'assets/food/003-french-fries.png');
-          scene.load.image('food6', 'assets/food/003-ice-cream-2.png');
-          scene.load.image('food7', 'assets/food/004-fried-egg.png');
-          scene.load.image('food8', 'assets/food/004-ice-cream-stick.png');
-          scene.load.image('food9', 'assets/food/005-bottle.png');
-          scene.load.image('food10', 'assets/food/006-banana.png');
-          scene.load.image('food11', 'assets/food/007-orange.png');
-          scene.load.image('food12', 'assets/food/008-orange-1.png');
-          scene.load.image('food13', 'assets/food/009-apple.png');
+          // online tool https://gammafp.com/tools/
+          scene.load.atlas("foods", "assets/food/food-by-atlas-packer.png", "assets/food/food-by-atlas-packer_atlas.json");
+          // texture packer
+          // scene.load.atlas("foods", "assets/food/foodspritesheet.png", "assets/food/foodspritesheet.json")
+          // scene.load.image('food0', 'assets/food/010-grapes.png')
+          // scene.load.image('food1', 'assets/food/001-burger.png')
+          // ...
           scene.load.image('plate', 'assets/plate.png');
           scene.load.image('coin', 'assets/coin.png');
           scene.load.image('hammer', 'assets/hammer.png');
@@ -1994,13 +2018,16 @@
       };
       AssetsScene.prototype.loadDogeAnimationAssets = function () {
           var scene = this;
-          var endIndex = 47;
-          for (var idx = 0; idx <= endIndex; idx++) {
-              var idxStr = (idx < 10) ? '0' + idx : '' + idx;
-              var fname = "assets/dogeFrame/frame_" + idxStr + "_delay-0.04s.gif";
-              var keyname = "dogeFrame" + idx;
-              scene.load.image(keyname, fname);
-          }
+          scene.load.atlas("dogeTurn", "assets/dogeFrame/dogeTurn.png", "assets/dogeFrame/dogeTurn.json");
+          // scene.load.atlas("dogeTurnBack", "assets/dogeFrame/dogeTurnBack.png", "assets/dogeFrame/dogeTurnBack.json")
+          // scene.load.atlas("dogeCookAgain", "assets/dogeFrame/dogeCookAgain.png", "assets/dogeFrame/dogeCookAgain.json")
+          // let endIndex = 47
+          // for (let idx = 0; idx <= endIndex; idx++) {
+          //     let idxStr = (idx < 10) ? '0' + idx : '' + idx
+          //     let fname = `assets/dogeFrame/frame_${idxStr}_delay-0.04s.gif`
+          //     let keyname = `dogeFrame${idx}`;
+          //     scene.load.image(keyname, fname)
+          // }
       };
       AssetsScene.prototype.loadEmojiAssets = function () {
           var scene = this;
@@ -2021,6 +2048,7 @@
           scene.load.spritesheet('button-music-off', "assets/UI/button-music-off.png", { frameWidth: 80, frameHeight: 80 });
           scene.load.spritesheet('button-back', "assets/UI/button-back.png", { frameWidth: 70, frameHeight: 70 });
           scene.load.spritesheet('button-settings', "assets/UI/button-settings.png", { frameWidth: 80, frameHeight: 80 });
+          // scene.load.atlas('UIButtons', 'assets/UI/UIButtons.png', 'assets/UI/UIButtons.json')
       };
       AssetsScene.prototype.loadMusic = function () {
           var scene = this;
