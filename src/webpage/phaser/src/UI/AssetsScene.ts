@@ -109,23 +109,17 @@ export default class AssetsScene extends Scene {
         scene.load.image('table', 'assets/table.png');
         scene.load.image('light', 'assets/light.png');
 
-        scene.load.image('food0', 'assets/food/010-grapes.png')
-        scene.load.image('food1', 'assets/food/001-burger.png')
-        scene.load.image('food2', 'assets/food/001-ice-cream.png')
-        scene.load.image('food3', 'assets/food/002-burger-1.png')
-        scene.load.image('food4', 'assets/food/002-ice-cream-1.png')
-        scene.load.image('food5', 'assets/food/003-french-fries.png')
-        scene.load.image('food6', 'assets/food/003-ice-cream-2.png')
-        scene.load.image('food7', 'assets/food/004-fried-egg.png')
-        scene.load.image('food8', 'assets/food/004-ice-cream-stick.png')
-        scene.load.image('food9', 'assets/food/005-bottle.png')
-        scene.load.image('food10', 'assets/food/006-banana.png')
-        scene.load.image('food11', 'assets/food/007-orange.png')
-        scene.load.image('food12', 'assets/food/008-orange-1.png')
-        scene.load.image('food13', 'assets/food/009-apple.png')
+        // online tool https://gammafp.com/tools/
+        scene.load.atlas("foods", "assets/food/food-by-atlas-packer.png", "assets/food/food-by-atlas-packer_atlas.json")
+
+        // texture packer
+        // scene.load.atlas("foods", "assets/food/foodspritesheet.png", "assets/food/foodspritesheet.json")
+
+        // scene.load.image('food0', 'assets/food/010-grapes.png')
+        // scene.load.image('food1', 'assets/food/001-burger.png')
+        // ...
 
         scene.load.image('plate', 'assets/plate.png')
-
         scene.load.image('coin', 'assets/coin.png');
         scene.load.image('hammer', 'assets/hammer.png');
         scene.load.image('dizzy1', 'assets/dizzy1.png');
@@ -141,16 +135,19 @@ export default class AssetsScene extends Scene {
     loadDogeAnimationAssets() {
 
         let scene = this
-        let endIndex = 47
+        scene.load.atlas("dogeTurn", "assets/dogeFrame/dogeTurn.png", "assets/dogeFrame/dogeTurn.json")
+        // scene.load.atlas("dogeTurnBack", "assets/dogeFrame/dogeTurnBack.png", "assets/dogeFrame/dogeTurnBack.json")
+        // scene.load.atlas("dogeCookAgain", "assets/dogeFrame/dogeCookAgain.png", "assets/dogeFrame/dogeCookAgain.json")
 
-        for (let idx = 0; idx <= endIndex; idx++) {
-            let idxStr = (idx < 10) ? '0' + idx : '' + idx
-            let fname = `assets/dogeFrame/frame_${idxStr}_delay-0.04s.gif`
-            let keyname = `dogeFrame${idx}`;
 
-            scene.load.image(keyname, fname)
 
-        }
+        // let endIndex = 47
+        // for (let idx = 0; idx <= endIndex; idx++) {
+        //     let idxStr = (idx < 10) ? '0' + idx : '' + idx
+        //     let fname = `assets/dogeFrame/frame_${idxStr}_delay-0.04s.gif`
+        //     let keyname = `dogeFrame${idx}`;
+        //     scene.load.image(keyname, fname)
+        // }
     }
 
     loadEmojiAssets() {
@@ -168,19 +165,18 @@ export default class AssetsScene extends Scene {
         // loadFn.apply(scene.load, ['button-sound-on', `assets/UI/button-sound-on.png`, { frameWidth: 80, frameHeight: 80 }])
         // loadFn.apply(scene.load, ['button-sound-off', `assets/UI/button-sound-off.png`, { frameWidth: 80, frameHeight: 80 }])
         // loadFn.apply(scene.load, ['button-settings', `assets/UI/button-settings.png`, { frameWidth: 80, frameHeight: 80 }])
+
+
+
         scene.load.image('background', 'assets/UI/background.png');
-
-
         scene.load.spritesheet('button-sound-on', `assets/UI/button-sound-on.png`, { frameWidth: 80, frameHeight: 80 })
         scene.load.spritesheet('button-sound-off', `assets/UI/button-sound-off.png`, { frameWidth: 80, frameHeight: 80 })
         scene.load.spritesheet('button-music-on', `assets/UI/button-music-on.png`, { frameWidth: 80, frameHeight: 80 })
         scene.load.spritesheet('button-music-off', `assets/UI/button-music-off.png`, { frameWidth: 80, frameHeight: 80 })
 
         scene.load.spritesheet('button-back', `assets/UI/button-back.png`, { frameWidth: 70, frameHeight: 70 })
-
         scene.load.spritesheet('button-settings', `assets/UI/button-settings.png`, { frameWidth: 80, frameHeight: 80 })                
-
-        
+        // scene.load.atlas('UIButtons', 'assets/UI/UIButtons.png', 'assets/UI/UIButtons.json')
     }
 
 

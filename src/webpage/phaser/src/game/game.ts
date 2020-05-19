@@ -12,7 +12,7 @@ const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientWidth / 9 * 16;
 // 在 RN 中得到的宽和高 是411 * 823
 // 在 webview 得到的宽高是 412 * 804  // 因为我的APP 并没有打开全屏
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE, ASSETS_SCENE, SETTINGS_SCENE, DISTANCE_ANGLE } from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE, ASSETS_SCENE, SETTINGS_SCENE, DISTANCE_ANGLE, FOOD_LIST_FNAME_MAP } from '@root/constants';
 import { isPC } from '@root/test'
 
 
@@ -215,11 +215,10 @@ export default class Demo extends Phaser.Scene {
 
 
     addFoodIfNeed() {
-        for (let i = 0; i < this.foodList.length; i++) {
-            
-            
+        // for (let i = 0; i < this.foodList.length; i++) {
+        for (let {idx, val} of this.foodList.map( (val, idx)=> ({idx, val}) )    ) {    
             // 盘子是空的, 且恰好转到一个固定的位置. 就添加食物
-            if (!this.foodList[i]) {
+            if (!val) {
 
 
                 //
@@ -265,14 +264,14 @@ export default class Demo extends Phaser.Scene {
                 // 上面的办法虽然对于人类理解比较直观 但是phaser 操作起来却比较复杂 主要是 phaser 的坐标系划分很诡异
 
                 let spinRad = this.spinTable.getRotation() % (2 * Math.PI)
-                let foodRad = i * this.spinTable.distanceRad
+                let foodRad = idx * this.spinTable.distanceRad
                 if (Math.abs(spinRad - foodRad) < 0.02) {
-                    let foodTextureKey = `food${i}`
-                    let food = this.add.image(0, 0, foodTextureKey) as Food
+                    let foodTextureKey = `food${idx}`
+                    let food = this.add.sprite(0, 0, "foods", FOOD_LIST_FNAME_MAP[foodTextureKey]) as Food
 
-                    food.name = `Food${i}`
+                    food.name = `Food${idx}`
                     food.setScale(1)
-                    this.foodList[i] = food
+                    this.foodList[idx] = food
                 }
             }
         }

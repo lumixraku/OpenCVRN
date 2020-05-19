@@ -1,0 +1,190 @@
+{
+    "frames": [
+        {
+            "filename": "001-burger",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 0,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "007-orange",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 64,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "001-ice-cream",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 0,
+                "y": 64
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "002-burger-1",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 64,
+                "y": 64
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "002-ice-cream-1",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 128,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "003-french-fries",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 128,
+                "y": 64
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "003-ice-cream-2",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 0,
+                "y": 128
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "004-fried-egg",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 64,
+                "y": 128
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "004-ice-cream-stick",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 128,
+                "y": 128
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "005-bottle",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 192,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "006-banana",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 192,
+                "y": 64
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "008-orange-1",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 192,
+                "y": 128
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "009-apple",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 0,
+                "y": 192
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "010-grapes",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 64,
+                "y": 192
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        }
+    ],
+    "meta": {
+        "description": "Atlas generado con Atlas Packer Gamma V2",
+        "web": "https://gammafp.github.io/atlas-packer-phaser/"
+    }
+}

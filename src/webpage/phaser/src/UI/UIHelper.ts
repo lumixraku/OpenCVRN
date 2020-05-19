@@ -76,16 +76,17 @@ class UIHelper {
         currentScene.time.addEvent({
             delay: 250,
             callback: function () {
-                if (!currentScene.scene.isActive(newScene) && 
-                    !currentScene.scene.isPaused(newScene) &&
-                    !currentScene.scene.isSleeping(newScene)
-                ) {
-                    currentScene.scene.launch(newScene)
-                }else {
-                    if (currentScene.scene.isSleeping(newScene)) {
-                        currentScene.scene.wake(newScene);
-                    }                    
-                }
+                // if (!currentScene.scene.isActive(newScene) && 
+                //     !currentScene.scene.isPaused(newScene) &&
+                //     !currentScene.scene.isSleeping(newScene)
+                // ) {
+                //     currentScene.scene.launch(newScene)
+                // }else {
+                //     if (currentScene.scene.isSleeping(newScene)) {
+                //         currentScene.scene.wake(newScene);
+                //     }                    
+                // }
+                currentScene.scene.switch(newScene)
             },
             callbackScope: currentScene
         });                
@@ -99,7 +100,8 @@ class UIHelper {
         currentScene.time.addEvent({
             delay: 250,
             callback: function () {
-                currentScene.scene.sleep(currentScene.scene.key);
+                // currentScene.scene.sleep(currentScene.scene.key);
+                currentScene.scene.switch(resumeScene)
             },
             callbackScope: currentScene
         });        
