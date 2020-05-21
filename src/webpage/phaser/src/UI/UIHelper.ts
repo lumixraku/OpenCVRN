@@ -25,7 +25,7 @@ class UIHelper {
      * @param borderWidth 
      * @param outerColor border Color (little darken than main color)
      */
-    public static drawRoundRect(scene: Scene, size: Rectagle, radius: number, color: any, borderWidth?: number, outerColor?: any) {
+    public static drawRoundRectWithBorder(scene: Scene, size: Rectagle, radius: number, color: any, borderWidth?: number, outerColor?: any) {
 
 
         let bg = scene.add.graphics()
@@ -50,6 +50,8 @@ class UIHelper {
         return bg
 
     }
+
+
 
     public static createImageButton(scene: Scene, x: number, y: number, texture: string, callback?: Function, noframes?: boolean): ImageButton {
         return new ImageButton(scene, x, y, texture, callback, noframes)
