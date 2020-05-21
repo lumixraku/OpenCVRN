@@ -31,7 +31,7 @@ import AnimateManager from './animate';
 import { UIHelper, ImageButton } from '@root/UI/UIHelper';
 import GameSoundManager from './soundManager';
 import GameUI from './gameUILayer';
-import GameEffectContainer from './gameEffect';
+import GameEffectContainer from './gameEffectLayer';
 
 
 export default class Demo extends Phaser.Scene {
@@ -157,7 +157,7 @@ export default class Demo extends Phaser.Scene {
         this.animateManager = new AnimateManager(this)
         this.animateManager.registerAnimation()
 
-        this.addScore = this.addScore.bind(this)
+        this.addScoreCallback = this.addScoreCallback.bind(this)
 
 
 
@@ -455,6 +455,8 @@ export default class Demo extends Phaser.Scene {
                 // if not get caught
                 if (this.cook.isCooking()) {
                     // this.effScene.addCoin(this.addScore)
+                    // addScoreCallback 已经绑定了 this
+                    this.gameEffLayer.addCoin(this.addScoreCallback)
                 } else {
                     if (this.cook.isChecking())
                         this.caughtAnimation()
@@ -469,6 +471,8 @@ export default class Demo extends Phaser.Scene {
     caughtAnimation() {
         // this.effScene.addHammer(this, this.addScore)
         // this.uiScene.createCaughtText(stageWidth / 2, stageHeight / 2, () => { })
+        this.gameEffLayer.addHammer(this.addScoreCallback)
+        this.gameUILayer.createCaughtText( ()=> {})
 
     }
 
@@ -595,11 +599,12 @@ export default class Demo extends Phaser.Scene {
 
     }
 
-    addScore(sc: number) {
+    addScoreCallback(sc: number) {
         if (this.score == 0  && sc < 0) {
             return 
         }
         this.score = this.score + sc
+        this.gameUILayer.scoreText. text = '' + this.score
         // this.effScene.scoreText.text = '' + this.score
     }
 

@@ -64,7 +64,7 @@ export default class SettingsScene extends Phaser.Scene {
 
             let backClick = () => {
                 GameSoundManager.playSound()
-                UIHelper.fadeToPrevScene(UI_SCENE, this)
+                UIHelper.fadeToPrevScene(GAME_SCENE, this)
                 // this.scene.get(UI_SCENE).cameras.main.fadeIn(0)
                 // this.cameras.main.fadeOut(250);
                 // this.time.addEvent({

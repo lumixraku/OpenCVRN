@@ -945,12 +945,13 @@
        */
       function GameUI(scene, x, y, children) {
           var _this = _super.call(this, scene, x, y, children) || this;
-          _this.testObject();
+          // this.testObject()
           _this.createScoreArea();
-          setInterval(function () {
-              _this.createCaughtText(function () { });
-          }, 2000);
+          _this.addSettingsBtn();
           return _this;
+          // setInterval( ()=> {
+          //     this.createCaughtText( ()=>{})
+          // }, 2000 )
       }
       GameUI.prototype.testObject = function () {
           this.testGrphics = new Graphics(this.scene);
@@ -1042,9 +1043,29 @@
           this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText, coinIcon]);
           return this.scoreArea;
       };
+      GameUI.prototype.addSettingsBtn = function () {
+          var _this = this;
+          var settingsClick = function (e) {
+              UIHelper.fadeToAddAnotherScene(SETTINGS_SCENE, _this.scene);
+              // this.scene.get(SETTINGS_SCENE).cameras.main.fadeIn(0)
+              // this.cameras.main.fadeOut(250);
+              // if (!this.scene.isActive(SETTINGS_SCENE) &&
+              //     !this.scene.isPaused(SETTINGS_SCENE) &&
+              //     !this.scene.isSleeping(SETTINGS_SCENE)
+              // ) {
+              //     this.scene.launch(SETTINGS_SCENE)
+              // } else {
+              //     if (this.scene.isSleeping(SETTINGS_SCENE)) {
+              //         this.scene.wake(SETTINGS_SCENE);
+              //     }
+              // }
+          };
+          settingsClick.bind(this);
+          this.settingsBtn = new ImageButton(this.scene, 50, 50, 'button-settings', settingsClick);
+          this.add(this.settingsBtn);
+      };
       return GameUI;
   }(Container));
-  //# sourceMappingURL=gameUILayer.js.map
 
   var Point$4 = Phaser.Geom.Point;
   var Container$1 = Phaser.GameObjects.Container;
@@ -1061,13 +1082,13 @@
               dropCoin: false,
               addCoin: false,
           };
-          setInterval(function () {
-              _this.addCoin(function () {
-              });
-              _this.addHammer(function () {
-              });
-          }, 1000);
           return _this;
+          //     setInterval(  ()=> {
+          //         this.addCoin( ()=> {
+          //         })
+          //         this.addHammer( ()=> {
+          //         })
+          //     }, 1000)
       }
       GameEffectContainer.prototype.addCoin = function (addScoreCount) {
           var _this = this;
@@ -1202,7 +1223,7 @@
       };
       return GameEffectContainer;
   }(Container$1));
-  //# sourceMappingURL=gameEffect.js.map
+  //# sourceMappingURL=gameEffectLayer.js.map
 
   var Circle$1 = Phaser.Geom.Circle;
   var Point$5 = Phaser.Geom.Point;
@@ -1268,7 +1289,7 @@
           this.gameEffLayer.setDepth(20);
           this.animateManager = new AnimateManager(this);
           this.animateManager.registerAnimation();
-          this.addScore = this.addScore.bind(this);
+          this.addScoreCallback = this.addScoreCallback.bind(this);
           // Main Scene
           this.cameras.main.fadeIn(250);
       };
@@ -1496,7 +1517,11 @@
               onComplete: function () {
                   food.destroy();
                   // if not get caught
-                  if (_this.cook.isCooking()) ;
+                  if (_this.cook.isCooking()) {
+                      // this.effScene.addCoin(this.addScore)
+                      // addScoreCallback 已经绑定了 this
+                      _this.gameEffLayer.addCoin(_this.addScoreCallback);
+                  }
                   else {
                       if (_this.cook.isChecking())
                           _this.caughtAnimation();
@@ -1507,6 +1532,8 @@
       Demo.prototype.caughtAnimation = function () {
           // this.effScene.addHammer(this, this.addScore)
           // this.uiScene.createCaughtText(stageWidth / 2, stageHeight / 2, () => { })
+          this.gameEffLayer.addHammer(this.addScoreCallback);
+          this.gameUILayer.createCaughtText(function () { });
       };
       Demo.prototype.missAnimation = function () {
       };
@@ -1606,11 +1633,12 @@
               });
           }, delay);
       };
-      Demo.prototype.addScore = function (sc) {
+      Demo.prototype.addScoreCallback = function (sc) {
           if (this.score == 0 && sc < 0) {
               return;
           }
           this.score = this.score + sc;
+          this.gameUILayer.scoreText.text = '' + this.score;
           // this.effScene.scoreText.text = '' + this.score
       };
       return Demo;
@@ -2176,6 +2204,96 @@
   }(Phaser.Scene));
   //# sourceMappingURL=EffectScene.js.map
 
+  var fontTitleStyle = { font: '46px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 7, align: 'center' };
+  var fontSettingsStyle = { font: '38px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 5, align: 'center' };
+  var frameHeight = 80;
+  var settingsLeft = stageWidth / 2 - 120;
+  var SettingsScene = /** @class */ (function (_super) {
+      __extends(SettingsScene, _super);
+      function SettingsScene() {
+          return _super.call(this, SETTINGS_SCENE) || this;
+      }
+      SettingsScene.prototype.preload = function () {
+      };
+      SettingsScene.prototype.create = function () {
+          this.cameras.main.fadeIn(0);
+          this.bindEvents();
+          this.createBackground();
+          this.createTitle();
+          this.createSoundBtn();
+          this.createMusicBtn();
+          this.createBackBtn();
+      };
+      SettingsScene.prototype.bindEvents = function () {
+          var _this = this;
+          this.events.on('wake', function () {
+              _this.cameras.main.fadeIn(0);
+          }, this);
+      };
+      SettingsScene.prototype.createBackground = function () {
+          this.add.sprite(0, 0, BACKGROUND).setOrigin(0, 0);
+      };
+      SettingsScene.prototype.createTitle = function () {
+          // text 的默认origin 是 0 0
+          var settingsText = this.add.text(stageWidth / 2, 50, 'settings', fontTitleStyle);
+          settingsText.setOrigin(0.5, 0.5);
+      };
+      SettingsScene.prototype.createBackBtn = function () {
+          var _this = this;
+          var backClick = function () {
+              GameSoundManager.playSound();
+              UIHelper.fadeToPrevScene(GAME_SCENE, _this);
+              // this.scene.get(UI_SCENE).cameras.main.fadeIn(0)
+              // this.cameras.main.fadeOut(250);
+              // this.time.addEvent({
+              //     delay: 250,
+              //     callback: function () {
+              //         this.scene.sleep(SETTINGS_SCENE);
+              //     },
+              //     callbackScope: this                    
+              // })
+          };
+          this.backBtn = new ImageButton(this, 50, 50, 'button-back', backClick);
+          this.add.existing(this.backBtn);
+      };
+      SettingsScene.prototype.createSoundBtn = function () {
+          var _this = this;
+          var clickSound = function () {
+              GameSoundManager.toggleSoundMode();
+              if (GameSoundManager.soundMode) {
+                  _this.textSound.text = 'Sound: OFF';
+              }
+              else {
+                  _this.textSound.text = 'Sound: ON!';
+              }
+          };
+          var soundHeight = 150;
+          this.soundBtn = new ImageButton(this, settingsLeft, soundHeight, 'button-sound-on', clickSound);
+          this.textSound = this.add.text(settingsLeft + frameHeight / 2, soundHeight, 'Sound: ON!', fontSettingsStyle);
+          this.textSound.setOrigin(0, 0.5);
+          this.add.existing(this.soundBtn);
+      };
+      SettingsScene.prototype.createMusicBtn = function () {
+          var _this = this;
+          var clickMusic = function () {
+              GameSoundManager.toogleMusicMode();
+              if (!GameSoundManager.musicMode) {
+                  _this.textMusic.text = 'Music: OFF';
+              }
+              else {
+                  _this.textMusic.text = 'Music: ON!';
+              }
+          };
+          var musicHeight = 250;
+          this.musicBtn = new ImageButton(this, settingsLeft, musicHeight, 'button-music-on', clickMusic);
+          this.textMusic = this.add.text(settingsLeft + frameHeight / 2, musicHeight, 'Music: ON!', fontSettingsStyle);
+          this.textMusic.setOrigin(0, 0.5);
+          this.add.existing(this.musicBtn);
+      };
+      return SettingsScene;
+  }(Phaser.Scene));
+  //# sourceMappingURL=SettingsScene.js.map
+
   var stageWidth$6 = document.body.clientWidth;
   var stageHeight$6 = document.body.clientWidth / 9 * 16;
   var BaseScene = /** @class */ (function (_super) {
@@ -2349,96 +2467,6 @@
       return AssetsScene;
   }(phaser.Scene));
   //# sourceMappingURL=AssetsScene.js.map
-
-  var fontTitleStyle = { font: '46px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 7, align: 'center' };
-  var fontSettingsStyle = { font: '38px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 5, align: 'center' };
-  var frameHeight = 80;
-  var settingsLeft = stageWidth / 2 - 120;
-  var SettingsScene = /** @class */ (function (_super) {
-      __extends(SettingsScene, _super);
-      function SettingsScene() {
-          return _super.call(this, SETTINGS_SCENE) || this;
-      }
-      SettingsScene.prototype.preload = function () {
-      };
-      SettingsScene.prototype.create = function () {
-          this.cameras.main.fadeIn(0);
-          this.bindEvents();
-          this.createBackground();
-          this.createTitle();
-          this.createSoundBtn();
-          this.createMusicBtn();
-          this.createBackBtn();
-      };
-      SettingsScene.prototype.bindEvents = function () {
-          var _this = this;
-          this.events.on('wake', function () {
-              _this.cameras.main.fadeIn(0);
-          }, this);
-      };
-      SettingsScene.prototype.createBackground = function () {
-          this.add.sprite(0, 0, BACKGROUND).setOrigin(0, 0);
-      };
-      SettingsScene.prototype.createTitle = function () {
-          // text 的默认origin 是 0 0
-          var settingsText = this.add.text(stageWidth / 2, 50, 'settings', fontTitleStyle);
-          settingsText.setOrigin(0.5, 0.5);
-      };
-      SettingsScene.prototype.createBackBtn = function () {
-          var _this = this;
-          var backClick = function () {
-              GameSoundManager.playSound();
-              UIHelper.fadeToPrevScene(GAMEUI_SCENE, _this);
-              // this.scene.get(UI_SCENE).cameras.main.fadeIn(0)
-              // this.cameras.main.fadeOut(250);
-              // this.time.addEvent({
-              //     delay: 250,
-              //     callback: function () {
-              //         this.scene.sleep(SETTINGS_SCENE);
-              //     },
-              //     callbackScope: this                    
-              // })
-          };
-          this.backBtn = new ImageButton(this, 50, 50, 'button-back', backClick);
-          this.add.existing(this.backBtn);
-      };
-      SettingsScene.prototype.createSoundBtn = function () {
-          var _this = this;
-          var clickSound = function () {
-              GameSoundManager.toggleSoundMode();
-              if (GameSoundManager.soundMode) {
-                  _this.textSound.text = 'Sound: OFF';
-              }
-              else {
-                  _this.textSound.text = 'Sound: ON!';
-              }
-          };
-          var soundHeight = 150;
-          this.soundBtn = new ImageButton(this, settingsLeft, soundHeight, 'button-sound-on', clickSound);
-          this.textSound = this.add.text(settingsLeft + frameHeight / 2, soundHeight, 'Sound: ON!', fontSettingsStyle);
-          this.textSound.setOrigin(0, 0.5);
-          this.add.existing(this.soundBtn);
-      };
-      SettingsScene.prototype.createMusicBtn = function () {
-          var _this = this;
-          var clickMusic = function () {
-              GameSoundManager.toogleMusicMode();
-              if (!GameSoundManager.musicMode) {
-                  _this.textMusic.text = 'Music: OFF';
-              }
-              else {
-                  _this.textMusic.text = 'Music: ON!';
-              }
-          };
-          var musicHeight = 250;
-          this.musicBtn = new ImageButton(this, settingsLeft, musicHeight, 'button-music-on', clickMusic);
-          this.textMusic = this.add.text(settingsLeft + frameHeight / 2, musicHeight, 'Music: ON!', fontSettingsStyle);
-          this.textMusic.setOrigin(0, 0.5);
-          this.add.existing(this.musicBtn);
-      };
-      return SettingsScene;
-  }(Phaser.Scene));
-  //# sourceMappingURL=SettingsScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);

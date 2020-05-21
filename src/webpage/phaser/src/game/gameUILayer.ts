@@ -11,7 +11,7 @@ import InputButton = Phaser.Input.Gamepad.Button
 import Group = Phaser.GameObjects.Group
 
 import { UI_SCENE, SETTINGS_SCENE, GAME_SCENE, MAIN_RED_LIGHT, MAIN_RED, stageHeight, stageWidth } from "../constants";
-import { UIHelper } from "@root/UI/UIHelper";
+import { UIHelper, ImageButton } from "@root/UI/UIHelper";
 
 // 根据contaienr 的大小计算左上角坐标相对于中心位置的偏移
 const TopLeftToCenter = (width: number, height: number, topLeftPoint: Point): Point => {
@@ -36,6 +36,8 @@ export default class GameUI extends Container{
 
     public scoreArea: Container
     public scoreText: PhaserText
+    
+    private settingsBtn: ImageButton
 
     /**
      * 
@@ -47,12 +49,12 @@ export default class GameUI extends Container{
     constructor(scene: Phaser.Scene, x?: number, y?: number, children?: Phaser.GameObjects.GameObject[]){ 
         super(scene,x, y, children)    
            
-        this.testObject()
+        // this.testObject()
         this.createScoreArea()
-
-        setInterval( ()=> {
-            this.createCaughtText( ()=>{})
-        }, 2000 )
+        this.addSettingsBtn()
+        // setInterval( ()=> {
+        //     this.createCaughtText( ()=>{})
+        // }, 2000 )
         
     }
 
@@ -200,6 +202,30 @@ export default class GameUI extends Container{
 
 
         return this.scoreArea
+    }
+
+    addSettingsBtn() {
+        let settingsClick = (e) => {
+            UIHelper.fadeToAddAnotherScene(SETTINGS_SCENE, this.scene)
+
+
+            // this.scene.get(SETTINGS_SCENE).cameras.main.fadeIn(0)
+            // this.cameras.main.fadeOut(250);
+
+            // if (!this.scene.isActive(SETTINGS_SCENE) &&
+            //     !this.scene.isPaused(SETTINGS_SCENE) &&
+            //     !this.scene.isSleeping(SETTINGS_SCENE)
+            // ) {
+            //     this.scene.launch(SETTINGS_SCENE)
+            // } else {
+            //     if (this.scene.isSleeping(SETTINGS_SCENE)) {
+            //         this.scene.wake(SETTINGS_SCENE);
+            //     }
+            // }
+        }        
+        settingsClick.bind(this)
+        this.settingsBtn = new ImageButton(this.scene, 50, 50, 'button-settings', settingsClick)
+        this.add(this.settingsBtn)
     }
 
 }

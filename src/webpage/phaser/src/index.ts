@@ -20,6 +20,8 @@ canvasELlem.style.top = `${(documentHeight - stageHeight)/2}px`
 import GameScene from '@game/game'
 import GameUIScene from '@root/UI/GameUIScene'
 import EFScene from '@root/UI/EffectScene'
+import SettingsScene from '@root/UI/SettingsScene';
+
 // import GameScene from 'game/game'
 // import UIScene from 'UI/UIScene'
 // import EFScene from 'UI/EffectScene'
@@ -50,7 +52,7 @@ const config: Phaser.Types.Core.GameConfig = {
     //         debug: false
     //     }
     // },
-    // 这个 npm 包存在问题
+    // 这个 npm 包存在问题 //这样引入会报错
     // plugins: {
     //     scene: [
     //     {´´´´´´´´´´´
@@ -70,7 +72,6 @@ console.log(game.scene.isSleeping(BASE_SCENE))
 
 
 import { changeMouth, setPreview, testClickEvent } from 'test'
-import SettingsScene from './UI/SettingsScene';
 
 changeMouth(game)
 setPreview()
