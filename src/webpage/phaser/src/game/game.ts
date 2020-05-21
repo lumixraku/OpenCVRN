@@ -30,6 +30,8 @@ import AssetsLoader from './assetsLoader';
 import AnimateManager from './animate';
 import { UIHelper, ImageButton } from '@root/UI/UIHelper';
 import GameSoundManager from './soundManager';
+import GameUI from './gameUILayer';
+import GameEffectContainer from './gameEffect';
 
 
 export default class Demo extends Phaser.Scene {
@@ -70,7 +72,7 @@ export default class Demo extends Phaser.Scene {
     private testText: PhaserText
     private hasCaughtToast: boolean
 
-
+    
 
     // preview 取景器
     private previewArea: Rectagle = new Rectagle(0, 0, 0, 0)
@@ -79,7 +81,8 @@ export default class Demo extends Phaser.Scene {
     private uiScene: GameUIScene;
     private effScene: EffectScene;
 
-
+    private gameUILayer: GameUI
+    private gameEffLayer: GameEffectContainer
 
 
     constructor() {
@@ -89,15 +92,14 @@ export default class Demo extends Phaser.Scene {
 
     preload() {
         console.log('game preload')
-        this.scene.launch(EF_SCENE)
-        this.scene.launch(UI_SCENE)
+        // this.scene.launch(EF_SCENE)
+        // this.scene.launch(UI_SCENE)
     }
 
 
     // preload 中的资源都加载完毕之后 才会调用 create
     create() {
         console.log('game create')
-
         GameSoundManager.initMusic(this)
 
 
@@ -141,8 +143,15 @@ export default class Demo extends Phaser.Scene {
 
         this.addText();
 
-        this.uiScene = this.scene.get(UI_SCENE) as GameUIScene
-        this.effScene = this.scene.get(EF_SCENE) as EffectScene
+        // this.uiScene = this.scene.get(UI_SCENE) as GameUIScene
+        // this.effScene = this.scene.get(EF_SCENE) as EffectScene
+        this.gameUILayer = new GameUI(this, 0, 0)
+        this.add.existing(this.gameUILayer)
+        this.gameUILayer.setDepth(10)
+        
+        this.gameEffLayer =  new GameEffectContainer(this, 0, 0 )
+        this.add.existing(this.gameEffLayer)
+        this.gameEffLayer.setDepth(20)
 
 
         this.animateManager = new AnimateManager(this)
@@ -445,7 +454,7 @@ export default class Demo extends Phaser.Scene {
 
                 // if not get caught
                 if (this.cook.isCooking()) {
-                    this.effScene.addCoin(this.addScore)
+                    // this.effScene.addCoin(this.addScore)
                 } else {
                     if (this.cook.isChecking())
                         this.caughtAnimation()
@@ -458,8 +467,8 @@ export default class Demo extends Phaser.Scene {
     }
 
     caughtAnimation() {
-        this.effScene.addHammer(this, this.addScore)
-        this.uiScene.createCaughtText(stageWidth / 2, stageHeight / 2, () => { })
+        // this.effScene.addHammer(this, this.addScore)
+        // this.uiScene.createCaughtText(stageWidth / 2, stageHeight / 2, () => { })
 
     }
 
@@ -591,7 +600,7 @@ export default class Demo extends Phaser.Scene {
             return 
         }
         this.score = this.score + sc
-        this.effScene.scoreText.text = '' + this.score
+        // this.effScene.scoreText.text = '' + this.score
     }
 
 

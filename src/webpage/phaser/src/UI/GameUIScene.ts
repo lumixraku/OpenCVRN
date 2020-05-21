@@ -362,7 +362,7 @@ export default class GameUIScene extends Phaser.Scene {
         // graphic 的 origin 是左上角
 
         // f9ebe9
-        let bg = UIHelper.drawRoundRect(
+        let bg = UIHelper.drawRoundRectWithBorder(
             this,
             new Rectagle(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight),
             20,

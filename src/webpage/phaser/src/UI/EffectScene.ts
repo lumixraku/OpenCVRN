@@ -206,7 +206,7 @@ export default class EffectScene extends Phaser.Scene {
             scoreBoxWidth,
             scoreBoxHeight
         )
-        let scoreBox = UIHelper.drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, MAIN_RED, scoreBoxBorder, MAIN_RED_LIGHT)
+        let scoreBox = UIHelper.drawRoundRectWithBorder(this, scoreBoxRectagle, scoreBoxRadius, MAIN_RED, scoreBoxBorder, MAIN_RED_LIGHT)
 
         let scoreTitlePos = new Point(scoreAreaCenter.x - 50, scoreAreaCenter.y)
         let scoreTitle = this.add.text(

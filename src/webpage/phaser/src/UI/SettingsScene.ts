@@ -4,7 +4,6 @@ import EffectScene from "./EffectScene";
 import GameSoundManager from "@root/game/soundManager";
 import PhaserImage = Phaser.GameObjects.Image;
 
-
 const fontTitleStyle = { font: '46px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 7, align: 'center' };
 const fontSettingsStyle = { font: '38px Berlin', fill: '#ffde00', stroke: '#000', strokeThickness: 5, align: 'center' };
 

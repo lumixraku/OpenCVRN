@@ -408,6 +408,7 @@
       };
       return SpinTable;
   }());
+  //# sourceMappingURL=spinTable.js.map
 
   var Point$2 = Phaser.Geom.Point;
   var Vector2 = Phaser.Math.Vector2;
@@ -806,9 +807,406 @@
   }());
   //# sourceMappingURL=soundManager.js.map
 
-  var Circle$1 = Phaser.Geom.Circle;
+  var UIHelper = /** @class */ (function () {
+      function UIHelper() {
+      }
+      /**
+       *
+       * @param scene parent scene
+       * @param size size of rectangle
+       * @param radius
+       * @param color mainColor
+       * @param borderWidth
+       * @param outerColor border Color (little darken than main color)
+       */
+      UIHelper.drawRoundRectWithBorder = function (scene, size, radius, color, borderWidth, outerColor) {
+          var bg = scene.add.graphics();
+          bg.clear();
+          bg.beginPath();
+          var x = size.x;
+          var y = size.y;
+          var width = size.width;
+          var height = size.height;
+          bg.fillStyle(outerColor);
+          // graphics 的 origin 是左上角
+          bg.fillRoundedRect(x, y, width, height, radius);
+          if (borderWidth) {
+              var x2 = x + borderWidth;
+              var y2 = y + borderWidth;
+              bg.fillStyle(color);
+              bg.fillRoundedRect(x2, y2, width - 2 * borderWidth, height - 2 * borderWidth, radius - borderWidth);
+          }
+          return bg;
+      };
+      UIHelper.createImageButton = function (scene, x, y, texture, callback, noframes) {
+          return new ImageButton(scene, x, y, texture, callback, noframes);
+      };
+      UIHelper.fadeToStartScene = function (newScene, currentScene) {
+          currentScene.cameras.main.fadeOut(250);
+          currentScene.time.addEvent({
+              delay: 250,
+              callback: function () {
+                  currentScene.scene.start(newScene);
+              },
+              callbackScope: currentScene
+          });
+      };
+      UIHelper.fadeToAddAnotherScene = function (newScene, currentScene) {
+          // 先把目标场景显示
+          currentScene.scene.get(newScene).cameras.main.fadeIn(0);
+          // 当前场景慢慢淡出
+          currentScene.cameras.main.fadeOut(250);
+          currentScene.time.addEvent({
+              delay: 250,
+              callback: function () {
+                  // if (!currentScene.scene.isActive(newScene) && 
+                  //     !currentScene.scene.isPaused(newScene) &&
+                  //     !currentScene.scene.isSleeping(newScene)
+                  // ) {
+                  //     currentScene.scene.launch(newScene)
+                  // }else {
+                  //     if (currentScene.scene.isSleeping(newScene)) {
+                  //         currentScene.scene.wake(newScene);
+                  //     }                    
+                  // }
+                  currentScene.scene["switch"](newScene);
+              },
+              callbackScope: currentScene
+          });
+      };
+      UIHelper.fadeToPrevScene = function (resumeScene, currentScene) {
+          currentScene.scene.get(resumeScene).cameras.main.fadeIn(0);
+          currentScene.cameras.main.fadeOut(250);
+          currentScene.time.addEvent({
+              delay: 250,
+              callback: function () {
+                  // currentScene.scene.sleep(currentScene.scene.key);
+                  currentScene.scene["switch"](resumeScene);
+              },
+              callbackScope: currentScene
+          });
+      };
+      return UIHelper;
+  }());
+  var ImageButton = /** @class */ (function (_super) {
+      __extends(ImageButton, _super);
+      function ImageButton(scene, x, y, texture, callback, noframes) {
+          var _this = _super.call(this, scene, x, y, texture, 0) || this;
+          _this.setInteractive({ useHandCursor: true });
+          _this.on('pointerup', function () {
+              if (!noframes) {
+                  this.setFrame(1);
+              }
+          }, _this);
+          _this.on('pointerdown', function () {
+              if (!noframes) {
+                  this.setFrame(2);
+              }
+              callback.call(scene);
+          }, _this);
+          _this.on('pointerover', function () {
+              if (!noframes) {
+                  this.setFrame(1);
+              }
+          }, _this);
+          _this.on('pointerout', function () {
+              if (!noframes) {
+                  this.setFrame(0);
+              }
+          }, _this);
+          return _this;
+          // scene.add.existing(this);
+      }
+      return ImageButton;
+  }(Phaser.GameObjects.Image));
+  //# sourceMappingURL=UIHelper.js.map
+
   var Point$3 = Phaser.Geom.Point;
   var Rectagle$2 = Phaser.Geom.Rectangle;
+  var Graphics = Phaser.GameObjects.Graphics;
+  var Container = Phaser.GameObjects.Container;
+  // 根据contaienr 的大小计算左上角坐标相对于中心位置的偏移
+  var TopLeftToCenter = function (width, height, topLeftPoint) {
+      var halfW = width / 2;
+      var halfH = height / 2;
+      return new Point$3(topLeftPoint.x - halfW, topLeftPoint.y - halfH);
+  };
+  var coinScorePos = new Point$3(210, 50); // 相对于 0 0 左上角而言
+  var coinSize = 25;
+  var originCoinScale = coinSize / 512;
+  var GameUI = /** @class */ (function (_super) {
+      __extends(GameUI, _super);
+      /**
+       *
+       * @param scene parent scene
+       * @param x container 左上角X 在 scene 中的位置
+       * @param y contaienr 左上角Y 在 scene 中的位置
+       * @param children
+       */
+      function GameUI(scene, x, y, children) {
+          var _this = _super.call(this, scene, x, y, children) || this;
+          _this.testObject();
+          _this.createScoreArea();
+          setInterval(function () {
+              _this.createCaughtText(function () { });
+          }, 2000);
+          return _this;
+      }
+      GameUI.prototype.testObject = function () {
+          this.testGrphics = new Graphics(this.scene);
+          this.testGrphics.lineStyle(50, 0x44bb44);
+          this.testGrphics.strokeLineShape(new Phaser.Geom.Line(0, 0, 300, 0));
+          this.testGrphics.strokeLineShape(new Phaser.Geom.Line(0, 0, 0, 300));
+          this.add(this.testGrphics);
+      };
+      GameUI.prototype.createCaughtText = function (cb) {
+          var _this = this;
+          var containerWidth = 400;
+          var containerHeight = 100;
+          // container 的中心点所在父容器的位置
+          var containerPos = new Point$3(stageWidth / 2, stageHeight / 2 * 1.6);
+          var caughtContainer = this.scene.add.container(containerPos.x, containerPos.y);
+          var toastPos = TopLeftToCenter(400, 100, new Point$3(250, 50));
+          var toastText = this.scene.add.text(toastPos.x, toastPos.y, 'You get Caught!!', {
+              fontFamily: 'Berlin',
+              stroke: '#000',
+              fontSize: 30,
+              strokeThickness: 4,
+              align: 'center'
+          });
+          toastText.setOrigin(0.5);
+          // bg 的位置是相对于 container 中心点而言的
+          var bg = UIHelper.drawRoundRectWithBorder(this.scene, new Rectagle$2(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, MAIN_RED_LIGHT, 5, MAIN_RED);
+          var AlternativeEmoji = ['sad', 'cry', 'sour'];
+          var hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji);
+          var emojiPos = TopLeftToCenter(400, 100, new Point$3(50, 50));
+          var emojiFace = this.scene.add.image(emojiPos.x, emojiPos.y, hitEmoji);
+          emojiFace.setScale(0.2);
+          caughtContainer.add([bg, emojiFace, toastText]);
+          caughtContainer.setScale(0);
+          this.add(caughtContainer);
+          this.scene.tweens.add({
+              targets: caughtContainer,
+              scale: 1,
+              duration: 132,
+              x: containerPos.x,
+              y: containerPos.y,
+              ease: ' Elastic.In',
+              onComplete: function () {
+                  setTimeout(function () {
+                      _this.scene.tweens.add({
+                          targets: caughtContainer,
+                          // y: stageHeight * 1.2,
+                          x: containerPos.x,
+                          y: containerPos.y,
+                          scale: 0,
+                          duration: 132,
+                          ease: ' Elastic.Out',
+                          onComplete: function () {
+                              caughtContainer.destroy();
+                          }
+                      });
+                  }, 532);
+              }
+          });
+          return caughtContainer;
+      };
+      // 由于 coin 悬浮在这个界面上方  所以 gameUILayer 要比 gameEffect 低一层
+      GameUI.prototype.createScoreArea = function () {
+          var scene = this.scene;
+          // score container 所在 parent container 的位置 
+          var scoreAreaCenter = new Point$3(stageWidth / 2, 50);
+          this.scoreArea = scene.add.container(scoreAreaCenter.x, scoreAreaCenter.y);
+          this.add(this.scoreArea);
+          var graphicsTopLeft = new Point$3(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y);
+          var bg = scene.add.graphics();
+          bg.beginPath();
+          bg.fillStyle(MAIN_RED); //yellow
+          bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth, 100);
+          bg.closePath();
+          var scoreBoxWidth = 300;
+          var scoreBoxHeight = 66;
+          var scoreBoxRadius = scoreBoxHeight / 2;
+          var scoreBoxBorder = 10;
+          // rectagle 的左上角会和红色title 的中心区域对齐
+          var scoreBoxRectagle = new Rectagle$2(-50, 0 - scoreBoxHeight / 2, scoreBoxWidth, scoreBoxHeight);
+          var scoreBox = UIHelper.drawRoundRectWithBorder(scene, scoreBoxRectagle, scoreBoxRadius, MAIN_RED, scoreBoxBorder, MAIN_RED_LIGHT);
+          var scoreTitlePos = new Point$3(50, 0); // 相对于父元素的中心点而言
+          var scoreTitle = scene.add.text(scoreTitlePos.x, scoreTitlePos.y, 'score:', { fontFamily: 'Arial', fontSize: 22, color: '#ffffff' });
+          scoreTitle.setOrigin(0.5);
+          var scorePos = new Point$3(100, 0); // 相对于父元素的中心点而言
+          var scoreText = this.scoreText = scene.add.text(scorePos.x, scorePos.y, '0', { fontFamily: 'Arial', fontSize: 22, color: '#ffffff' });
+          scoreText.setOrigin(0.5);
+          var coinIcon = scene.add.image(0, 0, 'coin');
+          coinIcon.setScale(originCoinScale);
+          this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText, coinIcon]);
+          return this.scoreArea;
+      };
+      return GameUI;
+  }(Container));
+  //# sourceMappingURL=gameUILayer.js.map
+
+  var Point$4 = Phaser.Geom.Point;
+  var Container$1 = Phaser.GameObjects.Container;
+  var coinScorePos$1 = new Point$4(210, 50);
+  var coinSize$1 = 25;
+  var originCoinScale$1 = coinSize$1 / 512;
+  var GameEffectContainer = /** @class */ (function (_super) {
+      __extends(GameEffectContainer, _super);
+      function GameEffectContainer(scene, x, y, children) {
+          var _this = _super.call(this, scene, x, y, children) || this;
+          _this.droppingCoins = [];
+          _this.animationPlaying = {
+              hammer: false,
+              dropCoin: false,
+              addCoin: false,
+          };
+          setInterval(function () {
+              _this.addCoin(function () {
+              });
+              _this.addHammer(function () {
+              });
+          }, 1000);
+          return _this;
+      }
+      GameEffectContainer.prototype.addCoin = function (addScoreCount) {
+          var _this = this;
+          var scene = this.scene;
+          var coin = scene.add.image(stageWidth / 2, stageHeight / 2, 'coin');
+          // this.coin.displayWidth = 64
+          // this.coin.displayHeight = 64
+          // scale 是根据原图的大小而言的。
+          coin.setScale(originCoinScale$1);
+          this.add(coin);
+          this.animationPlaying.addCoin = true;
+          scene.tweens.add({
+              targets: coin,
+              scale: 0.2,
+              duration: 132,
+              ease: 'Power4',
+              onComplete: function () {
+                  // cb()
+                  scene.tweens.add({
+                      targets: coin,
+                      x: coinScorePos$1.x,
+                      y: coinScorePos$1.y,
+                      scale: originCoinScale$1,
+                      duration: 332,
+                      ease: 'Circ',
+                      onComplete: function () {
+                          addScoreCount(1);
+                          coin.destroy();
+                          _this.animationPlaying.addCoin = false;
+                      }
+                  });
+              }
+          });
+      };
+      GameEffectContainer.prototype.addHammer = function (addScoreCount) {
+          var _this = this;
+          var scene = this.scene;
+          if (this.animationPlaying.hammer) {
+              return;
+          }
+          this.animationPlaying.hammer = true;
+          var hammerPos = new Point$4(258, 327);
+          var dizzyPos = new Point$4(284, 389);
+          var AlternativeEmoji = ['sad', 'cry', 'sour'];
+          var hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji);
+          this.hammer = scene.add.image(hammerPos.x, hammerPos.y, 'hammer');
+          // this.emojiFace = this.add.image(285,520, hitEmoji)
+          // this.emojiFace.setScale(0.3)
+          this.hammer.setScale(0.3);
+          this.hammer.rotation = 1;
+          this.addDizzy(dizzyPos).play(HIT_DIZZY);
+          var animationDuration = 232;
+          var holdDuration = 332;
+          setTimeout(function () {
+              scene.cameras.main.shake(100, 0.01, true);
+              addScoreCount(-1);
+              _this.dropACoin();
+          }, 332);
+          this.scene.tweens.add({
+              targets: this.hammer,
+              rotation: 1.5,
+              duration: animationDuration,
+              hold: holdDuration,
+              yoyo: true,
+              ease: 'Power3',
+              onComplete: function () {
+                  _this.hammer.destroy();
+                  _this.dizzy.destroy();
+                  // this.emojiFace.destroy()
+                  _this.animationPlaying.hammer = false;
+              },
+          });
+      };
+      GameEffectContainer.prototype.addDizzy = function (dizzyPos) {
+          var scene = this.scene;
+          this.dizzy = scene.add.sprite(dizzyPos.x, dizzyPos.y, 'dizzy1');
+          return this.dizzy;
+      };
+      // 原本这个是放在 UIScene 中的  但是因为addCoin 动画要表现在这里
+      // 如果放在 UIScene (UIScene 在层级上最高) Coin会被UIScene 遮住
+      // createScoreArea(): Container {
+      //     let scoreAreaCenter = new Point(stageWidth / 2 + 100, 50)
+      //     let graphicsTopLeft = new Point(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y)
+      //     this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y)
+      //     let bg = this.add.graphics()
+      //     bg.beginPath()
+      //     bg.fillStyle(MAIN_RED) //yellow
+      //     bg.fillRect(graphicsTopLeft.x, graphicsTopLeft.y, stageWidth, 100)
+      //     bg.closePath()
+      //     let scoreBoxWidth = 300
+      //     let scoreBoxHeight = 66
+      //     let scoreBoxRadius = scoreBoxHeight / 2
+      //     let scoreBoxBorder = 10
+      //     let scoreBoxRectagle = new Rectagle(
+      //         (scoreAreaCenter.x - scoreBoxWidth / 2) - scoreAreaCenter.x,
+      //         (scoreAreaCenter.y - scoreBoxHeight / 2) - scoreAreaCenter.y,
+      //         scoreBoxWidth,
+      //         scoreBoxHeight
+      //     )
+      //     let scoreBox = UIHelper.drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, MAIN_RED, scoreBoxBorder, MAIN_RED_LIGHT)
+      //     let scoreTitlePos = new Point(scoreAreaCenter.x - 50, scoreAreaCenter.y)
+      //     let scoreTitle = this.add.text(
+      //         scoreTitlePos.x - scoreAreaCenter.x,
+      //         scoreTitlePos.y - scoreAreaCenter.y,
+      //         'score:',
+      //         { fontFamily: 'Arial', fontSize: 22, color: '#ffffff' }
+      //     )
+      //     scoreTitle.setOrigin(0.5)
+      //     let scorePos = new Point(scoreAreaCenter.x + 0, scoreAreaCenter.y)
+      //     let scoreText = this.scoreText = this.add.text(
+      //         scorePos.x - scoreAreaCenter.x,
+      //         scorePos.y - scoreAreaCenter.y,
+      //         '0',
+      //         { fontFamily: 'Arial', fontSize: 22, color: '#ffffff' }
+      //     )
+      //     scoreText.setOrigin(0.5)
+      //     this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText])
+      //     let coinIcon = this.add.image(coinScorePos.x, coinScorePos.y, 'coin')
+      //     coinIcon.setScale(originCoinScale)
+      //     return this.scoreArea
+      // }
+      GameEffectContainer.prototype.dropACoin = function () {
+          var scene = this.scene;
+          var dropCoin = scene.matter.add.image(coinScorePos$1.x, coinScorePos$1.y, 'coin');
+          dropCoin.setScale(originCoinScale$1);
+          this.droppingCoins.push(dropCoin);
+          dropCoin.setCircle(coinSize$1 / 2);
+          dropCoin.setFriction(0.005);
+          dropCoin.setBounce(0.6);
+          dropCoin.setVelocityX(1);
+          dropCoin.setAngularVelocity(0.15);
+      };
+      return GameEffectContainer;
+  }(Container$1));
+  //# sourceMappingURL=gameEffect.js.map
+
+  var Circle$1 = Phaser.Geom.Circle;
+  var Point$5 = Phaser.Geom.Point;
+  var Rectagle$3 = Phaser.Geom.Rectangle;
   var stageWidth$3 = document.body.clientWidth;
   var stageHeight$3 = document.body.clientWidth / 9 * 16;
   var Demo = /** @class */ (function (_super) {
@@ -821,7 +1219,7 @@
           _this.tableCapacity = 360 / _this.distanceAngle; //根据间隔计算得到的桌面容量
           _this.foodList = __spreadArrays(Array(_this.tableCapacity)).map(function (_) { return null; });
           // preview 取景器
-          _this.previewArea = new Rectagle$2(0, 0, 0, 0);
+          _this.previewArea = new Rectagle$3(0, 0, 0, 0);
           _this.frameCounter = 0;
           _this.addCounter = 0;
           _this.messageListener();
@@ -829,8 +1227,8 @@
       }
       Demo.prototype.preload = function () {
           console.log('game preload');
-          this.scene.launch(EF_SCENE);
-          this.scene.launch(GAMEUI_SCENE);
+          // this.scene.launch(EF_SCENE)
+          // this.scene.launch(UI_SCENE)
       };
       // preload 中的资源都加载完毕之后 才会调用 create
       Demo.prototype.create = function () {
@@ -860,8 +1258,14 @@
           this.mouthObj = new Mouth(this);
           this.refreshMouth([], [], [], []);
           this.addText();
-          this.uiScene = this.scene.get(GAMEUI_SCENE);
-          this.effScene = this.scene.get(EF_SCENE);
+          // this.uiScene = this.scene.get(UI_SCENE) as GameUIScene
+          // this.effScene = this.scene.get(EF_SCENE) as EffectScene
+          this.gameUILayer = new GameUI(this, 0, 0);
+          this.add.existing(this.gameUILayer);
+          this.gameUILayer.setDepth(10);
+          this.gameEffLayer = new GameEffectContainer(this, 0, 0);
+          this.add.existing(this.gameEffLayer);
+          this.gameEffLayer.setDepth(20);
           this.animateManager = new AnimateManager(this);
           this.animateManager.registerAnimation();
           this.addScore = this.addScore.bind(this);
@@ -1092,9 +1496,7 @@
               onComplete: function () {
                   food.destroy();
                   // if not get caught
-                  if (_this.cook.isCooking()) {
-                      _this.effScene.addCoin(_this.addScore);
-                  }
+                  if (_this.cook.isCooking()) ;
                   else {
                       if (_this.cook.isChecking())
                           _this.caughtAnimation();
@@ -1103,13 +1505,13 @@
           });
       };
       Demo.prototype.caughtAnimation = function () {
-          this.effScene.addHammer(this, this.addScore);
-          this.uiScene.createCaughtText(stageWidth$3 / 2, stageHeight$3 / 2, function () { });
+          // this.effScene.addHammer(this, this.addScore)
+          // this.uiScene.createCaughtText(stageWidth / 2, stageHeight / 2, () => { })
       };
       Demo.prototype.missAnimation = function () {
       };
       Demo.prototype.drawHollowBackground = function () {
-          var faceCenter = new Point$3(300, 450);
+          var faceCenter = new Point$5(300, 450);
           var faceRadius = 200;
           this.bg.beginPath();
           this.bg.moveTo(0, 0);
@@ -1209,132 +1611,19 @@
               return;
           }
           this.score = this.score + sc;
-          this.effScene.scoreText.text = '' + this.score;
+          // this.effScene.scoreText.text = '' + this.score
       };
       return Demo;
   }(Phaser.Scene));
 
-  var UIHelper = /** @class */ (function () {
-      function UIHelper() {
-      }
-      /**
-       *
-       * @param scene parent scene
-       * @param size size of rectangle
-       * @param radius
-       * @param color mainColor
-       * @param borderWidth
-       * @param outerColor border Color (little darken than main color)
-       */
-      UIHelper.drawRoundRect = function (scene, size, radius, color, borderWidth, outerColor) {
-          var bg = scene.add.graphics();
-          bg.clear();
-          bg.beginPath();
-          var x = size.x;
-          var y = size.y;
-          var width = size.width;
-          var height = size.height;
-          bg.fillStyle(outerColor);
-          // graphics 的 origin 是左上角
-          bg.fillRoundedRect(x, y, width, height, radius);
-          if (borderWidth) {
-              var x2 = x + borderWidth;
-              var y2 = y + borderWidth;
-              bg.fillStyle(color);
-              bg.fillRoundedRect(x2, y2, width - 2 * borderWidth, height - 2 * borderWidth, radius - borderWidth);
-          }
-          return bg;
-      };
-      UIHelper.createImageButton = function (scene, x, y, texture, callback, noframes) {
-          return new ImageButton(scene, x, y, texture, callback, noframes);
-      };
-      UIHelper.fadeToStartScene = function (newScene, currentScene) {
-          currentScene.cameras.main.fadeOut(250);
-          currentScene.time.addEvent({
-              delay: 250,
-              callback: function () {
-                  currentScene.scene.start(newScene);
-              },
-              callbackScope: currentScene
-          });
-      };
-      UIHelper.fadeToAddAnotherScene = function (newScene, currentScene) {
-          // 先把目标场景显示
-          currentScene.scene.get(newScene).cameras.main.fadeIn(0);
-          // 当前场景慢慢淡出
-          currentScene.cameras.main.fadeOut(250);
-          currentScene.time.addEvent({
-              delay: 250,
-              callback: function () {
-                  // if (!currentScene.scene.isActive(newScene) && 
-                  //     !currentScene.scene.isPaused(newScene) &&
-                  //     !currentScene.scene.isSleeping(newScene)
-                  // ) {
-                  //     currentScene.scene.launch(newScene)
-                  // }else {
-                  //     if (currentScene.scene.isSleeping(newScene)) {
-                  //         currentScene.scene.wake(newScene);
-                  //     }                    
-                  // }
-                  currentScene.scene["switch"](newScene);
-              },
-              callbackScope: currentScene
-          });
-      };
-      UIHelper.fadeToPrevScene = function (resumeScene, currentScene) {
-          currentScene.scene.get(resumeScene).cameras.main.fadeIn(0);
-          currentScene.cameras.main.fadeOut(250);
-          currentScene.time.addEvent({
-              delay: 250,
-              callback: function () {
-                  // currentScene.scene.sleep(currentScene.scene.key);
-                  currentScene.scene["switch"](resumeScene);
-              },
-              callbackScope: currentScene
-          });
-      };
-      return UIHelper;
-  }());
-  var ImageButton = /** @class */ (function (_super) {
-      __extends(ImageButton, _super);
-      function ImageButton(scene, x, y, texture, callback, noframes) {
-          var _this = _super.call(this, scene, x, y, texture, 0) || this;
-          _this.setInteractive({ useHandCursor: true });
-          _this.on('pointerup', function () {
-              if (!noframes) {
-                  this.setFrame(1);
-              }
-          }, _this);
-          _this.on('pointerdown', function () {
-              if (!noframes) {
-                  this.setFrame(2);
-              }
-              callback.call(scene);
-          }, _this);
-          _this.on('pointerover', function () {
-              if (!noframes) {
-                  this.setFrame(1);
-              }
-          }, _this);
-          _this.on('pointerout', function () {
-              if (!noframes) {
-                  this.setFrame(0);
-              }
-          }, _this);
-          return _this;
-          // scene.add.existing(this);
-      }
-      return ImageButton;
-  }(Phaser.GameObjects.Image));
-
-  var Point$4 = Phaser.Geom.Point;
-  var Rectagle$3 = Phaser.Geom.Rectangle;
+  var Point$6 = Phaser.Geom.Point;
+  var Rectagle$4 = Phaser.Geom.Rectangle;
   var stageWidth$4 = document.body.clientWidth;
   var stageHeight$4 = document.body.clientWidth / 9 * 16;
-  var TopLeftToCenter = function (width, height, topLeftPoint) {
+  var TopLeftToCenter$1 = function (width, height, topLeftPoint) {
       var halfW = width / 2;
       var halfH = height / 2;
-      return new Point$4(topLeftPoint.x - halfW, topLeftPoint.y - halfH);
+      return new Point$6(topLeftPoint.x - halfW, topLeftPoint.y - halfH);
   };
   var GameUIScene = /** @class */ (function (_super) {
       __extends(GameUIScene, _super);
@@ -1551,10 +1840,10 @@
           var _this = this;
           var containerWidth = 400;
           var containerHeight = 100;
-          var containerPos = new Point$4(stageWidth$4 / 2, stageHeight$4 / 2 * 1.6);
+          var containerPos = new Point$6(stageWidth$4 / 2, stageHeight$4 / 2 * 1.6);
           var container = this.add.container(containerPos.x, containerPos.y);
           // (250,  50) 这个点是相对于容器左上角而言的
-          var toastPos = TopLeftToCenter(400, 100, new Point$4(250, 50));
+          var toastPos = TopLeftToCenter$1(400, 100, new Point$6(250, 50));
           var toastText = this.add.text(toastPos.x, toastPos.y, 'You get Caught!!', {
               fontFamily: 'Berlin',
               stroke: '#000',
@@ -1572,10 +1861,10 @@
           // 添加元素的时候也是将子元素的origin 和 父容器的origin 对齐
           // graphic 的 origin 是左上角
           // f9ebe9
-          var bg = UIHelper.drawRoundRect(this, new Rectagle$3(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, MAIN_RED_LIGHT, 5, MAIN_RED);
+          var bg = UIHelper.drawRoundRectWithBorder(this, new Rectagle$4(-containerWidth / 2, -containerHeight / 2, containerWidth, containerHeight), 20, MAIN_RED_LIGHT, 5, MAIN_RED);
           var AlternativeEmoji = ['sad', 'cry', 'sour'];
           var hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji);
-          var emojiPos = TopLeftToCenter(400, 100, new Point$4(50, 50));
+          var emojiPos = TopLeftToCenter$1(400, 100, new Point$6(50, 50));
           var emojiFace = this.add.image(emojiPos.x, emojiPos.y, hitEmoji);
           emojiFace.setScale(0.2);
           container.add([bg, emojiFace, toastText]);
@@ -1714,14 +2003,15 @@
       };
       return GameUIScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=GameUIScene.js.map
 
-  var Point$5 = Phaser.Geom.Point;
-  var Rectagle$4 = Phaser.Geom.Rectangle;
+  var Point$7 = Phaser.Geom.Point;
+  var Rectagle$5 = Phaser.Geom.Rectangle;
   var stageWidth$5 = document.body.clientWidth;
   var stageHeight$5 = document.body.clientWidth / 9 * 16;
-  var coinScorePos = new Point$5(210, 50);
-  var coinSize = 25;
-  var originCoinScale = coinSize / 512;
+  var coinScorePos$2 = new Point$7(210, 50);
+  var coinSize$2 = 25;
+  var originCoinScale$2 = coinSize$2 / 512;
   var EffectScene = /** @class */ (function (_super) {
       __extends(EffectScene, _super);
       function EffectScene() {
@@ -1756,7 +2046,7 @@
       EffectScene.prototype.update = function () {
           var _loop_1 = function (idx) {
               var dropCoin = this_1.droppingCoins[idx];
-              if (dropCoin && Math.abs(dropCoin.y + coinSize - stageHeight$5) < 15) {
+              if (dropCoin && Math.abs(dropCoin.y + coinSize$2 - stageHeight$5) < 15) {
                   // console.log('drop Coin', idx)
                   this_1.droppingCoins.splice(idx--, 1);
                   setTimeout(function () {
@@ -1777,7 +2067,7 @@
           // this.coin.displayWidth = 64
           // this.coin.displayHeight = 64
           // scale 是根据原图的大小而言的。
-          coin.setScale(originCoinScale);
+          coin.setScale(originCoinScale$2);
           this.animationPlaying.addCoin = true;
           this.tweens.add({
               targets: coin,
@@ -1788,9 +2078,9 @@
                   // cb()
                   _this.tweens.add({
                       targets: coin,
-                      x: coinScorePos.x,
-                      y: coinScorePos.y,
-                      scale: originCoinScale,
+                      x: coinScorePos$2.x,
+                      y: coinScorePos$2.y,
+                      scale: originCoinScale$2,
                       duration: 332,
                       ease: 'Circ',
                       onComplete: function () {
@@ -1808,8 +2098,8 @@
               return;
           }
           this.animationPlaying.hammer = true;
-          var hammerPos = new Point$5(258, 327);
-          var dizzyPos = new Point$5(284, 389);
+          var hammerPos = new Point$7(258, 327);
+          var dizzyPos = new Point$7(284, 389);
           var AlternativeEmoji = ['sad', 'cry', 'sour'];
           var hitEmoji = Phaser.Math.RND.pick(AlternativeEmoji);
           this.hammer = this.add.image(hammerPos.x, hammerPos.y, 'hammer');
@@ -1847,8 +2137,8 @@
       // 原本这个是放在 UIScene 中的  但是因为addCoin 动画要表现在这里
       // 如果放在 UIScene (UIScene 在层级上最高) Coin会被UIScene 遮住
       EffectScene.prototype.createScoreArea = function () {
-          var scoreAreaCenter = new Point$5(stageWidth$5 / 2 + 100, 50);
-          var graphicsTopLeft = new Point$5(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y);
+          var scoreAreaCenter = new Point$7(stageWidth$5 / 2 + 100, 50);
+          var graphicsTopLeft = new Point$7(0 - scoreAreaCenter.x, 0 - scoreAreaCenter.y);
           this.scoreArea = this.add.container(scoreAreaCenter.x, scoreAreaCenter.y);
           var bg = this.add.graphics();
           bg.beginPath();
@@ -1859,24 +2149,24 @@
           var scoreBoxHeight = 66;
           var scoreBoxRadius = scoreBoxHeight / 2;
           var scoreBoxBorder = 10;
-          var scoreBoxRectagle = new Rectagle$4((scoreAreaCenter.x - scoreBoxWidth / 2) - scoreAreaCenter.x, (scoreAreaCenter.y - scoreBoxHeight / 2) - scoreAreaCenter.y, scoreBoxWidth, scoreBoxHeight);
-          var scoreBox = UIHelper.drawRoundRect(this, scoreBoxRectagle, scoreBoxRadius, MAIN_RED, scoreBoxBorder, MAIN_RED_LIGHT);
-          var scoreTitlePos = new Point$5(scoreAreaCenter.x - 50, scoreAreaCenter.y);
+          var scoreBoxRectagle = new Rectagle$5((scoreAreaCenter.x - scoreBoxWidth / 2) - scoreAreaCenter.x, (scoreAreaCenter.y - scoreBoxHeight / 2) - scoreAreaCenter.y, scoreBoxWidth, scoreBoxHeight);
+          var scoreBox = UIHelper.drawRoundRectWithBorder(this, scoreBoxRectagle, scoreBoxRadius, MAIN_RED, scoreBoxBorder, MAIN_RED_LIGHT);
+          var scoreTitlePos = new Point$7(scoreAreaCenter.x - 50, scoreAreaCenter.y);
           var scoreTitle = this.add.text(scoreTitlePos.x - scoreAreaCenter.x, scoreTitlePos.y - scoreAreaCenter.y, 'score:', { fontFamily: 'Arial', fontSize: 22, color: '#ffffff' });
           scoreTitle.setOrigin(0.5);
-          var scorePos = new Point$5(scoreAreaCenter.x + 0, scoreAreaCenter.y);
+          var scorePos = new Point$7(scoreAreaCenter.x + 0, scoreAreaCenter.y);
           var scoreText = this.scoreText = this.add.text(scorePos.x - scoreAreaCenter.x, scorePos.y - scoreAreaCenter.y, '0', { fontFamily: 'Arial', fontSize: 22, color: '#ffffff' });
           scoreText.setOrigin(0.5);
           this.scoreArea.add([bg, scoreBox, scoreTitle, scoreText]);
-          var coinIcon = this.add.image(coinScorePos.x, coinScorePos.y, 'coin');
-          coinIcon.setScale(originCoinScale);
+          var coinIcon = this.add.image(coinScorePos$2.x, coinScorePos$2.y, 'coin');
+          coinIcon.setScale(originCoinScale$2);
           return this.scoreArea;
       };
       EffectScene.prototype.dropACoin = function () {
-          var dropCoin = this.matter.add.image(coinScorePos.x, coinScorePos.y, 'coin');
-          dropCoin.setScale(originCoinScale);
+          var dropCoin = this.matter.add.image(coinScorePos$2.x, coinScorePos$2.y, 'coin');
+          dropCoin.setScale(originCoinScale$2);
           this.droppingCoins.push(dropCoin);
-          dropCoin.setCircle(coinSize / 2);
+          dropCoin.setCircle(coinSize$2 / 2);
           dropCoin.setFriction(0.005);
           dropCoin.setBounce(0.6);
           dropCoin.setVelocityX(1);
@@ -1884,6 +2174,7 @@
       };
       return EffectScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=EffectScene.js.map
 
   var stageWidth$6 = document.body.clientWidth;
   var stageHeight$6 = document.body.clientWidth / 9 * 16;
@@ -2147,6 +2438,7 @@
       };
       return SettingsScene;
   }(Phaser.Scene));
+  //# sourceMappingURL=SettingsScene.js.map
 
   console.log(Phaser.AUTO);
   console.log(Phaser.AUTO);
