@@ -5,6 +5,7 @@ import Point = Phaser.Geom.Point;
 import Rectagle = Phaser.Geom.Rectangle;
 import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
+import Zone = Phaser.GameObjects.Zone;
 
 
 
@@ -22,7 +23,7 @@ import { FaceData, Bounds } from '@root/faceData';
 import SpinTable from './spinTable';
 import CamFaceCheck, { FaceInCircle } from './facePosCheck';
 import Cook from './cook';
-import { UIPlugin } from 'UI';
+import { UIPlugin, Dialog } from 'UI';
 import { Scene } from 'phaser';
 import GameUIScene from '@root/UI/GameUIScene';
 import EffectScene from '@root/UI/EffectScene';
@@ -32,6 +33,7 @@ import { UIHelper, ImageButton } from '@root/UI/UIHelper';
 import GameSoundManager from './soundManager';
 import GameUI from './gameUILayer';
 import GameEffectContainer from './gameEffectLayer';
+import DialogLayer from './DialogLayer';
 
 
 export default class Demo extends Phaser.Scene {
@@ -83,6 +85,7 @@ export default class Demo extends Phaser.Scene {
 
     private gameUILayer: GameUI
     private gameEffLayer: GameEffectContainer
+    private dialogLayer: DialogLayer
 
 
     constructor() {
@@ -92,6 +95,12 @@ export default class Demo extends Phaser.Scene {
 
     preload() {
         console.log('game preload')
+        // 用到 rexUI scene 必须加载 scenePlugin
+        this.load.scenePlugin({
+            key: 'rexuiplugin',
+            url: '/rexuiplugin.min.js',
+            sceneKey: 'rexUI'
+        });        
         // this.scene.launch(EF_SCENE)
         // this.scene.launch(UI_SCENE)
     }
@@ -153,6 +162,9 @@ export default class Demo extends Phaser.Scene {
         this.add.existing(this.gameEffLayer)
         this.gameEffLayer.setDepth(20)
 
+        this.dialogLayer = new DialogLayer(this, 0, 0)
+        this.add.existing(this.dialogLayer)
+        this.dialogLayer.setDepth(30)
 
         this.animateManager = new AnimateManager(this)
         this.animateManager.registerAnimation()
@@ -277,7 +289,6 @@ export default class Demo extends Phaser.Scene {
                 if (Math.abs(spinRad - foodRad) < 0.02) {
                     let foodTextureKey = `food${idx}`
                     let food = this.add.sprite(0, 0, "foods", FOOD_LIST_FNAME_MAP[foodTextureKey]) as Food
-
                     food.name = `Food${idx}`
                     food.setScale(1)
                     this.foodList[idx] = food

@@ -436,7 +436,7 @@ declare namespace UI {
         clear(destroyChild: any): Container;
     }
 
-    class Base {
+    class Base extends Phaser.GameObjects.Zone{
         constructor(scene: any, x: any, y: any, width: any, height: any);
         children: any[];
         destroy(fromScene: any): void;

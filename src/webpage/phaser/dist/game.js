@@ -1066,6 +1066,7 @@
       };
       return GameUI;
   }(Container));
+  //# sourceMappingURL=gameUILayer.js.map
 
   var Point$4 = Phaser.Geom.Point;
   var Container$1 = Phaser.GameObjects.Container;
@@ -1225,6 +1226,171 @@
   }(Container$1));
   //# sourceMappingURL=gameEffectLayer.js.map
 
+  var Container$2 = Phaser.GameObjects.Container;
+  var DialogLayer = /** @class */ (function (_super) {
+      __extends(DialogLayer, _super);
+      /**
+       *
+       * @param scene parent scene
+       * @param x container 左上角X 在 scene 中的位置
+       * @param y contaienr 左上角Y 在 scene 中的位置
+       * @param children
+       */
+      function DialogLayer(scene, x, y, children) {
+          var _this = _super.call(this, scene, x, y, children) || this;
+          // this.testObject()
+          _this.showWelcome();
+          return _this;
+      }
+      DialogLayer.prototype.testObject = function () {
+          var testObjj = this.scene.add.image(0, 0, 'plate');
+          this.add(testObjj);
+      };
+      DialogLayer.prototype.showWelcome = function () {
+          this.welcome = this.createWelcomeDialog(300, 500);
+          this.welcome.popUp(500);
+      };
+      DialogLayer.prototype.createWelcomeDialog = function (width, height) {
+          var scene = this.scene;
+          var makeContentLabel = function (content) {
+              var contentLabel = scene.rexUI.add.label({
+                  x: 0,
+                  y: 0,
+                  width: 40,
+                  height: 340,
+                  background: scene.rexUI.add.roundRectangle(40, 40, 100, 240, 0, 0xffffff),
+                  text: scene.add.text(0, 0, content, {
+                      fontSize: '20px',
+                      color: 0x888888,
+                      padding: {
+                          left: 20,
+                          right: 20,
+                          top: 20,
+                          bottom: 20,
+                      },
+                      wordWrap: { width: 240, useAdvancedWrap: true }
+                  }),
+                  space: {
+                      left: 10,
+                      right: 10,
+                      top: 10,
+                      bottom: 10
+                  },
+              }).layout();
+              return contentLabel;
+          };
+          var makeScrollSizer = function (content) {
+              // const COLOR_PRIMARY = 0x4e342e;
+              // const COLOR_LIGHT = 0x7b5e57;
+              // const COLOR_DARK = 0x260e04;
+              var scrollPanel = scene.rexUI.add.scrollablePanel({
+                  x: width / 2,
+                  y: height / 2,
+                  width: 240,
+                  height: 340,
+                  scrollMode: 0,
+                  background: scene.rexUI.add.roundRectangle(0, 0, 2, 2, 10, 0xffffff),
+                  panel: {
+                      child: makeContentLabel(content),
+                      // child: makeFixWidthPanel(240, content),
+                      mask: {
+                          padding: 1
+                      },
+                  },
+                  // slider: {
+                  //     track: this.rexUI.add.roundRectangle(0, 0, 20, 10, 10, COLOR_DARK),
+                  //     thumb: this.rexUI.add.roundRectangle(0, 0, 0, 0, 13, COLOR_LIGHT),
+                  // },
+                  space: {
+                      left: 10,
+                      right: 10,
+                      top: 10,
+                      bottom: 10,
+                      panel: 0,
+                  }
+              }).layout();
+              // insertTextToPanel(scrollPanel, content)
+              return scrollPanel;
+          };
+          // x y 用于定位panel的位置  默认 xy 是panel 的中心点
+          var x = stageWidth / 2;
+          var y = stageHeight / 2;
+          var contentStr = "\u8FD9\u662F\u4E00\u4E2A\u5077\u5403\u6C49\u5821\u7684\u6E38\u620F! \n\n\u26A0\uFE0F\u4F60\u53EA\u53EF\u4EE5\u5403\u6C49\u5821\u85AF\u6761\uFF0C\u559D\u53EF\u4E50\u3002\n\u5176\u4ED6\u7684\u4F60\u90FD\u4E0D\u559C\u6B22\u5403\u3002\n\u53E6\u5916\u4F60\u6CA1\u6709\u94B1\uFF0C\n\u53EA\u80FD\u5728\u53A8\u5E08\u770B\u4E0D\u5230\u4F60\u7684\u65F6\u5019\u5403\u3002\n\n\n\u628A\u6574\u5F20\u8138\u90FD\u653E\u5728\u6846\u5185\uFF0C \u901A\u8FC7\u5F20\u5634\u5C31\u53EF\u4EE5\u5077\u5403\u5566\u8FC7\u5F20\u5634\u5C31\u53EF\u4EE5\u5077\u5403\u5566\u8FC7\u5F20\u5634\u5C31\u53EF\u4EE5\u5077\u5403\u5566\u8FC7\u5F20\u5634\u5C31\u53EF\u4EE5\u5077\u5403\u5566\n";
+          // 默认x y 是 Dialog 中心位置   也就是说 Pivot 默认是 center 
+          var dialog = scene.rexUI.add.dialog({
+              x: x,
+              y: y,
+              width: width,
+              // height: height,
+              // background 并不在意大小的
+              background: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, MAIN_RED),
+              title: scene.rexUI.add.label({
+                  background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, MAIN_RED_LIGHT),
+                  text: scene.add.text(0, 0, 'Eat Burger AR Game', {
+                      fontSize: '20px',
+                      color: '#FC6158',
+                  }),
+                  space: {
+                      left: 10,
+                      right: 10,
+                      top: 10,
+                      bottom: 10
+                  }
+              }),
+              // content: makeContentLabel(contentStr),
+              content: makeScrollSizer(contentStr),
+              actions: [
+                  this.createRexUIButton(this.scene, 'OK', 0xf57f17),
+              ],
+              actionsAlign: '  center  ',
+              space: {
+                  title: 10,
+                  action: 45,
+                  content: 25,
+                  left: 10,
+                  right: 10,
+                  top: 10,
+                  bottom: 10,
+              }
+          });
+          dialog
+              .on('button.click', function (button, groupName, index, pointer, event) {
+              // this.print.text += groupName + '-' + index + ': ' + button.text + '\n';
+              dialog.scaleDownDestroy(100);
+              // this.scene.resume(GAME_SCENE)
+          }, this)
+              .on('button.over', function (button, groupName, index, pointer, event) {
+              button.getElement('background').setStrokeStyle(1, 0xffffff);
+          })
+              .on('button.out', function (button, groupName, index, pointer, event) {
+              button.getElement('background').setStrokeStyle();
+          });
+          dialog.layout(); //.pushIntoBounds()
+          dialog.setDepth(31);
+          return dialog;
+      };
+      DialogLayer.prototype.createRexUIButton = function (scene, text, color, space) {
+          return scene.rexUI.add.label({
+              x: 0,
+              y: 100,
+              width: 40,
+              height: 40,
+              background: scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0x5e92f3),
+              text: scene.add.text(0, 0, text, {
+                  fontSize: '24px'
+              }),
+              space: space || {
+                  left: 10,
+                  right: 10,
+                  top: 10,
+                  bottom: 10
+              }
+          });
+      };
+      return DialogLayer;
+  }(Container$2));
+  //# sourceMappingURL=DialogLayer.js.map
+
   var Circle$1 = Phaser.Geom.Circle;
   var Point$5 = Phaser.Geom.Point;
   var Rectagle$3 = Phaser.Geom.Rectangle;
@@ -1248,6 +1414,12 @@
       }
       Demo.prototype.preload = function () {
           console.log('game preload');
+          // 用到 rexUI scene 必须加载 scenePlugin
+          this.load.scenePlugin({
+              key: 'rexuiplugin',
+              url: '/rexuiplugin.min.js',
+              sceneKey: 'rexUI'
+          });
           // this.scene.launch(EF_SCENE)
           // this.scene.launch(UI_SCENE)
       };
@@ -1287,6 +1459,9 @@
           this.gameEffLayer = new GameEffectContainer(this, 0, 0);
           this.add.existing(this.gameEffLayer);
           this.gameEffLayer.setDepth(20);
+          this.dialogLayer = new DialogLayer(this, 0, 0);
+          this.add.existing(this.dialogLayer);
+          this.dialogLayer.setDepth(30);
           this.animateManager = new AnimateManager(this);
           this.animateManager.registerAnimation();
           this.addScoreCallback = this.addScoreCallback.bind(this);
@@ -1643,6 +1818,7 @@
       };
       return Demo;
   }(Phaser.Scene));
+  //# sourceMappingURL=game.js.map
 
   var Point$6 = Phaser.Geom.Point;
   var Rectagle$4 = Phaser.Geom.Rectangle;
@@ -2345,7 +2521,7 @@
               _this.progressBar.fillStyle(0xffde00, 1);
               _this.progressBar.fillRect(stageWidth / 2 - 150, stageHeight / 2, 300 * value, 30);
           });
-          // not work
+          // not work on PC ?!
           this.load.on('fileprogress', function (file, value) {
               _this.assetText.setText('Loading asset: ' + file.key);
           });
@@ -2364,7 +2540,7 @@
       };
       AssetsScene.prototype.create = function () {
           // 这些逻辑不能放在 index.ts 中  因为他们需要资源加载完成之后才能加载      
-          this.scene["switch"](GAME_SCENE);
+          this.scene.start(GAME_SCENE);
       };
       AssetsScene.prototype.addLoadingProgressUI = function () {
           this.bgColor = this.add.graphics();
@@ -2476,13 +2652,20 @@
   var stageHeight$7 = document.body.clientWidth / 9 * 16;
   var documentWidth = document.body.clientWidth;
   var documentHeight = document.body.clientHeight;
-  canvasELlem.style.top = (documentHeight - stageHeight$7) / 2 + "px";
+  // 通过指定 parent 元素 在FIT 屏幕的时候可以利用 Phaser 自己的处理机制 
   var config = {
-      canvas: canvasELlem,
+      // canvas: canvasELlem,
       type: Phaser.WEBGL,
       // parent: 'phaser-example',
       width: stageWidth$7,
       height: stageHeight$7,
+      scale: {
+          parent: 'phaser-example',
+          mode: Phaser.Scale.FIT,
+          autoCenter: Phaser.Scale.CENTER_BOTH,
+          width: stageWidth$7,
+          height: stageHeight$7
+      },
       scene: [BaseScene, AssetsScene, Demo, EffectScene, GameUIScene, SettingsScene],
       transparent: true,
       physics: {
@@ -2498,7 +2681,6 @@
   changeMouth();
   setPreview();
   testClickEvent(game);
-  //# sourceMappingURL=index.js.map
 
 }(Phaser));
 //# sourceMappingURL=game.js.map

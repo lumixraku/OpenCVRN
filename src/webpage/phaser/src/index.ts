@@ -14,7 +14,7 @@ const stageHeight = document.body.clientWidth / 9 * 16;
 const documentWidth = document.body.clientWidth
 const documentHeight = document.body.clientHeight
 
-canvasELlem.style.top = `${(documentHeight - stageHeight)/2}px`
+// canvasELlem.style.top = `${(documentHeight - stageHeight)/2}px`
 
 
 import GameScene from '@game/game'
@@ -29,13 +29,21 @@ import BaseScene from './BaseScene';
 import AssetsScene from '@root/UI/AssetsScene';
 
 
+// 通过指定 parent 元素 在FIT 屏幕的时候可以利用 Phaser 自己的处理机制 
 
 const config: Phaser.Types.Core.GameConfig = {
-    canvas: canvasELlem,
+    // canvas: canvasELlem,
     type: Phaser.WEBGL,
     // parent: 'phaser-example',
     width: stageWidth,
     height: stageHeight,
+    scale: {
+        parent: 'phaser-example',
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: stageWidth,
+        height: stageHeight
+    },    
     scene: [BaseScene, AssetsScene, GameScene, EFScene, GameUIScene, SettingsScene],
     transparent: true,
     physics: {

@@ -22,7 +22,7 @@ import { fakedata } from './fakedata'
 
 import _ from 'underscore'
 
-var webviewURL = 'http://10.12.167.198:5001/';
+var webviewURL = 'http://10.12.113.156:5001/';
 // var webviewURL = 'http://47.92.222.162:3001/
 // var webviewLocal = 'file:///android_asset/index.html' // blob 请求无法识别
 // var webviewSource = require("../../android/app/src/main/assets/index.html") // 报错
@@ -206,12 +206,13 @@ export default class CameraScreen extends Component {
       });
 
       let { bounds } = offsetFaceData;
+      let { bounds : originBounds } = faceData
       let centerX = bounds.origin.x + bounds.size.width / 2
       let centerY = bounds.origin.y + bounds.size.height / 2
       let noOffsetX = centerX - offsetXPreviewDefault
       let noOffsetY = centerY - offsetYPreviewDefault
-      
-      console.log('centerX', centerX, offsetXPreviewDefault, noOffsetX)
+      console.log('bounds', faceData.bounds, bounds)
+      // console.log('centerX', centerX, offsetXPreviewDefault, noOffsetX)
       // 某些情况会导致NaN  ？？？ 暂时不知为什么
       if (isNaN(noOffsetX) ) {
         noOffsetX = 0
@@ -220,6 +221,8 @@ export default class CameraScreen extends Component {
         noOffsetY = 0
       }
 
+
+      
 
       // 没有办法弄相对于屏幕的absolute
       // zIndex 无法遮盖。。。不懂。。。
@@ -234,14 +237,14 @@ export default class CameraScreen extends Component {
             style={[
               styles.face,
               {
-                ...bounds.size,
-                left: noOffsetX,
-                top: noOffsetY,
+                ...originBounds.size, // width height
+                left: originBounds.origin.x,
+                top: originBounds.origin.y,
                 zIndex: 150
               },
             ]}
           ></View>
-          <View
+          {/* <View
             style={{
               position: "absolute",
               height: 10,
@@ -250,8 +253,8 @@ export default class CameraScreen extends Component {
               top: noOffsetY,
               backgroundColor: 'lime',
               zIndex: 150
-            }}>
-          </View>
+            }}> 
+          </View>*/}
         </View>
       )
 
@@ -288,7 +291,7 @@ export default class CameraScreen extends Component {
       return elems
     }
 
-    // console.log('contours', faceData)
+    console.log('contours', faceData)
     if (faceData.bounds && faceData.upperLipBottom) {
       return (
         <View
@@ -435,11 +438,11 @@ export default class CameraScreen extends Component {
             RNCamera.Constants.FaceDetection.Classifications.none
           }
         >
-          {this.renderFaces()}
-          {this.renderAllContours()}
+        {this.renderFaces()}
+        {this.renderAllContours()}
         </RNCamera>
         <View style={styles.webViewContainer}>
-          <WebView
+          {/* <WebView
             // ref={this.webref}
             ref={(r) => (this.webref = r)}
             style={[styles.webview, { backgroundColor: this.state.webviewBG }]}
@@ -449,7 +452,7 @@ export default class CameraScreen extends Component {
             }}
             onLoadEnd={this.onWebviewLoadEnd}
             originWhitelist={['*']}
-          />
+          /> */}
         </View>
         <Toast ref="toast" position="center" />
       </View>

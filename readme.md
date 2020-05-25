@@ -182,6 +182,7 @@ create-react-native-module MyLibrary 将会创建 react-native-my-library 这样
 
 另外中文教程中的 `4.2 调试本地代码` 中提到的 `yarn link` 方法不再适用于 metro 管理的包
 
+use `yarn add /Users/xxxx/repos/RN/react-native-camera`
 
 ## Trouble shooting
 

@@ -15,10 +15,7 @@ export default class AssetsScene extends Scene {
         super(ASSETS_SCENE)
     }
 
-    preload() {
-
-
-    
+    preload() {    
         this.addLoadingProgressUI()
 
         this.load.on('progress', (value) => {
@@ -30,7 +27,7 @@ export default class AssetsScene extends Scene {
         });
 
 
-        // not work
+        // not work on PC ?!
         this.load.on('fileprogress', (file, value)  =>  {
             this.assetText.setText('Loading asset: ' + file.key);
         });
@@ -56,7 +53,7 @@ export default class AssetsScene extends Scene {
     create() {
 
         // 这些逻辑不能放在 index.ts 中  因为他们需要资源加载完成之后才能加载      
-        this.scene.switch(GAME_SCENE)
+        this.scene.start(GAME_SCENE)
     }
 
     addLoadingProgressUI() {

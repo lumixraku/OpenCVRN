@@ -43,7 +43,6 @@ https://github.com/rexrainbow/phaser3-rex-notes
 
 ## some tips to understand Phaser
 - 创建对象的方式
-- 利用scene 来实现层级
 - Phaser.Sprite 中可以 play 动画  但是 Phaser.Image 不行
 - Phaser 可以通过操作 frame 来切换 image 实际显示的内容
 
@@ -94,6 +93,12 @@ Even peer dependencies installed still not work.
 
 https://stackoverflow.com/questions/46636318/dts-gen-fails-to-find-globally-installed-modules/46640889#46640889
 The post suggests not installing global but local instead.
+
+
+Finally, I use `tsc` to generate d.ts for rexUI.
+```
+tsc -d /Users/luonan/hoho/phaser3-rex-plugins/templates/ui/ui-plugin.js  --outDir XXX  --allowJs
+```
 
 ### About webfontloader
 'WebFont' refers to a UMD global, but the current file is a module. Consider adding an import instead.

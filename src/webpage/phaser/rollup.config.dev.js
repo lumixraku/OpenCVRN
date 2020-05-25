@@ -5,7 +5,9 @@ import serve from 'rollup-plugin-serve';
 import typescript from 'rollup-plugin-typescript2';
 
 export default {
-
+    watch: {
+        chokidar: false
+    },
     //  Our games entry point (edit as required)
     input: [
         './src/index.ts'
