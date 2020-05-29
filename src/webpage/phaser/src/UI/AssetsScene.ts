@@ -105,8 +105,8 @@ export default class AssetsScene extends Scene {
     loadPics() {
         let scene = this;
         // yarn run dev 的时候 这个资源也还是从 dist 中读取的
-        scene.load.image('bgImg', 'assets/kitchen.png');
-        scene.load.image('table', 'assets/table.png');
+        scene.load.image('bgImg', 'assets/kitchen.jpg');
+        scene.load.image('table', 'assets/tablefix.png');
         scene.load.image('light', 'assets/light.png');
 
         // online tool https://gammafp.com/tools/

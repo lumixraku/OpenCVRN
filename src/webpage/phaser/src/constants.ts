@@ -35,6 +35,12 @@ const BACKGROUND = 'background'
 const SOUNDKEY = 'clickSound'
 const MUSICKEY = 'music'
 
+const TABLE_DEPTH = 110
+const PLATE_DEPTH = 113
+const FOOD_DEPTH = 115
+const UI_DEPTH = 200
+const EFF_DEPTH = 300
+
 // animation
 const COOK_LOOKBACK_ANIMI = 'lookback'
 const COOK_TOCOOK_ANIMI = 'cookAgain'
@@ -105,4 +111,11 @@ export {
   SETTINGS_SCENE,
   ASSETS_SCENE,
   LOADING_SCENE,
+
+  //UI
+  TABLE_DEPTH,
+  PLATE_DEPTH,
+  FOOD_DEPTH,
+  UI_DEPTH,
+  EFF_DEPTH,
 }

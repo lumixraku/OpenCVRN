@@ -17,17 +17,24 @@ import { Scene } from "phaser";
 // import { isPC } from '../test'
 import { isPC } from '@root/test'
 import { ImageButton } from "@root/UI/UIHelper";
-import { DISTANCE_ANGLE, stageWidth, stageHeight } from "@root/constants";
+import { DISTANCE_ANGLE, stageWidth, stageHeight, PLATE_DEPTH, TABLE_DEPTH } from "@root/constants";
 
 
 const angle2Rad = (angle: number) => {
     return (Math.PI / 180) * angle
 }
 
+const newTableWidthSize = 750
+
+
+// 根据设定
+// 桌面处于 10 层级
+// 盘子在 11 层级
+// 食物在 15 层
 export default class SpinTable {
     public tableContainer: Container;
 
-    public spinTable: Sprite;
+    public spinTableSprite: Sprite;
 
 
     private angleVal: number = 0;
@@ -56,17 +63,27 @@ export default class SpinTable {
     createTable(){
         this.circle = new Phaser.Geom.Circle(this.circleCenter.x, this.circleCenter.y, this.circleRadius);       
         this.tableContainer = this.scene.add.container(this.circleCenter.x, this.circleCenter.y)
-        this.spinTable = this.scene.add.sprite(0, 0, 'table');
-        let bds: Rectagle = this.spinTable.getBounds()
+        this.tableContainer.setDepth(PLATE_DEPTH)
+        // 后面的设定中 桌子不转
+        // spinTable 并不会放在 tableContainer 中
+        this.spinTableSprite = this.scene.add.sprite(stageWidth, stageHeight + 100, 'table');
+        // 因为桌子是右下角和屏幕右下角对齐 
+        this.spinTableSprite.setOrigin(1, 1)
+        // 桌子宽度应该和屏幕一样大
+        this.spinTableSprite.setScale( newTableWidthSize/ stageWidth )
+        this.spinTableSprite.setDepth(TABLE_DEPTH)
+
+
+        let bds: Rectagle = this.spinTableSprite.getBounds()
         let width = bds.width
-        this.spinTable.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2))        
+        this.spinTableSprite.setScale(this.circleRadius / (width / 2), this.circleRadius / (width / 2))        
         // if (isPC) {
         //     this.spinTable.alpha = 0.5
 
         // }
         
         
-        this.tableContainer.add(this.spinTable)
+        // this.tableContainer.add(this.spinTable)
         this.addPlates()
     }
 
@@ -99,8 +116,9 @@ export default class SpinTable {
             let rad = this.calcRadByIdx(i)
             let circle = new Circle(0, 0, this.platePosRadius)
             let p = this.calcRadToPoint(rad, circle)
-            this.plates[i] = this.scene.add.image(p.x, p.y, 'plate')
-            this.plates[i].setScale(2)
+            let plate = this.scene.add.image(p.x, p.y, 'plate')
+            plate.setScale(1)
+            this.plates[i] = plate
             this.tableContainer.add(this.plates[i])
         }
     }

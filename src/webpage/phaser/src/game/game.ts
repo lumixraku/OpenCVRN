@@ -10,9 +10,10 @@ import PhaserText = Phaser.GameObjects.Text;
 
 const stageWidth = document.body.clientWidth;
 const stageHeight = document.body.clientWidth / 9 * 16;
+const bgImgWidth = 750
 // 在 RN 中得到的宽和高 是411 * 823
 // 在 webview 得到的宽高是 412 * 804  // 因为我的APP 并没有打开全屏
-import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE, ASSETS_SCENE, SETTINGS_SCENE, DISTANCE_ANGLE, FOOD_LIST_FNAME_MAP } from '@root/constants';
+import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE, ASSETS_SCENE, SETTINGS_SCENE, DISTANCE_ANGLE, FOOD_LIST_FNAME_MAP, FOOD_DEPTH, UI_DEPTH, EFF_DEPTH } from '@root/constants';
 import { isPC } from '@root/test'
 
 
@@ -26,7 +27,6 @@ import { UIPlugin } from 'UI';
 import { Scene } from 'phaser';
 import GameUIScene from '@root/UI/GameUIScene';
 import EffectScene from '@root/UI/EffectScene';
-import AssetsLoader from './assetsLoader';
 import AnimateManager from './animate';
 import { UIHelper, ImageButton } from '@root/UI/UIHelper';
 import GameSoundManager from './soundManager';
@@ -35,7 +35,6 @@ import GameEffectContainer from './gameEffectLayer';
 
 
 export default class Demo extends Phaser.Scene {
-    public assetsLoader: AssetsLoader
     public animateManager: AnimateManager
     public timer: Phaser.Time.TimerEvent
     public score: number = 0
@@ -57,7 +56,7 @@ export default class Demo extends Phaser.Scene {
     public camFaceCheck: CamFaceCheck;
 
     // background
-    public bg: Graphics;
+    public bgMask: Graphics;
     public bgImg: PhaserImage;
 
     // cook
@@ -78,8 +77,8 @@ export default class Demo extends Phaser.Scene {
     private previewArea: Rectagle = new Rectagle(0, 0, 0, 0)
 
     // scene
-    private uiScene: GameUIScene;
-    private effScene: EffectScene;
+    // private uiScene: GameUIScene;
+    // private effScene: EffectScene;
 
     private gameUILayer: GameUI
     private gameEffLayer: GameEffectContainer
@@ -131,7 +130,8 @@ export default class Demo extends Phaser.Scene {
 
 
 
-        this.drawBackground()
+        // this.drawBackground()
+        this.drawHollowBackground()
         this.addCook()
         this.addFace()
         this.drawWheel()
@@ -145,13 +145,13 @@ export default class Demo extends Phaser.Scene {
 
         // this.uiScene = this.scene.get(UI_SCENE) as GameUIScene
         // this.effScene = this.scene.get(EF_SCENE) as EffectScene
-        this.gameUILayer = new GameUI(this, 0, 0)
-        this.add.existing(this.gameUILayer)
-        this.gameUILayer.setDepth(10)
+        // this.gameUILayer = new GameUI(this, 0, 0)
+        // this.add.existing(this.gameUILayer)
+        // this.gameUILayer.setDepth(UI_DEPTH)
         
-        this.gameEffLayer =  new GameEffectContainer(this, 0, 0 )
-        this.add.existing(this.gameEffLayer)
-        this.gameEffLayer.setDepth(20)
+        // this.gameEffLayer =  new GameEffectContainer(this, 0, 0 )
+        // this.add.existing(this.gameEffLayer)
+        // this.gameEffLayer.setDepth(EFF_DEPTH)
 
 
         this.animateManager = new AnimateManager(this)
@@ -277,7 +277,7 @@ export default class Demo extends Phaser.Scene {
                 if (Math.abs(spinRad - foodRad) < 0.02) {
                     let foodTextureKey = `food${idx}`
                     let food = this.add.sprite(0, 0, "foods", FOOD_LIST_FNAME_MAP[foodTextureKey]) as Food
-
+                    food.setDepth(FOOD_DEPTH)
                     food.name = `Food${idx}`
                     food.setScale(1)
                     this.foodList[idx] = food
@@ -484,32 +484,40 @@ export default class Demo extends Phaser.Scene {
 
 
     drawHollowBackground() {
-        let faceCenter = new Point(300, 450)
-        let faceRadius = 200
-        this.bg.beginPath()
-        this.bg.moveTo(0, 0)
-        this.bg.lineTo(stageWidth, 0)
-        this.bg.lineTo(stageWidth, faceCenter.y)
-        this.bg.lineTo(faceCenter.x + faceRadius, faceCenter.y)
-        this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI, true);
-        this.bg.lineTo(0, faceCenter.y)
-        this.bg.lineTo(0, 0)
-        this.bg.fillStyle(0xffeeff)
-        this.bg.fill()
+        this.bgMask = this.add.graphics()
+        this.bgImg = this.add.image( stageWidth/2,  stageHeight/2 , 'bgImg')
+        this.bgImg.setScale(stageWidth / bgImgWidth )
+
+        let hollowCenter = new Point(300, 450)
+        let faceRadius = 50
+        this.bgMask.beginPath()
+        this.bgMask.moveTo(0, 0)
+        this.bgMask.lineTo(stageWidth, 0)
+        this.bgMask.lineTo(stageWidth, hollowCenter.y)
+        this.bgMask.lineTo(hollowCenter.x + faceRadius, hollowCenter.y)
+        this.bgMask.arc(hollowCenter.x, hollowCenter.y, faceRadius, 0, Math.PI, true);
+        this.bgMask.lineTo(0, hollowCenter.y)
+        this.bgMask.lineTo(0, 0)
+        this.bgMask.fillStyle(0xffeeff)
+        this.bgMask.fill()
 
 
-        this.bg.moveTo(stageWidth, stageHeight)
-        this.bg.lineTo(stageWidth, faceCenter.y)
-        this.bg.arc(faceCenter.x, faceCenter.y, faceRadius, 0, Math.PI, false);
-        this.bg.lineTo(0, faceCenter.y)
-        this.bg.lineTo(0, stageHeight)
-        this.bg.lineTo(stageWidth, stageHeight)
-        this.bg.fillStyle(0xffeeff)
-        this.bg.fill()
+        this.bgMask.moveTo(stageWidth, stageHeight)
+        this.bgMask.lineTo(stageWidth, hollowCenter.y)
+        this.bgMask.arc(hollowCenter.x, hollowCenter.y, faceRadius, 0, Math.PI, false);
+        this.bgMask.lineTo(0, hollowCenter.y)
+        this.bgMask.lineTo(0, stageHeight)
+        this.bgMask.lineTo(stageWidth, stageHeight)
+        this.bgMask.fillStyle(0xffeeff)
+        this.bgMask.fill()
+
+        this.bgImg.mask = new Phaser.Display.Masks.BitmapMask(this,this.bgMask)
+
+        
     }
 
     drawBackground() {
-        this.bg = this.add.graphics()
+        this.bgMask = this.add.graphics()
         this.bgImg = this.add.image(0, 0, 'bgImg')
         let bd: Rectagle = this.bgImg.getBounds()
 
@@ -528,6 +536,7 @@ export default class Demo extends Phaser.Scene {
     drawWheel() {
         this.spinTable = new SpinTable(this, this.spSpinSpeed)
         this.spinTable.createTable()
+        this.spinTable.spinTableSprite.setDepth(5)
     }
 
     addFace() {
