@@ -12,8 +12,7 @@ import { Bounds } from "@root/faceData";
 import { Scene, Tilemaps } from "phaser";
 import { MSG_TYPE_FACE_TARGET_POS } from "@root/constants";
 
-const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientWidth / 9 * 16;
+import {stageWidth, stageHeight} from '@root/constants';
 
 interface FaceInCircle {
     pass: boolean

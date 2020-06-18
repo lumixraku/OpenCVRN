@@ -8,9 +8,7 @@ import PhaserText = Phaser.GameObjects.Text;
 
 
 
-const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientWidth / 9 * 16;
-const bgImgWidth = 750
+import  {stageWidth, stageHeight} from '@root/constants';
 // 在 RN 中得到的宽和高 是411 * 823
 // 在 webview 得到的宽高是 412 * 804  // 因为我的APP 并没有打开全屏
 import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, GAME_SCENE, UI_SCENE, EF_SCENE, CHECKING_DURATION, FIRST_CHECK_ELAPSE, ASSETS_SCENE, SETTINGS_SCENE, DISTANCE_ANGLE, FOOD_LIST_FNAME_MAP, FOOD_DEPTH, UI_DEPTH, EFF_DEPTH } from '@root/constants';
@@ -33,6 +31,8 @@ import GameSoundManager from './soundManager';
 import GameUI from './gameUILayer';
 import GameEffectContainer from './gameEffectLayer';
 
+const bgImgWidth = 750
+const hollowCenter = new Point(300, 300)
 
 export default class Demo extends Phaser.Scene {
     public animateManager: AnimateManager
@@ -58,6 +58,8 @@ export default class Demo extends Phaser.Scene {
     // background
     public bgMask: Graphics;
     public bgImg: PhaserImage;
+    public yourHat: PhaserImage;
+    public yourBody: PhaserImage;
 
     // cook
     public cook: Cook;
@@ -98,27 +100,7 @@ export default class Demo extends Phaser.Scene {
 
     // preload 中的资源都加载完毕之后 才会调用 create
     create() {
-        console.log('game create')
         GameSoundManager.initMusic(this)
-
-
-        // setTimeout(() => {
-        //     this.scene.launch(SETTINGS_SCENE)
-
-
-        //     setTimeout(  ()=> {
-        //         this.scene.sendToBack(SETTINGS_SCENE)
-        //     }, 500)
-        // }, 500);
-
-
-        // this.scene.get(UI_SCENE).events.on('afterCreate', ()=> {
-        //     (<GameUIScene>this.scene.get(UI_SCENE)).showWelcome()
-        // })
-
-
-
-
 
         this.timer = this.time.addEvent({
             // delay: 500,                // ms
@@ -133,7 +115,7 @@ export default class Demo extends Phaser.Scene {
         // this.drawBackground()
         this.drawHollowBackground()
         this.addCook()
-        this.addFace()
+        this.addYourself()
         this.drawWheel()
 
         // Phaser会根据 add 的先后顺序决定层级.
@@ -143,15 +125,13 @@ export default class Demo extends Phaser.Scene {
 
         this.addText();
 
-        // this.uiScene = this.scene.get(UI_SCENE) as GameUIScene
-        // this.effScene = this.scene.get(EF_SCENE) as EffectScene
-        // this.gameUILayer = new GameUI(this, 0, 0)
-        // this.add.existing(this.gameUILayer)
-        // this.gameUILayer.setDepth(UI_DEPTH)
+        this.gameUILayer = new GameUI(this, 0, 0)
+        this.add.existing(this.gameUILayer)
+        this.gameUILayer.setDepth(UI_DEPTH)
         
-        // this.gameEffLayer =  new GameEffectContainer(this, 0, 0 )
-        // this.add.existing(this.gameEffLayer)
-        // this.gameEffLayer.setDepth(EFF_DEPTH)
+        this.gameEffLayer =  new GameEffectContainer(this, 0, 0 )
+        this.add.existing(this.gameEffLayer)
+        this.gameEffLayer.setDepth(EFF_DEPTH)
 
 
         this.animateManager = new AnimateManager(this)
@@ -161,7 +141,7 @@ export default class Demo extends Phaser.Scene {
 
 
 
-        // Main Scene
+        // Main Scenee
         this.cameras.main.fadeIn(250);
     }
 
@@ -539,7 +519,13 @@ export default class Demo extends Phaser.Scene {
         this.spinTable.spinTableSprite.setDepth(5)
     }
 
-    addFace() {
+
+
+    addYourself() {
+        this.yourHat = this.add.image(hollowCenter.x, hollowCenter.y, 'hat');
+        this.yourHat.setScale(0.7);        
+        this.yourBody = this.add.image(240, 514, 'body');
+        this.yourBody.setScale(0.5)
         this.camFaceCheck = new CamFaceCheck(this)
     }
 

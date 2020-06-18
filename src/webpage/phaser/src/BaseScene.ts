@@ -2,8 +2,7 @@ import { BASE_SCENE, GAME_SCENE, EF_SCENE, UI_SCENE, SETTINGS_SCENE, ASSETS_SCEN
 import { Scene } from "phaser";
 import GameUIScene from "./UI/GameUIScene";
 import EffectScene from "./UI/EffectScene";
-const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientWidth / 9 * 16;
+import {stageWidth, stageHeight} from '@root/constants';
 
 export default class BaseScene extends Phaser.Scene {
 

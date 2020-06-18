@@ -1,5 +1,5 @@
 import { Scene } from "phaser";
-import { DOGCOOK, ASSETS_SCENE, UI_SCENE, EF_SCENE, GAME_SCENE, SOUNDKEY, MUSICKEY, stageWidth, stageHeight } from "@root/constants";
+import { DOGCOOK, ASSETS_SCENE, UI_SCENE, EF_SCENE, GAME_SCENE, SOUNDKEY, MUSICKEY, stageWidth, stageHeight, GetTheme } from "@root/constants";
 import GameSoundManager from "@root/game/soundManager";
 // import { DOGCOOK } from "../constants";
 
@@ -16,9 +16,6 @@ export default class AssetsScene extends Scene {
     }
 
     preload() {
-
-
-    
         this.addLoadingProgressUI()
 
         this.load.on('progress', (value) => {
@@ -104,20 +101,18 @@ export default class AssetsScene extends Scene {
 
     loadPics() {
         let scene = this;
+        let theme = GetTheme()
         // yarn run dev 的时候 这个资源也还是从 dist 中读取的
-        scene.load.image('bgImg', 'assets/kitchen.jpg');
-        scene.load.image('table', 'assets/tablefix.png');
-        scene.load.image('light', 'assets/light.png');
+        scene.load.image('cookbody', `assets/${theme}/cookdefault.png`)
+        scene.load.image('cookchecking', `assets/${theme}/cookchecking.png`);
+        scene.load.image('bgImg', `assets/${theme}/kitchen.jpg`);
+        scene.load.image('table', `assets/${theme}/fixedTable.png`);
+        scene.load.image('hat', `assets/${theme}/hat.png`);
+        scene.load.image('body', `assets/${theme}/body.png`)
 
         // online tool https://gammafp.com/tools/
         scene.load.atlas("foods", "assets/food/food-by-atlas-packer.png", "assets/food/food-by-atlas-packer_atlas.json")
 
-        // texture packer
-        // scene.load.atlas("foods", "assets/food/foodspritesheet.png", "assets/food/foodspritesheet.json")
-
-        // scene.load.image('food0', 'assets/food/010-grapes.png')
-        // scene.load.image('food1', 'assets/food/001-burger.png')
-        // ...
 
         scene.load.image('plate', 'assets/plate.png')
         scene.load.image('coin', 'assets/coin.png');
@@ -128,6 +123,7 @@ export default class AssetsScene extends Scene {
         scene.load.image('ground', 'assets/ground.png');
         // // 应当使用 gif 中的某一帧
         // // scene.load.image('dogcook', 'assets/back.png');
+
         scene.load.image(DOGCOOK, `assets/dogeFrame/frame_00_delay-0.04s.gif`)
 
     }

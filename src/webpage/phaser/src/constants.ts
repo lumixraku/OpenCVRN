@@ -1,8 +1,10 @@
 
 const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientWidth / 9 * 16;
+const stageHeight = document.body.clientWidth / 9 * 18;
 
-
+const GetTheme = () => {
+  return 'theme0'
+}
 
 // Message 类型
 const MSG_TYPE_FACE = 'face'
@@ -34,6 +36,11 @@ const DISTANCE_ANGLE = 40
 const BACKGROUND = 'background'
 const SOUNDKEY = 'clickSound'
 const MUSICKEY = 'music'
+
+
+const COOK_DEPTH = 100
+const PLAYERBODY_DEPTH = 104
+const HAT_DEPTH = 105
 
 const TABLE_DEPTH = 110
 const PLATE_DEPTH = 113
@@ -118,4 +125,6 @@ export {
   FOOD_DEPTH,
   UI_DEPTH,
   EFF_DEPTH,
+
+  GetTheme,
 }

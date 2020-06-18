@@ -8,8 +8,7 @@ import { MSG_TYPE_FACE, MSG_TYPE_CAM, MSG_TYPE_WEBVIEW_READY, UI_SCENE, BASE_SCE
 
 const canvasELlem: HTMLCanvasElement = document.querySelector('#gameCanvas')
 
-const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientWidth / 9 * 16;
+import {stageWidth, stageHeight} from '@root/constants';
 
 const documentWidth = document.body.clientWidth
 const documentHeight = document.body.clientHeight

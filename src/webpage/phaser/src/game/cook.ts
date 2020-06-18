@@ -24,11 +24,12 @@ export default class Cook extends Sprite {
     public checkTimeCount: number = 0 //回头检查次数
 
     constructor(scene: Phaser.Scene, x: number, y: number,) {
-        super(scene, x, y, DOGCOOK, 0)
+        super(scene, x, y, 'cookbody', 0)
+        // super(scene, x, y, DOGCOOK, 0)
         // scene.add.image(0, 0, 'dog', 0)
         // let img = new Image(scene,x,y,texture);
         // scene.children.add(this);
-        scene.add.existing(this)
+        scene.add.existing(this) // add existing 是推荐做法
         this.addAnimationListener()
     }
 

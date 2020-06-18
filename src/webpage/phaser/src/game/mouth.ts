@@ -6,8 +6,7 @@ import Rectagle = Phaser.Geom.Rectangle;
 import Graphics = Phaser.GameObjects.Graphics;
 import PhaserText = Phaser.GameObjects.Text;
 
-const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientWidth / 9 * 16;
+import {stageWidth, stageHeight} from '@root/constants';
 
 export default class Mouth {
     public mouthRect: Rectagle = new Rectagle(0, 0, 0, 0);

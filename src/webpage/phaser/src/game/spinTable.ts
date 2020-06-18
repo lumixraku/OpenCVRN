@@ -10,10 +10,6 @@ import Container = Phaser.GameObjects.Container
 import { Scene } from "phaser";
 
 
-
-
-
-
 // import { isPC } from '../test'
 import { isPC } from '@root/test'
 import { ImageButton } from "@root/UI/UIHelper";
@@ -46,7 +42,7 @@ export default class SpinTable {
     public circleCenter: Point = new Point(stageWidth / 2 + 200, stageHeight + 200);    
     // public circleCenter: Point = new Point(stageWidth / 2 , stageHeight - 200);    
 
-    public platePosRadius: number = this.circleRadius * 0.9
+    public platePosRadius: number = this.circleRadius 
 
     public distanceAngle: number = DISTANCE_ANGLE  //食物和食物之间的间隔(角度)
     public tableCapacity: number = 360 / this.distanceAngle; //根据间隔计算得到的桌面容量
@@ -117,7 +113,7 @@ export default class SpinTable {
             let circle = new Circle(0, 0, this.platePosRadius)
             let p = this.calcRadToPoint(rad, circle)
             let plate = this.scene.add.image(p.x, p.y, 'plate')
-            plate.setScale(1)
+            plate.setScale(0.6)
             this.plates[i] = plate
             this.tableContainer.add(this.plates[i])
         }

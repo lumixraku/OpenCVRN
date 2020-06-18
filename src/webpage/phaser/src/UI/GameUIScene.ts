@@ -13,8 +13,7 @@ import InputButton = Phaser.Input.Gamepad.Button
 import { UI_SCENE, SETTINGS_SCENE, GAME_SCENE, MAIN_RED_LIGHT, MAIN_RED } from "../constants";
 import { World } from "matter";
 import { UIHelper, ImageButton } from "./UIHelper";
-const stageWidth = document.body.clientWidth;
-const stageHeight = document.body.clientWidth / 9 * 16;
+import {stageWidth, stageHeight} from '@root/constants';
 
 const TopLeftToCenter = (width: number, height: number, topLeftPoint: Point): Point => {
     let halfW = width/2
